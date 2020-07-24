@@ -1,0 +1,45 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: pv5-
+spec:
+  entrypoint: main-loop
+  templates:
+  - name: main-loop
+    steps:
+    - - name: launch
+        template: pipeline
+        arguments:
+          parameters:
+          - name: patient
+            value: "{{item}}"
+        withItems: 
+        - CPCT12345678
+
+  - name: pipeline
+    inputs:
+      parameters:
+      - name: patient
+    container:
+      image: eu.gcr.io/hmf-pipeline-development/pipelinev5-pending-check@sha256:8ee9e4610b878be371e0da31dbdc1db3d14cf2480ac685492378f5519bc51976
+      command: [python]
+      args: ["/usr/src/app/somatic.py", 
+             "-project", "-hmf-pipeline-development", 
+             "-service_account_email", "bootstrap@hmf-pipeline-development.iam.gserviceaccount.com", 
+             "-patient_report_bucket", "pipeline-output-dev",
+             "-private_network", "default",
+             "-private_key_path", "source/hartwig/credentials/hmf-pipeline-development.json",
+             "-cmek", "projects/hmf-pipeline-development/locations/europe-west4/keyRings/hmf-pipeline-development/cryptoKeys/default-test",
+             "-publish_to_turquoise", "false"
+             "-sample_json", "cancerPanel.json", 
+             "-set_id", "{{inputs.parameters.patient}}"]
+      env:
+      - name: SLACK_HOOK
+        valueFrom:
+          secretKeyRef:
+            key: hook_url
+            name: slackhook
+      - name: PIPELINE_VERSION
+        value: 5.12.1646
+      - name: MAX_STARTS
+        value: "1"
