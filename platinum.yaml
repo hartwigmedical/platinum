@@ -4,6 +4,10 @@ metadata:
   generateName: pv5-
 spec:
   entrypoint: main-loop
+  volumes:
+  - name: patient-jsons
+    secret:
+      secretName: patient-jsons
   templates:
   - name: main-loop
     steps:
@@ -22,14 +26,17 @@ spec:
       parameters:
       - name: patient
     container:
-        image: hartwigmedicalfoundation/pipeline5:5.12.1646
+      image: hartwigmedicalfoundation/pipeline5:5.12.1646
+      volumeMounts:
+      - name: patient-jsons
+        mountPath: "/secrets"
       command: ["echo"]
-      args: ["/pipeline5.sh", -project", "-hmf-pipeline-development", 
+      args: ["/pipeline5.sh", "-project", "-hmf-pipeline-development", 
              "-service_account_email", "bootstrap@hmf-pipeline-development.iam.gserviceaccount.com", 
              "-patient_report_bucket", "pipeline-output-dev",
              "-private_network", "default",
              "-private_key_path", "source/hartwig/credentials/hmf-pipeline-development.json",
              "-cmek", "projects/hmf-pipeline-development/locations/europe-west4/keyRings/hmf-pipeline-development/cryptoKeys/default-test",
-             "-publish_to_turquoise", "false"
-             "-sample_json", "cancerPanel.json", 
+             "-publish_to_turquoise", "false",
+             "-sample_json", "/secrets/{{inputs.parameters.patient}}.json", 
              "-set_id", "{{inputs.parameters.patient}}"]
