@@ -15,16 +15,16 @@ spec:
             value: "{{item}}"
         withItems: 
         - CPCT12345678
+        - CPCT34567890
 
   - name: pipeline
     inputs:
       parameters:
       - name: patient
     container:
-      image: eu.gcr.io/hmf-pipeline-development/pipelinev5-pending-check@sha256:8ee9e4610b878be371e0da31dbdc1db3d14cf2480ac685492378f5519bc51976
-      command: [python]
-      args: ["/usr/src/app/somatic.py", 
-             "-project", "-hmf-pipeline-development", 
+        image: hartwigmedicalfoundation/pipeline5:5.12.1646
+      command: ["echo"]
+      args: ["/pipeline5.sh", -project", "-hmf-pipeline-development", 
              "-service_account_email", "bootstrap@hmf-pipeline-development.iam.gserviceaccount.com", 
              "-patient_report_bucket", "pipeline-output-dev",
              "-private_network", "default",
@@ -33,13 +33,3 @@ spec:
              "-publish_to_turquoise", "false"
              "-sample_json", "cancerPanel.json", 
              "-set_id", "{{inputs.parameters.patient}}"]
-      env:
-      - name: SLACK_HOOK
-        valueFrom:
-          secretKeyRef:
-            key: hook_url
-            name: slackhook
-      - name: PIPELINE_VERSION
-        value: 5.12.1646
-      - name: MAX_STARTS
-        value: "1"
