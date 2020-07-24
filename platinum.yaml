@@ -8,6 +8,9 @@ spec:
   - name: patient-json
     configMap:
       name: patient-jsons
+  - name: platinum-bootstrap-key
+    secret:
+      secretName: platinum-bootstrap-key
   templates:
   - name: main-loop
     steps:
@@ -29,14 +32,16 @@ spec:
       image: hartwigmedicalfoundation/pipeline5:5.12.1646
       volumeMounts:
       - name: patient-json
-        mountPath: "/secret/patients"
+        mountPath: "/secrets/patients"
+      - name: platinum-bootstrap-key
+        mountPath: "/secrets/"
       command: ["/pipeline5.sh"]
-      args: ["-project", "-hmf-pipeline-development", 
+      args: ["-project", "hmf-pipeline-development", 
              "-service_account_email", "bootstrap@hmf-pipeline-development.iam.gserviceaccount.com", 
              "-patient_report_bucket", "platinum-output-dev",
              "-private_network", "default",
-             "-private_key_path", "source/hartwig/credentials/hmf-pipeline-development.json",
+             "-private_key_path", "secrets/platinum-bootstrap-key",
              "-cmek", "projects/hmf-pipeline-development/locations/europe-west4/keyRings/hmf-pipeline-development/cryptoKeys/default-test",
              "-publish_to_turquoise", "false",
-             "-sample_json", "/secret/patients/{{inputs.parameters.patient}}.json", 
+             "-sample_json", "/secrets/patients/{{inputs.parameters.patient}}.json", 
              "-set_id", "{{inputs.parameters.patient}}"]
