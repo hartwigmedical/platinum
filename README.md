@@ -5,11 +5,18 @@ _P_ipe_L_ine _AT_ any _num_ber!
 
 ## To Make The Cluster
 
+On my version of `gcloud` (294.0.0.) it asks to enable the required APIs if they are not already active. Older versions might
+require you to manually enable them first.
+
 ```
 # gcloud config set project ...
 # gcloud config set account ...
 # gcloud deployment-manager deployments create platinum-cluster --config cluster.yaml
-...
+```
+
+To delete it: 
+
+```
 # gcloud deployment-manager deployments delete platinum-cluster
 ```
 

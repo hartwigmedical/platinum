@@ -43,5 +43,6 @@ spec:
              "-private_key_path", "secrets/platinum-bootstrap-key",
              "-cmek", "projects/hmf-pipeline-development/locations/europe-west4/keyRings/hmf-pipeline-development/cryptoKeys/default-test",
              "-publish_to_turquoise", "false",
+             "-ref_genome_version", "HG38",
              "-sample_json", "/secrets/patients/{{inputs.parameters.patient}}.json", 
              "-set_id", "{{inputs.parameters.patient}}"]
