@@ -8,9 +8,9 @@ _P_ipe_L_ine _AT_ any _num_ber!
 ```
 # gcloud config set project ...
 # gcloud config set account ...
-# gcloud deployment-manager deployments create ned-cluster --config cluster.yaml
+# gcloud deployment-manager deployments create platinum-cluster --config cluster.yaml
 ...
-# gcloud deployment-manager deployments delete ned-cluster
+# gcloud deployment-manager deployments delete platinum-cluster
 ```
 
 ## Installing Workflow Management on the Cluster
