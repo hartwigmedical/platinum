@@ -10,9 +10,9 @@ resources:
       locations: [ 'europe-west4-a', 'europe-west4-b', 'europe-west4-c' ]
       nodePools:
       - name: cluster-pool
-        initialNodeCount: 1
+        initialNodeCount: 3
         config:
-          machineType: 'n1-standard-1'
+          machineType: 'e2-medium'
           oauthScopes:
           - https://www.googleapis.com/auth/compute
           - https://www.googleapis.com/auth/devstorage.read_only
