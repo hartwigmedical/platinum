@@ -66,7 +66,9 @@ Then you have to do this because for some reason the Argo install doesn't give i
 ```
 # kubectl create clusterrolebinding argo-cluster-admin-binding --clusterrole=cluster-admin --user=system:serviceaccount:platinum:argo
 # kubectl create clusterrolebinding argo-server-cluster-admin-binding --clusterrole=cluster-admin --user=system:serviceaccount:platinum:argo-server
+# kubectl create clusterrolebinding argo-cluster-platinum-binding --clusterrole=cluster-admin --user=system:serviceaccount:platinum:default
 ```
 
+Suspect those permissions are too much and we could/should reduce them to some miniumum necessary privileges.
 
 
