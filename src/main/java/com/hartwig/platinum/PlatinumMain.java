@@ -12,7 +12,7 @@ public class PlatinumMain implements Callable<Integer> {
     private String patients;
 
     @Override
-    public Integer call() throws Exception {
+    public Integer call() {
         new Platinum(clusterName, patients).execute();
         return 0;
     }
