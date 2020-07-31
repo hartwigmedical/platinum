@@ -35,7 +35,7 @@ To delete it:
 
 Simple explanation of how to use it on the CLI: `https://argoproj.github.io/argo/examples/#argo-cli`
 
-## Preapring Data for the Run
+## Preparing Data for the Run
 
 Make your JSON files according to the `sample_json` format in the Pipleine5 repo. Put them all in a single directory named
 according to their samples (eg `CPCT12345678.json`) and then load them into a config map (here the directory containing the JSON
