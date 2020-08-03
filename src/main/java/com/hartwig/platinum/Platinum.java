@@ -1,33 +1,23 @@
 package com.hartwig.platinum;
 
-import static java.lang.String.format;
-
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.Collection;
-import java.util.Set;
-
-import com.google.container.v1.Cluster;
+import com.hartwig.platinum.config.RunConfiguration;
+import com.hartwig.platinum.kubernetes.KubernetesCluster;
+import com.hartwig.platinum.storage.OutputBucket;
 
 public class Platinum {
-    private String clusterName;
-    private String patientsFile;
 
-    Platinum(String clusterName, final String patientsFile) {
-        this.clusterName = clusterName;
-        this.patientsFile = patientsFile;
+    private final String runName;
+    private final String input;
+
+    public Platinum(final String runName, final String input) {
+        this.runName = runName;
+        this.input = input;
     }
 
-    public void execute() {
-        Cluster cluster = Cluster.newBuilder().setName(clusterName).build();
-    }
-
-    private Collection<String> readPatients(String filename) {
-        try {
-            return Set.copyOf(Files.readAllLines(Path.of(patientsFile)));
-        } catch (IOException ioe) {
-            throw new RuntimeException(format("Could not read patients list from [%s]", patientsFile));
-        }
+    public PlatinumResult run() {
+        RunConfiguration configuration = RunConfiguration.from(runName, input);
+        OutputBucket outputBucket = OutputBucket.findOrCreate(runName);
+        KubernetesCluster cluster = KubernetesCluster.findOrCreate(runName, outputBucket);
+        return PlatinumResult.of(cluster.submit(configuration).get());
     }
 }
