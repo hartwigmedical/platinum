@@ -23,6 +23,7 @@
         <junit.version>4.12</junit.version>
         <mockito.version>2.23.4</mockito.version>
         <assertj-core.version>3.8.0</assertj-core.version>
+        <google-api-services-iam.version>v1-rev20200709-1.30.10</google-api-services-iam.version>
     </properties>
 
     <scm>
@@ -51,6 +52,11 @@
         <dependency>
             <groupId>com.google.cloud</groupId>
             <artifactId>google-cloud-storage</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.google.apis</groupId>
+            <artifactId>google-api-services-iam</artifactId>
+            <version>${google-api-services-iam.version}</version>
         </dependency>
         <dependency>
             <groupId>org.immutables</groupId>

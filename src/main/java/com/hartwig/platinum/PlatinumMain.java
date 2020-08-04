@@ -3,7 +3,9 @@ package com.hartwig.platinum;
 import java.util.concurrent.Callable;
 
 import com.google.cloud.storage.StorageOptions;
+import com.hartwig.platinum.iam.IamProvider;
 
+import picocli.CommandLine;
 import picocli.CommandLine.Option;
 
 public class PlatinumMain implements Callable<Integer> {
@@ -18,9 +20,20 @@ public class PlatinumMain implements Callable<Integer> {
             description = "")
     private String inputJson;
 
+    @Option(names = { "-p", "--project" },
+            required = true,
+            description = "")
+    private String project;
+
     @Override
     public Integer call() {
-        PlatinumResult result = new Platinum(runName, inputJson, StorageOptions.getDefaultInstance().getService()).run();
+        PlatinumResult result = new Platinum(runName, inputJson, StorageOptions.getDefaultInstance().getService(), IamProvider.get(),
+                project).run();
         return result.numFailure() > 0 ? 1 : 0;
+    }
+
+    public static void main(final String[] args) {
+        int exitCode = new CommandLine(new PlatinumMain()).execute(args);
+        System.exit(exitCode);
     }
 }
