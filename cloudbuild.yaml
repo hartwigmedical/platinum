@@ -30,3 +30,5 @@ steps:
     volumes:
       - path: '/cache/.m2'
         name: 'm2_cache'
+options:
+  machineType: 'N1_HIGHCPU_32'
