@@ -5,15 +5,20 @@ import java.util.concurrent.Callable;
 import picocli.CommandLine.Option;
 
 public class PlatinumMain implements Callable<Integer> {
-    @Option(names = {"-c", "--cluster-name"}, required=true, description = "Name to give the cluster that will be created")
-    private String clusterName;
 
-    @Option(names = {"-p", "--patients"}, required=true, description = "Text file containing patient names (eg CPCT12345678), one per line")
-    private String patients;
+    @Option(names = { "-r", "--run_name" },
+            required = true,
+            description = "The name of the run, used in output bucket and cluster naming")
+    private String runName;
+
+    @Option(names = { "-i", "--input_json" },
+            required = true,
+            description = "")
+    private String inputJson;
 
     @Override
     public Integer call() {
-        new Platinum(clusterName, patients).execute();
-        return 0;
+        PlatinumResult result = new Platinum(runName, inputJson).run();
+        return result.numFailure() > 0 ? 1 : 0;
     }
 }
