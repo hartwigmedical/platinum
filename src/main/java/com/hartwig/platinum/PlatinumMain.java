@@ -2,12 +2,9 @@ package com.hartwig.platinum;
 
 import java.util.concurrent.Callable;
 
-<<<<<<< HEAD
 import com.google.cloud.storage.StorageOptions;
 
-=======
 import picocli.CommandLine;
->>>>>>> 998bb93... DEV-1436 Args and samples to JSON
 import picocli.CommandLine.Option;
 
 public class PlatinumMain implements Callable<Integer> {
@@ -24,8 +21,13 @@ public class PlatinumMain implements Callable<Integer> {
 
     @Override
     public Integer call() {
-        PlatinumResult result = new Platinum(runName, inputJson, StorageOptions.getDefaultInstance().getService()).run();
-        return result.numFailure() > 0 ? 1 : 0;
+        try {
+            new Platinum(runName, inputJson, StorageOptions.getDefaultInstance().getService()).run();
+            return(0);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return(1);
+        }
     }
 
     public static void main(String[] args) {

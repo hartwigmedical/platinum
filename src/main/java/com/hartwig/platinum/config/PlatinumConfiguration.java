@@ -12,7 +12,7 @@ import org.immutables.value.Value.Parameter;
 @Immutable
 @Style(jdkOnly = true)
 @JsonDeserialize(as = ImmutableInputJson.class)
-public interface InputJson {
+public interface PlatinumConfiguration {
     @Parameter
     List<String> samples();
 
