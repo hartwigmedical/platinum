@@ -34,6 +34,7 @@ public class OutputBucketTest {
         storage = mock(Storage.class);
         bucket = mock(Bucket.class);
         when(bucket.getName()).thenReturn(BUCKET_NAME);
+        when(bucket.getLocation()).thenReturn(LOCATION);
         victim = OutputBucket.from(storage);
     }
 
@@ -53,6 +54,32 @@ public class OutputBucketTest {
         String bucketName = victim.findOrCreate(RUN_NAME, CONFIGURATION);
         verify(storage, never()).create(Mockito.<BlobInfo>any());
         assertThat(bucketName).isEqualTo(BUCKET_NAME);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void failsWhenBucketExistsWithDifferentLocation() {
+        when(storage.get(BUCKET_NAME)).thenReturn(bucket);
+        victim.findOrCreate(RUN_NAME, OutputConfiguration.builder().location("us-east1").build());
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void failsWhenCmekAlreadyOnBucketButNotConfigured() {
+        when(bucket.getDefaultKmsKeyName()).thenReturn(CMEK_KEY);
+        when(storage.get(BUCKET_NAME)).thenReturn(bucket);
+        victim.findOrCreate(RUN_NAME, OutputConfiguration.builder().location(LOCATION).build());
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void failsWhenCmekNotOnBucketButIsConfigured() {
+        when(storage.get(BUCKET_NAME)).thenReturn(bucket);
+        victim.findOrCreate(RUN_NAME, OutputConfiguration.builder().location(LOCATION).cmek(CMEK_KEY).build());
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void failsWhenCmekOnBucketAndConfiguredDifferently() {
+        when(bucket.getDefaultKmsKeyName()).thenReturn(CMEK_KEY);
+        when(storage.get(BUCKET_NAME)).thenReturn(bucket);
+        victim.findOrCreate(RUN_NAME, OutputConfiguration.builder().location(LOCATION).cmek("/another/key").build());
     }
 
     @Test
