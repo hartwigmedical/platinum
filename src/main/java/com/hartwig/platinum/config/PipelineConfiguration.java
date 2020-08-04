@@ -1,6 +1,6 @@
 package com.hartwig.platinum.config;
 
-import com.hartwig.platinum.jobs.Pipeline;
+import java.util.Map;
 
 import org.immutables.value.Value;
 
@@ -9,5 +9,9 @@ public interface PipelineConfiguration {
 
     String sampleName();
 
-    String json();
+    Map<String, String> arguments();
+
+    static ImmutablePipelineConfiguration.Builder builder() {
+        return ImmutablePipelineConfiguration.builder();
+    }
 }

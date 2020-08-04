@@ -1,0 +1,10 @@
+{
+  "samples": [
+    "CPCT12345678",
+    "CORE12345678",
+    "CPCT12345678"
+  ],
+  "pipelineArguments": {
+    "some": "arg"
+  }
+}

@@ -17,10 +17,10 @@ public class Platinum {
         this.storage = storage;
     }
 
-    public PlatinumResult run() {
+    public void run() {
         RunConfiguration configuration = RunConfiguration.from(runName, input);
         KubernetesCluster cluster = KubernetesCluster.findOrCreate(runName,
                 OutputBucket.from(storage).findOrCreate(runName, configuration.outputConfiguration()));
-        return PlatinumResult.of(cluster.submit(configuration).get());
+        cluster.submit(configuration);
     }
 }
