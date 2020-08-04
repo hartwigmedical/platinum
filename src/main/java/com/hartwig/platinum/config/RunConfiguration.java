@@ -6,6 +6,8 @@ public interface RunConfiguration {
 
     String runName();
 
+    OutputConfiguration outputConfiguration();
+
     List<PipelineConfiguration> pipelines();
 
     static RunConfiguration from(final String runName, final String gcsPath) {

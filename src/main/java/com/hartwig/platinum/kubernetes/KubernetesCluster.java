@@ -17,7 +17,7 @@ public class KubernetesCluster {
         return new PipelineFutures();
     }
 
-    public static KubernetesCluster findOrCreate(final String runName, final OutputBucket outputBucket) {
+    public static KubernetesCluster findOrCreate(final String runName, final String outputBucketName) {
         // we should have some kind of convention on cluster name based on run name
         return new KubernetesCluster(new CoreV1Api());
     }
