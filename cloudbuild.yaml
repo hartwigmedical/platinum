@@ -1,0 +1,34 @@
+steps:
+  - name: 'gcr.io/cloud-builders/gsutil'
+    args:
+      - '-m'
+      - 'rsync'
+      - '-r'
+      - 'gs://hmf-build-caches/platinum/.m2'
+      - '/cache/.m2'
+    volumes:
+      - path: '/cache/.m2'
+        name: 'm2_cache'
+
+  - name: 'gcr.io/cloud-builders/mvn'
+    args:
+      - 'install'
+      - '--batch-mode'
+    volumes:
+      - path: '/cache/.m2'
+        name: 'm2_cache'
+    env:
+      - MAVEN_OPTS=-Dmaven.repo.local=/cache/.m2
+
+  - name: 'gcr.io/cloud-builders/gsutil'
+    args:
+      - '-m'
+      - 'rsync'
+      - '-r'
+      - '/cache/.m2'
+      - 'gs://hmf-build-caches/platinum/.m2/'
+    volumes:
+      - path: '/cache/.m2'
+        name: 'm2_cache'
+options:
+  machineType: 'N1_HIGHCPU_32'
