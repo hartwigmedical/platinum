@@ -25,7 +25,7 @@ public class OutputBucket {
     }
 
     public String findOrCreate(final String runName, final OutputConfiguration configuration) {
-        String bucketName = BucketName.of(runName);
+        String bucketName = BucketName.from(runName);
         Bucket outputBucket = storage.get(bucketName);
         if (outputBucket == null) {
             outputBucket = storage.create(BucketInfo.newBuilder(bucketName)

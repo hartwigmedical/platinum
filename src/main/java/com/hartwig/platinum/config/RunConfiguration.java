@@ -4,8 +4,6 @@ import java.util.List;
 
 public interface RunConfiguration {
 
-    String runName();
-
     OutputConfiguration outputConfiguration();
 
     List<PipelineConfiguration> pipelines();
