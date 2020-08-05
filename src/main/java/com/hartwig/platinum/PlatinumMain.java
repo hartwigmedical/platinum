@@ -3,6 +3,8 @@ package com.hartwig.platinum;
 import java.util.concurrent.Callable;
 
 import com.google.cloud.storage.StorageOptions;
+import com.hartwig.platinum.iam.IamProvider;
+import com.hartwig.platinum.iam.ResourceManagerProvider;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,14 +25,24 @@ public class PlatinumMain implements Callable<Integer> {
             description = "JSON file that contains arguments to be passed to the pipeline jobs and a list of samples")
     private String inputJson;
 
+    @Option(names = { "-p", "--project" },
+            required = true,
+            description = "")
+    private String project;
+
     @Override
     public Integer call() {
         try {
-            new Platinum(runName, inputJson, StorageOptions.getDefaultInstance().getService()).run();
-            return(0);
+            new Platinum(runName,
+                    inputJson,
+                    StorageOptions.getDefaultInstance().getService(),
+                    IamProvider.get(),
+                    ResourceManagerProvider.get(),
+                    project).run();
+            return (0);
         } catch (Exception e) {
             LOGGER.error("Unexpected exception", e);
-            return(1);
+            return (1);
         }
     }
 

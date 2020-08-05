@@ -2,7 +2,7 @@ package com.hartwig.platinum.storage;
 
 public class BucketName {
 
-    static String of(final String runName) {
+    static String from(final String runName) {
         return "platinum-output-" + runName;
     }
 }
