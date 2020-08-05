@@ -20,6 +20,7 @@ public class KubernetesCluster {
     }
 
     public void submit(final PlatinumConfiguration configuration) {
+
     }
 
     public static KubernetesCluster findOrCreate(final String runName, final String outputBucket) {

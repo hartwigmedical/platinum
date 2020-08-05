@@ -4,10 +4,14 @@ import java.util.concurrent.Callable;
 
 import com.google.cloud.storage.StorageOptions;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import picocli.CommandLine;
 import picocli.CommandLine.Option;
 
 public class PlatinumMain implements Callable<Integer> {
+    private static final Logger LOGGER = LoggerFactory.getLogger(PlatinumMain.class);
 
     @Option(names = { "-r", "--run_name" },
             required = true,
@@ -19,23 +23,13 @@ public class PlatinumMain implements Callable<Integer> {
             description = "JSON file that contains arguments to be passed to the pipeline jobs and a list of samples")
     private String inputJson;
 
-    @Option(names = {"-d", "--data_directory"},
-            required = true,
-            description = "Directory containing the JSON manifests for the samples in the input")
-    private String dataDirectory;
-
-    @Option(names = {"-l", "--location"},
-            required = true,
-            description = "GCP location for the Kubernetes cluster to be created in")
-    private String location;
-
     @Override
     public Integer call() {
         try {
-            new Platinum(runName, inputJson, dataDirectory, location, StorageOptions.getDefaultInstance().getService()).run();
+            new Platinum(runName, inputJson, StorageOptions.getDefaultInstance().getService()).run();
             return(0);
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.error("Unexpected exception", e);
             return(1);
         }
     }
