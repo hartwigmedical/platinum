@@ -87,4 +87,12 @@ public class PipelineServiceAccountTest {
         victim.findOrCreate(PROJECT, RUN_NAME);
         verify(iamPolicy).apply(serviceAccount);
     }
+
+    @Test
+    public void deletesServiceAccount() throws Exception {
+        ArgumentCaptor<String> accountNameArgumentCaptor = ArgumentCaptor.forClass(String.class);
+        when(serviceAccounts.delete(accountNameArgumentCaptor.capture())).thenReturn(mock(Iam.Projects.ServiceAccounts.Delete.class));
+        victim.delete(PROJECT, EMAIL);
+        assertThat(accountNameArgumentCaptor.getValue()).isEqualTo("/projects/hmf-test/serviceAccounts/" + EMAIL);
+    }
 }

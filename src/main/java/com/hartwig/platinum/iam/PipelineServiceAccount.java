@@ -40,6 +40,14 @@ public class PipelineServiceAccount {
         }
     }
 
+    public void delete(final String project, final String email) {
+        try {
+            iam.projects().serviceAccounts().delete(String.format("projects/%s/serviceAccounts/%s", project, email)).execute();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     private String serviceAccountName(final ServiceAccount s) {
         return s.getEmail().split("@")[0];
     }
@@ -57,9 +65,5 @@ public class PipelineServiceAccount {
             accounts.addAll(response.getAccounts());
         }
         return accounts;
-    }
-
-    public void delete() {
-
     }
 }

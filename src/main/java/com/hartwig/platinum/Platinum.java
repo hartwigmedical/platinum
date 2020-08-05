@@ -34,11 +34,11 @@ public class Platinum {
     public PlatinumResult run() {
         RunConfiguration configuration = RunConfiguration.from(runName, input);
         PipelineServiceAccount serviceAccount = new PipelineServiceAccount(iam, new PipelineIamPolicy(resourceManager));
-        String serviceAccountName = serviceAccount.findOrCreate(project, runName);
+        String serviceAccountEmail = serviceAccount.findOrCreate(project, runName);
         KubernetesCluster cluster = KubernetesCluster.findOrCreate(runName,
                 OutputBucket.from(storage).findOrCreate(runName, configuration.outputConfiguration()));
         List<PipelineResult> results = cluster.submit(configuration).get();
-        serviceAccount.delete();
-        return PlatinumResult.of(results);
+        serviceAccount.delete(project, serviceAccountEmail);
+        return PlatinumResult.of(null);
     }
 }
