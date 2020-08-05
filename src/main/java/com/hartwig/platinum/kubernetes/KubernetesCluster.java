@@ -2,8 +2,7 @@ package com.hartwig.platinum.kubernetes;
 
 import static java.lang.String.format;
 
-import com.hartwig.platinum.config.RunConfiguration;
-import com.hartwig.platinum.storage.OutputBucket;
+import com.hartwig.platinum.config.PlatinumConfiguration;
 
 import io.kubernetes.client.openapi.apis.CoreV1Api;
 
@@ -20,7 +19,7 @@ public class KubernetesCluster {
         this.api = api;
     }
 
-    public void submit(final RunConfiguration configuration) {
+    public void submit(final PlatinumConfiguration configuration) {
     }
 
     public static KubernetesCluster findOrCreate(final String runName, final String outputBucket) {
