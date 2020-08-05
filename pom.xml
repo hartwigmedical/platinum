@@ -24,6 +24,7 @@
         <mockito.version>2.23.4</mockito.version>
         <assertj-core.version>3.8.0</assertj-core.version>
         <google-api-services-iam.version>v1-rev20200709-1.30.10</google-api-services-iam.version>
+        <google-api-services-cloudresourcemanager.version>v1-rev20200720-1.30.10</google-api-services-cloudresourcemanager.version>
     </properties>
 
     <scm>
@@ -57,6 +58,11 @@
             <groupId>com.google.apis</groupId>
             <artifactId>google-api-services-iam</artifactId>
             <version>${google-api-services-iam.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.apis</groupId>
+            <artifactId>google-api-services-cloudresourcemanager</artifactId>
+            <version>${google-api-services-cloudresourcemanager.version}</version>
         </dependency>
         <dependency>
             <groupId>org.immutables</groupId>

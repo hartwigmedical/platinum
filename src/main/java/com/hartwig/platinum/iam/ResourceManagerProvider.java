@@ -6,19 +6,22 @@ import java.util.Collections;
 
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.json.jackson2.JacksonFactory;
+import com.google.api.services.cloudresourcemanager.CloudResourceManager;
+import com.google.api.services.cloudresourcemanager.CloudResourceManagerScopes;
 import com.google.api.services.iam.v1.Iam;
 import com.google.api.services.iam.v1.IamScopes;
 import com.google.auth.http.HttpCredentialsAdapter;
 import com.google.auth.oauth2.GoogleCredentials;
 
-public class IamProvider {
+public class ResourceManagerProvider {
 
-    public static Iam get() {
+    public static CloudResourceManager get() {
         try {
-            return new Iam.Builder(GoogleNetHttpTransport.newTrustedTransport(),
+            return new CloudResourceManager.Builder(GoogleNetHttpTransport.newTrustedTransport(),
                     JacksonFactory.getDefaultInstance(),
                     new HttpCredentialsAdapter(GoogleCredentials.getApplicationDefault()
-                            .createScoped(Collections.singleton(IamScopes.CLOUD_PLATFORM)))).setApplicationName("platinum").build();
+                            .createScoped(Collections.singleton(CloudResourceManagerScopes.CLOUD_PLATFORM)))).setApplicationName("platinum")
+                    .build();
         } catch (IOException | GeneralSecurityException e) {
             throw new RuntimeException(e);
         }

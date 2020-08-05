@@ -11,28 +11,37 @@ import com.google.api.services.iam.v1.model.ServiceAccount;
 public class PipelineServiceAccount {
 
     private final Iam iam;
+    private final PipelineIamPolicy policy;
 
-    public PipelineServiceAccount(final Iam iam) {
+    public PipelineServiceAccount(final Iam iam, final PipelineIamPolicy policy) {
         this.iam = iam;
+        this.policy = policy;
     }
 
     public String findOrCreate(final String project, final String runName) {
         try {
-            String serviceAccountId = ServiceAccountId.from(project, runName);
+            String serviceAccountName = ServiceAccountName.from(project, runName);
             String projectResourceName = "projects/" + project;
             List<ServiceAccount> accounts = projectServiceAccounts(iam, projectResourceName);
-            ServiceAccount serviceAccount =
-                    accounts.stream().filter(s -> s.getUniqueId().equals(serviceAccountId)).findFirst().orElse(null);
+            ServiceAccount serviceAccount = accounts != null ? accounts.stream()
+                    .filter(s -> serviceAccountName(s).equals(serviceAccountName))
+                    .findFirst()
+                    .orElse(null) : null;
             if (serviceAccount == null) {
                 serviceAccount = iam.projects()
                         .serviceAccounts()
-                        .create(projectResourceName, new CreateServiceAccountRequest().setAccountId(serviceAccountId))
+                        .create(projectResourceName, new CreateServiceAccountRequest().setAccountId(serviceAccountName))
                         .execute();
             }
+            policy.apply(serviceAccount);
             return serviceAccount.getEmail();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private String serviceAccountName(final ServiceAccount s) {
+        return s.getEmail().split("@")[0];
     }
 
     private static List<ServiceAccount> projectServiceAccounts(final Iam iam, final String projectResourceName) throws IOException {
