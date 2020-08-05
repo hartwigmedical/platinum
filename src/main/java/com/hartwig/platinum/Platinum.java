@@ -1,14 +1,13 @@
 package com.hartwig.platinum;
 
-import java.util.List;
+import java.io.File;
 
 import com.google.api.services.cloudresourcemanager.CloudResourceManager;
 import com.google.api.services.iam.v1.Iam;
 import com.google.cloud.storage.Storage;
-import com.hartwig.platinum.config.RunConfiguration;
+import com.hartwig.platinum.config.PlatinumConfiguration;
 import com.hartwig.platinum.iam.PipelineIamPolicy;
 import com.hartwig.platinum.iam.PipelineServiceAccount;
-import com.hartwig.platinum.jobs.PipelineResult;
 import com.hartwig.platinum.kubernetes.KubernetesCluster;
 import com.hartwig.platinum.storage.OutputBucket;
 
@@ -31,14 +30,13 @@ public class Platinum {
         this.project = project;
     }
 
-    public PlatinumResult run() {
-        RunConfiguration configuration = RunConfiguration.from(runName, input);
+    public void run() {
+        PlatinumConfiguration configuration = PlatinumConfiguration.from(new File(input));
         PipelineServiceAccount serviceAccount = new PipelineServiceAccount(iam, new PipelineIamPolicy(resourceManager));
         String serviceAccountEmail = serviceAccount.findOrCreate(project, runName);
         KubernetesCluster cluster = KubernetesCluster.findOrCreate(runName,
                 OutputBucket.from(storage).findOrCreate(runName, configuration.outputConfiguration()));
-        List<PipelineResult> results = cluster.submit(configuration).get();
+        cluster.submit(configuration);
         serviceAccount.delete(project, serviceAccountEmail);
-        return PlatinumResult.of(null);
     }
 }

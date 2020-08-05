@@ -1,24 +1,29 @@
 package com.hartwig.platinum.kubernetes;
 
-import com.hartwig.platinum.config.RunConfiguration;
-import com.hartwig.platinum.storage.OutputBucket;
+import static java.lang.String.format;
+
+import com.hartwig.platinum.config.PlatinumConfiguration;
 
 import io.kubernetes.client.openapi.apis.CoreV1Api;
 
 public class KubernetesCluster {
-
+    private final String runName;
+    private final String name;
+    private final String namespace;
     private final CoreV1Api api;
 
-    private KubernetesCluster(final CoreV1Api api) {
+    private KubernetesCluster(final String runName, final CoreV1Api api) {
+        this.runName = runName;
+        this.name = format("platinum-%s-cluster", runName);
+        this.namespace = "platinum-" + runName;
         this.api = api;
     }
 
-    public PipelineFutures submit(final RunConfiguration configuration) {
-        return new PipelineFutures();
+    public void submit(final PlatinumConfiguration configuration) {
+
     }
 
-    public static KubernetesCluster findOrCreate(final String runName, final String outputBucketName) {
-        // we should have some kind of convention on cluster name based on run name
-        return new KubernetesCluster(new CoreV1Api());
+    public static KubernetesCluster findOrCreate(final String runName, final String outputBucket) {
+        return new KubernetesCluster(runName, new CoreV1Api());
     }
 }

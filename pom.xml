@@ -20,6 +20,7 @@
         <commons-lang3.version>3.9</commons-lang3.version>
         <picocli.version>4.2.0</picocli.version>
         <kubernetes.version>9.0.0</kubernetes.version>
+        <jackson.version>2.9.5</jackson.version>
         <junit.version>4.12</junit.version>
         <mockito.version>2.23.4</mockito.version>
         <assertj-core.version>3.8.0</assertj-core.version>
@@ -78,11 +79,27 @@
             <groupId>io.kubernetes</groupId>
             <artifactId>client-java</artifactId>
             <version>${kubernetes.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>io.sundr</groupId>
+                    <artifactId>builder-annotations</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
             <version>${slf4j-api.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-core</artifactId>
+            <version>${jackson.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.datatype</groupId>
+            <artifactId>jackson-datatype-jdk8</artifactId>
+            <version>${jackson.version}</version>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
