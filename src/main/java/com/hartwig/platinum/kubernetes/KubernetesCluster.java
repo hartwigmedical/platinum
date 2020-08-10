@@ -10,6 +10,8 @@ import com.hartwig.platinum.config.PipelineConfiguration;
 import com.hartwig.platinum.config.PlatinumConfiguration;
 
 import io.fabric8.kubernetes.api.model.Container;
+import io.fabric8.kubernetes.api.model.VolumeBuilder;
+import io.fabric8.kubernetes.api.model.VolumeMountBuilder;
 import io.fabric8.kubernetes.api.model.batch.JobSpecBuilder;
 import io.fabric8.kubernetes.client.DefaultKubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClient;
@@ -21,10 +23,10 @@ public class KubernetesCluster {
     private final String jobName;
     private String outputBucket;
 
-    private KubernetesCluster(final String runName, final String outputBucket) {
+    private KubernetesCluster(final String runName, final String namespace, final String outputBucket) {
         this.runName = runName.toLowerCase();
+        this.namespace = namespace;
         this.name = format("platinum-%s-cluster", this.runName);
-        this.namespace = format("platinum-%s", this.runName);
         this.jobName = format("platinum-%s", this.runName);
         this.outputBucket = outputBucket;
     }
@@ -58,17 +60,22 @@ public class KubernetesCluster {
                 arguments.add(entry.getValue());
             }
             container.setCommand(arguments);
+            container.setVolumeMounts(List.of(new VolumeMountBuilder().withMountPath("/secrets").withName("samples").build()));
             containers.add(container);
         }
 
-        jobSpecBuilder.withNewTemplate().withNewSpec().withContainers(containers).withRestartPolicy("Never").endSpec().endTemplate();
-        client.namespaces().createNew().withNewMetadata().withName(namespace).endMetadata().done();
+        jobSpecBuilder.withNewTemplate().withNewSpec()
+                .withContainers(containers)
+                .withRestartPolicy("Never")
+                .withVolumes(new VolumeBuilder().withName("samples").build())
+                .endSpec()
+                .endTemplate();
         client.batch().jobs().inNamespace(namespace).createNew().withNewMetadata().withName(jobName).endMetadata().withSpec(jobSpecBuilder.build()).done();
     }
 
-    public static KubernetesCluster findOrCreate(final String runName, final String outputBucket) {
+    public static KubernetesCluster findOrCreate(final String runName, final String namespace, final String outputBucket) {
         try {
-            return new KubernetesCluster(runName, outputBucket);
+            return new KubernetesCluster(runName, namespace, outputBucket);
         } catch (Exception e) {
             throw new RuntimeException("Unable to create cluster", e);
         }
