@@ -3,40 +3,33 @@ package com.hartwig.platinum.kubernetes;
 import static java.lang.String.format;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
+import java.util.Map.Entry;
 
 import com.hartwig.platinum.config.PipelineConfiguration;
 import com.hartwig.platinum.config.PlatinumConfiguration;
 
-import io.kubernetes.client.openapi.ApiClient;
-import io.kubernetes.client.openapi.apis.CoreV1Api;
-import io.kubernetes.client.openapi.models.V1Container;
-import io.kubernetes.client.openapi.models.V1ObjectMeta;
-import io.kubernetes.client.openapi.models.V1Pod;
-import io.kubernetes.client.openapi.models.V1PodList;
-import io.kubernetes.client.openapi.models.V1PodSpec;
-import io.kubernetes.client.util.ClientBuilder;
-import io.kubernetes.client.util.generic.GenericKubernetesApi;
+import io.fabric8.kubernetes.api.model.Container;
+import io.fabric8.kubernetes.api.model.batch.JobSpecBuilder;
+import io.fabric8.kubernetes.client.DefaultKubernetesClient;
+import io.fabric8.kubernetes.client.KubernetesClient;
 
 public class KubernetesCluster {
     private final String runName;
     private final String name;
     private final String namespace;
+    private final String jobName;
     private String outputBucket;
-    private final CoreV1Api api;
 
-    private KubernetesCluster(final String runName, final String outputBucket, final CoreV1Api api) {
-        this.runName = runName;
-        this.name = format("platinum-%s-cluster", runName);
-        this.namespace = "platinum-" + runName;
+    private KubernetesCluster(final String runName, final String outputBucket) {
+        this.runName = runName.toLowerCase();
+        this.name = format("platinum-%s-cluster", this.runName);
+        this.namespace = format("platinum-%s", this.runName);
+        this.jobName = format("platinum-%s", this.runName);
         this.outputBucket = outputBucket;
-        this.api = api;
     }
 
     public void submit(final PlatinumConfiguration configuration) {
-        //api.createNamespace()
         List<PipelineConfiguration> pipelines = new ArrayList<>();
         for (String sample: configuration.samples().keySet()) {
             pipelines.add(PipelineConfiguration.builder()
@@ -48,63 +41,34 @@ public class KubernetesCluster {
                     .putArguments("-private_key_path", "")
                     .build());
         }
+
+        KubernetesClient client = new DefaultKubernetesClient();
+        JobSpecBuilder jobSpecBuilder = new JobSpecBuilder();
+        List<Container> containers = new ArrayList<>();
+
         for (PipelineConfiguration pipeline: pipelines) {
-//            V1Pod pod = new V1Pod();
-//            pod.
-//            api.createNamespacedPod(namespace, pod, );
+            String containerName = format("%s-%s", namespace, pipeline.sampleName()).toLowerCase();
+            Container container = new Container();
+            container.setImage("hartwigmedicalfoundation/pipeline5:5.13.1677");
+            container.setName(containerName);
             List<String> arguments = new ArrayList<>();
             arguments.add("/pipeline5.sh");
-            for (Map.Entry<String, String> argumentPair: pipeline.arguments().entrySet()) {
-                arguments.add(argumentPair.getKey());
-                arguments.add(argumentPair.getValue());
+            for (Entry<String, String> entry : pipeline.arguments().entrySet()) {
+                arguments.add(entry.getKey());
+                arguments.add(entry.getValue());
             }
-            String[] args = arguments.toArray(new String[]{});
-            String podName = format("%s-%s", namespace, pipeline.sampleName());
-
-            // Messing around
-
-            V1Pod pod =
-                    new V1Pod()
-                            .metadata(new V1ObjectMeta().name(podName).namespace(namespace))
-                            .spec(
-                                    new V1PodSpec()
-                                            .containers(Arrays.asList(new V1Container().name("c").image("hartwigmedicalfoundation/pipeline5:5.13.1672"))));
-
-            GenericKubernetesApi<V1Pod, V1PodList> podClient =
-                    new GenericKubernetesApi<>(V1Pod.class, V1PodList.class, "", "v1", "pods", api.getApiClient());
-
-            V1Pod latestPod = podClient.create(pod).getObject();
-//                            .onFailure(
-//                                    errorStatus -> {
-//                                        System.out.println("Not Created!");
-//                                        throw new RuntimeException(errorStatus.toString());
-//                                    })
-//                            .getObject();
-
-            System.out.println(latestPod.getStatus());
-            System.out.println("Created!");
-
-
-
-            // Client errors, doesn't want to leave localhost
-//            Exec exec = new Exec();
-//
-//            try {
-//                exec.exec(namespace, podName, args, true, false);
-//
-//            } catch (Exception e) {
-//                throw new RuntimeException("Failed to execute pod", e);
-//            }
+            container.setCommand(arguments);
+            containers.add(container);
         }
+
+        jobSpecBuilder.withNewTemplate().withNewSpec().withContainers(containers).withRestartPolicy("Never").endSpec().endTemplate();
+        client.namespaces().createNew().withNewMetadata().withName(namespace).endMetadata().done();
+        client.batch().jobs().inNamespace(namespace).createNew().withNewMetadata().withName(jobName).endMetadata().withSpec(jobSpecBuilder.build()).done();
     }
 
     public static KubernetesCluster findOrCreate(final String runName, final String outputBucket) {
         try {
-//            ApiClient apiClient = Config.defaultClient();
-            ApiClient apiClient = ClientBuilder.standard().build();
-
-//            apiClient.buildUrl("https://35.204.252.11", null, null);
-            return new KubernetesCluster(runName, outputBucket, new CoreV1Api(apiClient));
+            return new KubernetesCluster(runName, outputBucket);
         } catch (Exception e) {
             throw new RuntimeException("Unable to create cluster", e);
         }
