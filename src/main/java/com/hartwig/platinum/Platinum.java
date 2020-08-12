@@ -21,15 +21,17 @@ public class Platinum {
 
     private final String runName;
     private final String input;
+    private String keyFile;
     private final Storage storage;
     private final Iam iam;
     private final CloudResourceManager resourceManager;
     private final String project;
 
-    public Platinum(final String runName, final String input, final Storage storage, final Iam iam,
+    public Platinum(final String runName, final String input, final String keyFile, final Storage storage, final Iam iam,
             final CloudResourceManager resourceManager, final String project) {
         this.runName = runName;
         this.input = input;
+        this.keyFile = keyFile;
         this.storage = storage;
         this.iam = iam;
         this.resourceManager = resourceManager;
@@ -45,7 +47,7 @@ public class Platinum {
         KubernetesClient client = new DefaultKubernetesClient();
         client.namespaces().createNew().withNewMetadata().withName(namespace).endMetadata().done();
 
-        new ConfigPopulator(namespace, configuration).populateJson();
+        new ConfigPopulator(namespace, keyFile, configuration).populate();
         KubernetesCluster cluster = KubernetesCluster.findOrCreate(runName, namespace,
                 OutputBucket.from(storage).findOrCreate(runName, configuration.outputConfiguration()));
         cluster.submit(configuration);

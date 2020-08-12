@@ -20,14 +20,13 @@ public class KubernetesCluster {
     private final String runName;
     private final String name;
     private final String namespace;
-    private final String jobName;
+//    private final String jobName;
     private String outputBucket;
 
     private KubernetesCluster(final String runName, final String namespace, final String outputBucket) {
         this.runName = runName.toLowerCase();
         this.namespace = namespace;
         this.name = format("platinum-%s-cluster", this.runName);
-        this.jobName = format("platinum-%s", this.runName);
         this.outputBucket = outputBucket;
     }
 
@@ -38,15 +37,13 @@ public class KubernetesCluster {
                     .sampleName(sample)
                     .putAllArguments(configuration.pipelineArguments())
                     .putArguments("-set_id", sample)
-                    .putArguments("-sample_json", format("/secrets/samples/%s.json", sample))
+                    .putArguments("-sample_json", format("/samples/%s", sample))
                     .putArguments("-patient_report_bucket", outputBucket)
-                    .putArguments("-private_key_path", "")
+                    .putArguments("-private_key_path", "/secrets/compute-key")
                     .build());
         }
 
         KubernetesClient client = new DefaultKubernetesClient();
-        JobSpecBuilder jobSpecBuilder = new JobSpecBuilder();
-        List<Container> containers = new ArrayList<>();
 
         for (PipelineConfiguration pipeline: pipelines) {
             String containerName = format("%s-%s", namespace, pipeline.sampleName()).toLowerCase();
@@ -60,17 +57,21 @@ public class KubernetesCluster {
                 arguments.add(entry.getValue());
             }
             container.setCommand(arguments);
-            container.setVolumeMounts(List.of(new VolumeMountBuilder().withMountPath("/secrets").withName("samples").build()));
-            containers.add(container);
-        }
+            container.setVolumeMounts(List.of(new VolumeMountBuilder().withMountPath("/samples").withName("samples").build(),
+                    new VolumeMountBuilder().withMountPath("/secrets").withName("compute-key").build()));
 
-        jobSpecBuilder.withNewTemplate().withNewSpec()
-                .withContainers(containers)
-                .withRestartPolicy("Never")
-                .withVolumes(new VolumeBuilder().withName("samples").build())
-                .endSpec()
-                .endTemplate();
-        client.batch().jobs().inNamespace(namespace).createNew().withNewMetadata().withName(jobName).endMetadata().withSpec(jobSpecBuilder.build()).done();
+            String jobName = format("platinum-%s-%s", this.runName, pipeline.sampleName()).toLowerCase();
+            JobSpecBuilder jobSpecBuilder = new JobSpecBuilder();
+            jobSpecBuilder.withNewTemplate().withNewSpec()
+                    .withContainers(container)
+                    .withRestartPolicy("Never")
+                    .withVolumes(List.of(
+                            new VolumeBuilder().withName("samples").editOrNewConfigMap().withName("samples").endConfigMap().build(),
+                            new VolumeBuilder().withName("compute-key").editOrNewSecret().withSecretName("compute-key").endSecret().build()))
+                    .endSpec()
+                    .endTemplate();
+            client.batch().jobs().inNamespace(namespace).createNew().withNewMetadata().withName(jobName).endMetadata().withSpec(jobSpecBuilder.build()).done();
+        }
     }
 
     public static KubernetesCluster findOrCreate(final String runName, final String namespace, final String outputBucket) {
