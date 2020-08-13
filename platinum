@@ -1,0 +1,51 @@
+#!/usr/bin/env bash
+
+function install {
+    ./mvnw clean install -DskipTests
+}
+
+function create-cluster() {
+    while getopts ':p:r:' flag; do
+      case "${flag}" in
+          p) project_id=${OPTARG} ;;
+          r) run_name=${OPTARG} ;;
+          *) exit 1 ;;
+      esac
+    done
+
+    which gcloud &>/dev/null
+    [[ $? -ne 0 ]] && echo "cannot find gcloud!" && exit 1
+    kubectl_component_installed=$(gcloud components list 2>/dev/null | grep kubectl | grep -cv 'Not Installed')
+    [[ "$kubectl_component_installed" != "1" ]] && echo "the gcloud \"kubectl\" component does not look to be installed!" && exit 1
+    which kubectl &>/dev/null
+    [[ $? -ne 0 ]] && echo "Cannot find kubectl!" && exit 1
+
+    project_id=$1
+    cluster_name="$2"
+
+    gcloud container clusters create "${cluster_name}" --release-channel regular -p "${project_id}"
+    gcloud container clusters get-credentials "${cluster_name}"
+    kubectl get pods &> /dev/null
+}
+
+function run {
+    export SUPPRESS_GCLOUD_CREDS_WARNING=true
+    JAR=./target/platinum-local-SNAPSHOT.jar
+    if [ ! -f $JAR ]; then
+      echo "$JAR not found. Please run platinum install before platinum run"
+      exit 1
+    fi
+    java -jar ./target/platinum-local-SNAPSHOT.jar "$@"
+}
+
+CMD=$1
+shift
+
+case $CMD in
+install)
+  install
+  ;;
+run)
+  run "$@"
+  ;;
+esac
