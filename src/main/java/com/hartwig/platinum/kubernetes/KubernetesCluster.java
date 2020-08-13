@@ -24,6 +24,7 @@ public class KubernetesCluster {
 
     private final static String SAMPLES_PATH = "/samples";
     private final static String SECRETS_PATH = "/secrets";
+    final static String NAMESPACE = "default";
 
     private KubernetesCluster(final String runName, final String configMapName, final String jsonKeySecret, final String outputBucket,
             final KubernetesClient kubernetesClient) {
@@ -72,7 +73,8 @@ public class KubernetesCluster {
                             new VolumeBuilder().withName(jsonKeySecret).editOrNewSecret().withSecretName(jsonKeySecret).endSecret().build()))
                     .endSpec()
                     .endTemplate();
-            kubernetesClient.batch().jobs().createNew().withNewMetadata().withName(jobName).endMetadata().withSpec(jobSpecBuilder.build()).done();
+            kubernetesClient.batch().jobs().createNew().withNewMetadata().withName(jobName).withNamespace(NAMESPACE).endMetadata()
+                    .withSpec(jobSpecBuilder.build()).done();
         }
     }
 

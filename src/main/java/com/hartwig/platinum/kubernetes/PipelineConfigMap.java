@@ -24,6 +24,7 @@ public class PipelineConfigMap {
                 .addToData(configuration.samples().entrySet().stream().collect(toMap(Entry::getKey, e -> e.getValue().toString())))
                 .withNewMetadata()
                 .withName(name)
+                .withNamespace(KubernetesCluster.NAMESPACE)
                 .endMetadata()
                 .done();
         return name;

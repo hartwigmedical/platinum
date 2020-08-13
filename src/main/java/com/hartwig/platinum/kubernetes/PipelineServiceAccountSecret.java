@@ -15,7 +15,7 @@ public class PipelineServiceAccountSecret {
 
     public String create() {
         String keyName = "compute-key";
-        kubernetesClient.secrets().createNew().withNewMetadata().withName(keyName).endMetadata().addToData(keyName, jsonKey.jsonBase64()).done();
+        kubernetesClient.secrets().createNew().withNewMetadata().withName(keyName).withNamespace(KubernetesCluster.NAMESPACE).endMetadata().addToData(keyName, jsonKey.jsonBase64()).done();
         return keyName;
     }
 }
