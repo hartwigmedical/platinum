@@ -25,11 +25,6 @@ public class PlatinumMain implements Callable<Integer> {
             description = "JSON file that contains arguments to be passed to the pipeline jobs and a list of samples")
     private String inputJson;
 
-    @Option(names = {"-k", "--key-file"},
-            required = true,
-            description = "A service account key file to be used for interactions with GCP")
-    private String keyFile;
-
     @Option(names = { "-p", "--project" },
             required = true,
             description = "")
@@ -40,7 +35,6 @@ public class PlatinumMain implements Callable<Integer> {
         try {
             new Platinum(runName,
                     inputJson,
-                    keyFile,
                     StorageOptions.getDefaultInstance().getService(),
                     IamProvider.get(),
                     ResourceManagerProvider.get(),

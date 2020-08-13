@@ -18,15 +18,14 @@ import io.fabric8.kubernetes.client.KubernetesClient;
 
 public class KubernetesCluster {
     private final String runName;
-    private final String name;
-    private final String namespace;
-//    private final String jobName;
-    private String outputBucket;
+    private final String configMapName;
+    private final String jsonKeySecret;
+    private final String outputBucket;
 
-    private KubernetesCluster(final String runName, final String namespace, final String outputBucket) {
+    private KubernetesCluster(final String runName, final String configMapName, final String jsonKeySecret, final String outputBucket) {
         this.runName = runName.toLowerCase();
-        this.namespace = namespace;
-        this.name = format("platinum-%s-cluster", this.runName);
+        this.configMapName = configMapName;
+        this.jsonKeySecret = jsonKeySecret;
         this.outputBucket = outputBucket;
     }
 
@@ -46,9 +45,9 @@ public class KubernetesCluster {
         KubernetesClient client = new DefaultKubernetesClient();
 
         for (PipelineConfiguration pipeline: pipelines) {
-            String containerName = format("%s-%s", namespace, pipeline.sampleName()).toLowerCase();
+            String containerName = format("%s-%s", runName, pipeline.sampleName()).toLowerCase();
             Container container = new Container();
-            container.setImage("hartwigmedicalfoundation/pipeline5:5.13.1677");
+            container.setImage("hartwigmedicalfoundation/pipeline5:platinum");
             container.setName(containerName);
             List<String> arguments = new ArrayList<>();
             arguments.add("/pipeline5.sh");
@@ -57,8 +56,8 @@ public class KubernetesCluster {
                 arguments.add(entry.getValue());
             }
             container.setCommand(arguments);
-            container.setVolumeMounts(List.of(new VolumeMountBuilder().withMountPath("/samples").withName("samples").build(),
-                    new VolumeMountBuilder().withMountPath("/secrets").withName("compute-key").build()));
+            container.setVolumeMounts(List.of(new VolumeMountBuilder().withMountPath("/samples").withName(configMapName).build(),
+                    new VolumeMountBuilder().withMountPath("/secrets").withName(jsonKeySecret).build()));
 
             String jobName = format("platinum-%s-%s", this.runName, pipeline.sampleName()).toLowerCase();
             JobSpecBuilder jobSpecBuilder = new JobSpecBuilder();
@@ -66,17 +65,18 @@ public class KubernetesCluster {
                     .withContainers(container)
                     .withRestartPolicy("Never")
                     .withVolumes(List.of(
-                            new VolumeBuilder().withName("samples").editOrNewConfigMap().withName("samples").endConfigMap().build(),
-                            new VolumeBuilder().withName("compute-key").editOrNewSecret().withSecretName("compute-key").endSecret().build()))
+                            new VolumeBuilder().withName(configMapName).editOrNewConfigMap().withName(configMapName).endConfigMap().build(),
+                            new VolumeBuilder().withName(jsonKeySecret).editOrNewSecret().withSecretName(jsonKeySecret).endSecret().build()))
                     .endSpec()
                     .endTemplate();
-            client.batch().jobs().inNamespace(namespace).createNew().withNewMetadata().withName(jobName).endMetadata().withSpec(jobSpecBuilder.build()).done();
+            client.batch().jobs().createNew().withNewMetadata().withName(jobName).endMetadata().withSpec(jobSpecBuilder.build()).done();
         }
     }
 
-    public static KubernetesCluster findOrCreate(final String runName, final String namespace, final String outputBucket) {
+    public static KubernetesCluster findOrCreate(final String runName, final String configMapName, final String jsonSecretName,
+            final String outputBucket) {
         try {
-            return new KubernetesCluster(runName, namespace, outputBucket);
+            return new KubernetesCluster(runName, configMapName, jsonSecretName, outputBucket);
         } catch (Exception e) {
             throw new RuntimeException("Unable to create cluster", e);
         }

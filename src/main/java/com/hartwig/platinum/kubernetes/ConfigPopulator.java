@@ -14,12 +14,10 @@ import io.fabric8.kubernetes.client.DefaultKubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClient;
 
 public class ConfigPopulator {
-    private final String namespace;
     private String keyJson;
     private final PlatinumConfiguration configuration;
 
-    public ConfigPopulator(final String namespace, final String keyJson, final PlatinumConfiguration configuration) {
-        this.namespace = namespace;
+    public ConfigPopulator(final String keyJson, final PlatinumConfiguration configuration) {
         this.keyJson = keyJson;
         this.configuration = configuration;
     }
@@ -31,12 +29,11 @@ public class ConfigPopulator {
                 .addToData(configuration.samples().entrySet().stream().collect(toMap(Entry::getKey, e -> e.getValue().toString())))
                 .withNewMetadata()
                 .withName("samples")
-                .withNamespace(namespace)
                 .endMetadata()
                 .done();
         try {
             String base64 = Base64.getEncoder().encodeToString(Files.readAllBytes(new File(keyJson).toPath()));
-            client.secrets().createNew().withNewMetadata().withNamespace(namespace).withName("compute-key").endMetadata().addToData("compute-key", base64).done();
+            client.secrets().createNew().withNewMetadata().withName("compute-key").endMetadata().addToData("compute-key", base64).done();
         } catch (IOException e) {
             throw new RuntimeException("Could not populate key", e);
         }
