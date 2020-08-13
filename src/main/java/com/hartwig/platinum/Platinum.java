@@ -13,7 +13,12 @@ import com.hartwig.platinum.iam.ServiceAccountPrivateKey;
 import com.hartwig.platinum.kubernetes.KubernetesCluster;
 import com.hartwig.platinum.storage.OutputBucket;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class Platinum {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(Platinum.class);
 
     private final String runName;
     private final String input;
@@ -33,17 +38,18 @@ public class Platinum {
     }
 
     public void run() {
+
+        LOGGER.info("Starting platinum run with name [{}] and input [{}]", runName, input);
         PlatinumConfiguration configuration = PlatinumConfiguration.from(new File(input));
         PipelineServiceAccount serviceAccount = new PipelineServiceAccount(iam, new PipelineIamPolicy(resourceManager));
         String serviceAccountEmail = serviceAccount.findOrCreate(project, runName);
+        LOGGER.info("Created service account with email [{}].", serviceAccountEmail);
         ServiceAccountPrivateKey privateKey = new ServiceAccountPrivateKey(iam);
         JsonKey keyJson = privateKey.create(project, serviceAccountEmail);
-
+        LOGGER.info("Created private key for service account [{}] with id [{}]", serviceAccountEmail, keyJson.id());
         KubernetesCluster cluster = KubernetesCluster.findOrCreate(runName,
                 OutputBucket.from(storage).findOrCreate(runName, configuration.outputConfiguration()));
         cluster.submit(configuration);
-
-        privateKey.delete(keyJson);
-        serviceAccount.delete(project, serviceAccountEmail);
+        LOGGER.info("Submitted workloads to kubernetes");
     }
 }
