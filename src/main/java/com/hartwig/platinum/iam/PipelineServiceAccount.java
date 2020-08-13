@@ -20,7 +20,7 @@ public class PipelineServiceAccount {
 
     public String findOrCreate(final String project, final String runName) {
         try {
-            String serviceAccountName = ServiceAccountName.from(project, runName);
+            String serviceAccountName = ServiceAccountName.from(runName);
             String projectResourceName = "projects/" + project;
             List<ServiceAccount> accounts = projectServiceAccounts(iam, projectResourceName);
             ServiceAccount serviceAccount = accounts != null ? accounts.stream()
