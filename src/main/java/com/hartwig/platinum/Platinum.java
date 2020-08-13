@@ -49,7 +49,7 @@ public class Platinum {
         String keySecretName = new PipelineServiceAccountSecret(keyJson, kubernetesClient).create();
 
         KubernetesCluster cluster = KubernetesCluster.findOrCreate(runName, configMapName, keySecretName,
-                OutputBucket.from(storage).findOrCreate(runName, configuration.outputConfiguration()));
+                OutputBucket.from(storage).findOrCreate(runName, configuration.outputConfiguration()), kubernetesClient);
         cluster.submit(configuration);
 
         privateKey.delete(keyJson);

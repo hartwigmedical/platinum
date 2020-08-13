@@ -13,7 +13,6 @@ import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.VolumeBuilder;
 import io.fabric8.kubernetes.api.model.VolumeMountBuilder;
 import io.fabric8.kubernetes.api.model.batch.JobSpecBuilder;
-import io.fabric8.kubernetes.client.DefaultKubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClient;
 
 public class KubernetesCluster {
@@ -21,12 +20,18 @@ public class KubernetesCluster {
     private final String configMapName;
     private final String jsonKeySecret;
     private final String outputBucket;
+    private final KubernetesClient kubernetesClient;
 
-    private KubernetesCluster(final String runName, final String configMapName, final String jsonKeySecret, final String outputBucket) {
+    private final static String SAMPLES_PATH = "/samples";
+    private final static String SECRETS_PATH = "/secrets";
+
+    private KubernetesCluster(final String runName, final String configMapName, final String jsonKeySecret, final String outputBucket,
+            final KubernetesClient kubernetesClient) {
         this.runName = runName.toLowerCase();
         this.configMapName = configMapName;
         this.jsonKeySecret = jsonKeySecret;
         this.outputBucket = outputBucket;
+        this.kubernetesClient = kubernetesClient;
     }
 
     public void submit(final PlatinumConfiguration configuration) {
@@ -36,13 +41,11 @@ public class KubernetesCluster {
                     .sampleName(sample)
                     .putAllArguments(configuration.pipelineArguments())
                     .putArguments("-set_id", sample)
-                    .putArguments("-sample_json", format("/samples/%s", sample))
+                    .putArguments("-sample_json", format("%s/%s", SAMPLES_PATH, sample))
                     .putArguments("-patient_report_bucket", outputBucket)
-                    .putArguments("-private_key_path", "/secrets/compute-key")
+                    .putArguments("-private_key_path", format("%s/%s", SECRETS_PATH, jsonKeySecret))
                     .build());
         }
-
-        KubernetesClient client = new DefaultKubernetesClient();
 
         for (PipelineConfiguration pipeline: pipelines) {
             String containerName = format("%s-%s", runName, pipeline.sampleName()).toLowerCase();
@@ -56,8 +59,8 @@ public class KubernetesCluster {
                 arguments.add(entry.getValue());
             }
             container.setCommand(arguments);
-            container.setVolumeMounts(List.of(new VolumeMountBuilder().withMountPath("/samples").withName(configMapName).build(),
-                    new VolumeMountBuilder().withMountPath("/secrets").withName(jsonKeySecret).build()));
+            container.setVolumeMounts(List.of(new VolumeMountBuilder().withMountPath(SAMPLES_PATH).withName(configMapName).build(),
+                    new VolumeMountBuilder().withMountPath(SECRETS_PATH).withName(jsonKeySecret).build()));
 
             String jobName = format("platinum-%s-%s", this.runName, pipeline.sampleName()).toLowerCase();
             JobSpecBuilder jobSpecBuilder = new JobSpecBuilder();
@@ -69,14 +72,14 @@ public class KubernetesCluster {
                             new VolumeBuilder().withName(jsonKeySecret).editOrNewSecret().withSecretName(jsonKeySecret).endSecret().build()))
                     .endSpec()
                     .endTemplate();
-            client.batch().jobs().createNew().withNewMetadata().withName(jobName).endMetadata().withSpec(jobSpecBuilder.build()).done();
+            kubernetesClient.batch().jobs().createNew().withNewMetadata().withName(jobName).endMetadata().withSpec(jobSpecBuilder.build()).done();
         }
     }
 
     public static KubernetesCluster findOrCreate(final String runName, final String configMapName, final String jsonSecretName,
-            final String outputBucket) {
+            final String outputBucket, final KubernetesClient kubernetesClient) {
         try {
-            return new KubernetesCluster(runName, configMapName, jsonSecretName, outputBucket);
+            return new KubernetesCluster(runName, configMapName, jsonSecretName, outputBucket, kubernetesClient);
         } catch (Exception e) {
             throw new RuntimeException("Unable to create cluster", e);
         }
