@@ -37,8 +37,7 @@ public class PlatinumMain implements Callable<Integer> {
                     inputJson,
                     StorageOptions.getDefaultInstance().getService(),
                     IamProvider.get(),
-                    ResourceManagerProvider.get(),
-                    project).run();
+                    ResourceManagerProvider.get(), kubernetesClient, project).run();
             return (0);
         } catch (Exception e) {
             LOGGER.error("Unexpected exception", e);
