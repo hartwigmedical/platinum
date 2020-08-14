@@ -93,6 +93,6 @@ public class PipelineServiceAccountTest {
         ArgumentCaptor<String> accountNameArgumentCaptor = ArgumentCaptor.forClass(String.class);
         when(serviceAccounts.delete(accountNameArgumentCaptor.capture())).thenReturn(mock(Iam.Projects.ServiceAccounts.Delete.class));
         victim.delete(PROJECT, EMAIL);
-        assertThat(accountNameArgumentCaptor.getValue()).isEqualTo("/projects/hmf-test/serviceAccounts/" + EMAIL);
+        assertThat(accountNameArgumentCaptor.getValue()).isEqualTo(ServiceAccountId.from(PROJECT, EMAIL));
     }
 }

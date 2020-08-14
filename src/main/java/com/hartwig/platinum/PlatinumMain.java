@@ -9,6 +9,7 @@ import com.hartwig.platinum.iam.ResourceManagerProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import io.fabric8.kubernetes.client.DefaultKubernetesClient;
 import picocli.CommandLine;
 import picocli.CommandLine.Option;
 
@@ -37,8 +38,7 @@ public class PlatinumMain implements Callable<Integer> {
                     inputJson,
                     StorageOptions.getDefaultInstance().getService(),
                     IamProvider.get(),
-                    ResourceManagerProvider.get(),
-                    project).run();
+                    ResourceManagerProvider.get(), new DefaultKubernetesClient(), project).run();
             return (0);
         } catch (Exception e) {
             LOGGER.error("Unexpected exception", e);

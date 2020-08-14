@@ -27,7 +27,7 @@ public interface PlatinumConfiguration {
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.registerModule(new Jdk8Module());
         try {
-            return objectMapper.readValue(inputFile, new TypeReference<PlatinumConfiguration>() {});
+            return objectMapper.readValue(inputFile, new TypeReference<>() {});
         } catch (IOException ioe) {
             throw new RuntimeException("Could not parse input", ioe);
         }

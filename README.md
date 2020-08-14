@@ -1,74 +1,32 @@
 # Platinum
 
 This project is to enable running Pipeline5 at scale, using Kubernetes for orchestration, ie
-_P_ipe_L_ine _AT_ any _num_ber!
+_P_ipe_L_ine _AT_ any _num_ber! It works by creating a Job in your Kubernetes cluster for each pair of samples you provide. 
+To use it:
 
-## To Make The Cluster
+1. Run the `make_cluster.sh` script if you don't already have a Kubernetes cluster in mind
+2. Make a JSON file describing your inputs and arguments to the pipeline
+3. Execute the application passing your JSON file
 
-On my version of `gcloud` (294.0.0.) it asks to enable the required APIs if they are not already active. Older versions might
-require you to manually enable them first. Note that this procedure only worked for me in development, I think the other
-environments have default networking in place that is too restrictive for the health checks to complete.
+## Making the Cluster
 
-```
-# gcloud config set project ...
-# gcloud config set account ...
-# gcloud deployment-manager deployments create platinum-cluster --config cluster.yaml
-```
+This is scripted and should work if you have the required tools installed and there are not any peculiarities about your GKE setup
+(custom networking, etc). The script should tell you if you are missing any dependencies or if anything fails.
 
-To delete it: 
+When this succeeds the machine you're executing on should be configured to connect to the new cluster via the `gcloud kubectl`
+component. 
 
-```
-# gcloud deployment-manager deployments delete platinum-cluster
-```
+## Making the JSON file
 
-## Installing Workflow Management on the Cluster
+Platinum uses a JSON batch descriptor file to specify:
 
-```
-# gcloud container clusters get-credentials platinum-cluster --zone europe-west4-a --project ...
-# kubectl create namespace platinum
-# kubectl config set-context --current --namespace=platinum
-# kubectl create clusterrolebinding ned-cluster-admin-binding --clusterrole=cluster-admin --user=n.leitch@hartwigmedicalfoundation.nl
-# kubectl apply -n platinum -f https://raw.githubusercontent.com/argoproj/argo/stable/manifests/install.yaml
-# curl -sSL -o ~/bin/argo https://github.com/argoproj/argo/releases/download/v2.2.1/argo-linux-amd64
-# chmod +x ~/bin/argo
-```
+* Where your samples are and what their names are;
+* Where the output of the pipeline will go;
+* Arguments to pass to the invoked pipeline processes.
 
-Simple explanation of how to use it on the CLI: `https://argoproj.github.io/argo/examples/#argo-cli`
+## Executing the Pipelines
 
-## Preparing Data for the Run
-
-Make your JSON files according to the `sample_json` format in the Pipleine5 repo. Put them all in a single directory named
-according to their samples (eg `CPCT12345678.json`) and then load them into a config map (here the directory containing the JSON
-files is `jsons` and we're in its parent directory):
-
-```
-# kubectl create configmap patient-jsons --from-file=jsons
-```
-
-Then make the required secret for the pipeline to run:
-
-```
-# kubectl create secret generic platinum-bootstrap-key --from-file=platinum-bootstrap-key=./hmf-crunch-425af65e20aa.json
-```
-
-## Additional Configuration 
-
-If you get these in the logs for the Argo controller:
-
-
-```
-n_leitch@cloudshell:~/DEV-1389$ kubectl logs workflow-controller-7955968c89-q84r9
-time="2020-07-24T23:31:23Z" level=info msg="config map" name=workflow-controller-configmap
-time="2020-07-24T23:31:23Z" level=fatal msg="Failed to register watch for controller config map: configmaps \"workflow-controller-configmap\" is forbidden: User \"system:serviceaccount:platinum:argo\" cannot get resource \"configmaps\" in API group \"\" in the namespace \"platinum\""
-```
-Then you have to do this because for some reason the Argo install doesn't give itself the right permissions:
-
-```
-# kubectl create clusterrolebinding argo-cluster-admin-binding --clusterrole=cluster-admin --user=system:serviceaccount:platinum:argo
-# kubectl create clusterrolebinding argo-server-cluster-admin-binding --clusterrole=cluster-admin --user=system:serviceaccount:platinum:argo-server
-# kubectl create clusterrolebinding argo-cluster-platinum-binding --clusterrole=cluster-admin --user=system:serviceaccount:platinum:default
-```
-
-Suspect those permissions are too much and we could/should reduce them to some miniumum necessary privileges.
-
+With the setup complete the Platinum application is run with the JSON file that was prepared above. The cluster setup script will
+have configured the `gcloud kubectl` component to connect to the new cluster it created. Platinum depends on the environment to
+have been setup so that getting a default client will connect to the correct cluster.
 
