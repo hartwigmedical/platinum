@@ -8,10 +8,9 @@ function run {
     export SUPPRESS_GCLOUD_CREDS_WARNING=true
     JAR=./target/platinum-local-SNAPSHOT.jar
     if [ ! -f $JAR ]; then
-      echo "$JAR not found. Please run platinum install before platinum run"
-      exit 1
+      install
     fi
-    java -jar ./target/platinum-local-SNAPSHOT.jar "$@"
+    java -jar $JAR "$@"
 }
 
 CMD=$1
