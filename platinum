@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+
+function install {
+    ./mvnw clean install -DskipTests
+}
+
+function run {
+    export SUPPRESS_GCLOUD_CREDS_WARNING=true
+    JAR=./target/platinum-local-SNAPSHOT.jar
+    if [ ! -f $JAR ]; then
+      echo "$JAR not found. Please run platinum install before platinum run"
+      exit 1
+    fi
+    java -jar ./target/platinum-local-SNAPSHOT.jar "$@"
+}
+
+CMD=$1
+shift
+
+case $CMD in
+install)
+  install
+  ;;
+run)
+  run "$@"
+  ;;
+esac

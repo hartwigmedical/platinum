@@ -17,7 +17,12 @@ import com.hartwig.platinum.storage.OutputBucket;
 
 import io.fabric8.kubernetes.client.KubernetesClient;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class Platinum {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(Platinum.class);
 
     private final String runName;
     private final String input;
@@ -39,20 +44,19 @@ public class Platinum {
     }
 
     public void run() {
+
+        LOGGER.info("Starting platinum run with name [{}] and input [{}]", runName, input);
         PlatinumConfiguration configuration = PlatinumConfiguration.from(new File(input));
         PipelineServiceAccount serviceAccount = new PipelineServiceAccount(iam, new PipelineIamPolicy(resourceManager));
         String serviceAccountEmail = serviceAccount.findOrCreate(project, runName);
-
+        LOGGER.info("Created service account with email [{}].", serviceAccountEmail);
         ServiceAccountPrivateKey privateKey = new ServiceAccountPrivateKey(iam);
-        JsonKey keyJson = privateKey.create(project, serviceAccountEmail);
-        String configMapName = new PipelineConfigMapVolume(configuration, kubernetesClient).create();
-        String keySecretName = new PipelineServiceAccountSecretVolume(keyJson, kubernetesClient).create();
-
-        KubernetesCluster cluster = KubernetesCluster.findOrCreate(runName, configMapName, keySecretName,
-                OutputBucket.from(storage).findOrCreate(runName, configuration.outputConfiguration()), kubernetesClient);
-        cluster.submit(configuration);
-
-        privateKey.delete(keyJson);
-        serviceAccount.delete(project, serviceAccountEmail);
+        JsonKey jsonKey = privateKey.create(project, serviceAccountEmail);
+        LOGGER.info("Created private key for service account [{}] with id [{}]", serviceAccountEmail, jsonKey.id());
+        KubernetesCluster cluster = KubernetesCluster.findOrCreate(runName,
+                OutputBucket.from(storage).findOrCreate(runName, configuration.outputConfiguration()),
+                kubernetesClient);
+        cluster.submit(configuration, jsonKey);
+        LOGGER.info("Submitted workloads to kubernetes");
     }
 }
