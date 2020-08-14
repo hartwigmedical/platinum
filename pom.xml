@@ -21,6 +21,7 @@
         <picocli.version>4.2.0</picocli.version>
         <kubernetes.version>4.10.3</kubernetes.version>
         <jackson.version>2.10.0</jackson.version>
+        <failsafe.version>2.0.1</failsafe.version>
         <junit.version>4.12</junit.version>
         <mockito.version>2.23.4</mockito.version>
         <assertj-core.version>3.8.0</assertj-core.version>
@@ -85,6 +86,11 @@
             <groupId>io.fabric8</groupId>
             <artifactId>kubernetes-client</artifactId>
             <version>${kubernetes.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>net.jodah</groupId>
+            <artifactId>failsafe</artifactId>
+            <version>${failsafe.version}</version>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
