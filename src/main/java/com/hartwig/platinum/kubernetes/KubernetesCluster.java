@@ -15,8 +15,11 @@ import com.google.api.services.container.v1beta1.Container;
 import com.google.api.services.container.v1beta1.Container.Projects.Locations.Clusters.Create;
 import com.google.api.services.container.v1beta1.Container.Projects.Locations.Clusters.Get;
 import com.google.api.services.container.v1beta1.ContainerScopes;
+import com.google.api.services.container.v1beta1.model.ClientCertificateConfig;
 import com.google.api.services.container.v1beta1.model.Cluster;
 import com.google.api.services.container.v1beta1.model.CreateClusterRequest;
+import com.google.api.services.container.v1beta1.model.MasterAuth;
+import com.google.api.services.container.v1beta1.model.Operation;
 import com.google.auth.http.HttpCredentialsAdapter;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.hartwig.platinum.config.PlatinumConfiguration;
@@ -92,10 +95,14 @@ public class KubernetesCluster {
             Cluster newCluster = new Cluster();
             newCluster.setName(runName + "-cluster");
             newCluster.setInitialNodeCount(3);
+            ClientCertificateConfig certificateConfig = new ClientCertificateConfig();
+            certificateConfig.setIssueClientCertificate(true);
+            newCluster.setMasterAuth(new MasterAuth());
+            newCluster.getMasterAuth().setClientCertificateConfig(certificateConfig);
             CreateClusterRequest createRequest = new CreateClusterRequest();
             createRequest.setCluster(newCluster);
             Create created = containerApi.projects().locations().clusters().create(parent, createRequest);
-            created.execute();
+            Operation execute = created.execute();
             return find(containerApi, fullPath(runName)).get();
         } catch (Exception e) {
             throw new RuntimeException("Failed to create cluster", e);
