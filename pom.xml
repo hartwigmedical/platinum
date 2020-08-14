@@ -26,6 +26,7 @@
         <assertj-core.version>3.8.0</assertj-core.version>
         <google-api-services-iam.version>v1-rev20200709-1.30.10</google-api-services-iam.version>
         <google-api-services-cloudresourcemanager.version>v1-rev20200720-1.30.10</google-api-services-cloudresourcemanager.version>
+        <google-api-services-container.version>v1beta1-rev20200724-1.30.10</google-api-services-container.version>
     </properties>
 
     <scm>
@@ -64,6 +65,11 @@
             <groupId>com.google.apis</groupId>
             <artifactId>google-api-services-cloudresourcemanager</artifactId>
             <version>${google-api-services-cloudresourcemanager.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.apis</groupId>
+            <artifactId>google-api-services-container</artifactId>
+            <version>${google-api-services-container.version}</version>
         </dependency>
         <dependency>
             <groupId>org.immutables</groupId>
