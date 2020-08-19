@@ -2,9 +2,7 @@
 
 Platinum is a tool to run the HMF OncoAct pipeline from any GCP project for any number of samples in one easy command. 
 
-Internally platinum runs the Pipeline5 docker container on an ephemeral Kubernetes cluster.
-
-# Quickstart
+### Quickstart
 
 ```shell script
 # PROJECT is your GCP Project
@@ -16,7 +14,7 @@ Internally platinum runs the Pipeline5 docker container on an ephemeral Kubernet
 gsutil ls gs://platinum-output-EXPERIMENT_NAME/
 ```
 
-# Pre-Requisites
+### Before you begin
 
 Platinum runs on the Google Cloud Platform. We've tried to automate as much of the setup as possible, but there are still
 one or two things to configure.
@@ -26,7 +24,7 @@ To start you'll need:
 - An account within that project with the [Project Owner role](https://cloud.google.com/iam/docs/understanding-roles)
 - [A region](https://cloud.google.com/compute/docs/regions-zones) where you plan to store your data and run your workload (hint: pick the region closest to where your data currently resides)
 
-# Configuring your GCP Project
+### Configuring your GCP Project
 
 When you have your project setup, install the [gcloud SDK](https://cloud.google.com/sdk/docs/downloads-interactive).
 
@@ -40,7 +38,45 @@ Checkout this repository on your local machine and run the following from the re
 ./platinum configure -p your_project -r your_region 
 ```  
 
-# Configuring Input
+### Configuring Input
 
-The HMF pipeline takes pair-end fastq as input. This input should be uploaded to a bucket in GCP before running platinum. When
-That is complete
+The HMF pipeline takes pair-end fastq as input. This input should be uploaded to a bucket in [Google Cloud Storage](https://cloud.google.com/storage) (GCS) before running platinum. 
+Once the input fastq is in GCS you define a JSON configuration in the following format.
+
+Notes:
+- Reference in this context is our internal terminology for the blood or normal sample.
+- The first part of the path is the bucket, with no `gs://` prefix.
+
+
+```json
+{
+  "samples": {
+    "SAMPLE_1": {
+      "tumor": {
+        "type": "TUMOR",
+        "name": "SAMPLE_1_TUMOR",
+        "lanes": [
+          {
+            "laneNumber": "1",
+            "firstOfPairPath": "path/to/your/tumor_r1.fastq.gz",
+            "secondOfPairPath":  "path/to/your/tumor_r2.fastq.gz"
+          }
+        ]
+      },
+      "reference": {
+        "type": "REFERENCE",
+        "name": "SAMPLE_1_REFERENCE",
+        "lanes": [
+          {
+            "laneNumber": "1",
+            "firstOfPairPath": "path/to/your/reference_r1.fastq.gz",
+            "secondOfPairPath": "path/to/your/reference_r2.fastq.gz"
+          }
+        ]
+      }
+    }
+  }
+}
+```
+
+### Running Platinum
