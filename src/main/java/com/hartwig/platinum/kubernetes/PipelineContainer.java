@@ -16,7 +16,7 @@ public class PipelineContainer {
 
     private final static String SAMPLES_PATH = "/samples";
     private final static String SECRETS_PATH = "/secrets";
-    private static final String IMAGE = "hartwigmedicalfoundation/pipeline5:5.13.1743";
+    private static final String IMAGE = "hartwigmedicalfoundation/pipeline5:5.14.1742";
     private final String sample;
     private final String runName;
     private final Map<String, String> argumentPairs;
