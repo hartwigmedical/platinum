@@ -1,6 +1,6 @@
 # Platinum
 
-Platinum is a tool to run the HMF OncoAct pipeline from any GCP project for any number of samples in one easy command. 
+Platinum is a tool to run the HMF pipeline from any GCP project for any number of samples in one easy command. 
 
 ### Quickstart
 
