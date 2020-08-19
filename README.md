@@ -4,6 +4,8 @@ Platinum is a tool to run the HMF pipeline from any GCP project for any number o
 
 ### Quickstart
 
+Checkout this repo and run the following from the root:
+
 ```shell script
 # PROJECT is your GCP Project
 # REGION is your closest GCP region
