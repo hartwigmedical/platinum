@@ -21,11 +21,13 @@
         <picocli.version>4.2.0</picocli.version>
         <kubernetes.version>4.10.3</kubernetes.version>
         <jackson.version>2.10.0</jackson.version>
+        <failsafe.version>2.0.1</failsafe.version>
         <junit.version>4.12</junit.version>
         <mockito.version>2.23.4</mockito.version>
         <assertj-core.version>3.8.0</assertj-core.version>
         <google-api-services-iam.version>v1-rev20200709-1.30.10</google-api-services-iam.version>
         <google-api-services-cloudresourcemanager.version>v1-rev20200720-1.30.10</google-api-services-cloudresourcemanager.version>
+        <google-api-services-container.version>v1beta1-rev20200724-1.30.10</google-api-services-container.version>
     </properties>
 
     <scm>
@@ -66,6 +68,11 @@
             <version>${google-api-services-cloudresourcemanager.version}</version>
         </dependency>
         <dependency>
+            <groupId>com.google.apis</groupId>
+            <artifactId>google-api-services-container</artifactId>
+            <version>${google-api-services-container.version}</version>
+        </dependency>
+        <dependency>
             <groupId>org.immutables</groupId>
             <artifactId>value</artifactId>
             <version>${immutables.version}</version>
@@ -79,6 +86,11 @@
             <groupId>io.fabric8</groupId>
             <artifactId>kubernetes-client</artifactId>
             <version>${kubernetes.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>net.jodah</groupId>
+            <artifactId>failsafe</artifactId>
+            <version>${failsafe.version}</version>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>

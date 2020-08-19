@@ -33,7 +33,7 @@ public class PipelineServiceAccount {
                         .create(projectResourceName, new CreateServiceAccountRequest().setAccountId(serviceAccountName))
                         .execute();
             }
-            policy.apply(serviceAccount);
+        //    policy.apply(serviceAccount);
             return serviceAccount.getEmail();
         } catch (IOException e) {
             throw new RuntimeException(e);

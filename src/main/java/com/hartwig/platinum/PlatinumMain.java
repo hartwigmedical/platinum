@@ -9,27 +9,31 @@ import com.hartwig.platinum.iam.ResourceManagerProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.fabric8.kubernetes.client.DefaultKubernetesClient;
 import picocli.CommandLine;
 import picocli.CommandLine.Option;
 
 public class PlatinumMain implements Callable<Integer> {
     private static final Logger LOGGER = LoggerFactory.getLogger(PlatinumMain.class);
 
-    @Option(names = { "-r", "--run_name" },
+    @Option(names = { "-n"},
             required = true,
             description = "The name of the run, used in output bucket and cluster naming")
     private String runName;
 
-    @Option(names = { "-i", "--input_json" },
+    @Option(names = { "-i"},
             required = true,
             description = "JSON file that contains arguments to be passed to the pipeline jobs and a list of samples")
     private String inputJson;
 
-    @Option(names = { "-p", "--project" },
+    @Option(names = { "-p" },
             required = true,
             description = "")
     private String project;
+
+    @Option(names = { "-r" },
+            required = true,
+            description = "")
+    private String region;
 
     @Override
     public Integer call() {
@@ -38,11 +42,12 @@ public class PlatinumMain implements Callable<Integer> {
                     inputJson,
                     StorageOptions.getDefaultInstance().getService(),
                     IamProvider.get(),
-                    ResourceManagerProvider.get(), new DefaultKubernetesClient(), project).run();
-            return (0);
+                    ResourceManagerProvider.get(),
+                    project, region).run();
+            return 0;
         } catch (Exception e) {
             LOGGER.error("Unexpected exception", e);
-            return (1);
+            return 1;
         }
     }
 
