@@ -1,0 +1,43 @@
+#!/usr/bin/env bash
+
+function configure() {
+  gcloud auth login
+  gcloud compute networks subnets update default --region=$2 --no-enable-private-ip-google-access
+  gcloud services enable compute.googleapis.com --project $1
+  gcloud services enable container.googleapis.com --project $1
+}
+
+function install {
+    ./mvnw clean install -DskipTests
+}
+
+function run {
+    gcloud auth login
+    gcloud auth application-default login
+    export SUPPRESS_GCLOUD_CREDS_WARNING=true
+    JAR=./target/platinum-local-SNAPSHOT.jar
+    if [ ! -f $JAR ]; then
+      install
+    fi
+    java -jar $JAR "$@"
+}
+
+CMD=$1
+shift
+project=""
+region=""
+while getopts ':p:r:' flag; do
+    case "${flag}" in
+        p) project=${OPTARG} ;;
+        r) region=${OPTARG} ;;
+        *) ;;
+    esac
+done
+case $CMD in
+configure)
+  configure $project $region
+  ;;
+run)
+  run "$@"
+  ;;
+esac

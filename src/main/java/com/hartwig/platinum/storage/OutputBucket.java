@@ -29,6 +29,7 @@ public class OutputBucket {
         Bucket outputBucket = storage.get(bucketName);
         if (outputBucket == null) {
             outputBucket = storage.create(BucketInfo.newBuilder(bucketName)
+                    .setIamConfiguration(BucketInfo.IamConfiguration.newBuilder().setIsUniformBucketLevelAccessEnabled(true).build())
                     .setLocation(configuration.location())
                     .setDefaultKmsKeyName(configuration.cmek().orElse(null))
                     .build());

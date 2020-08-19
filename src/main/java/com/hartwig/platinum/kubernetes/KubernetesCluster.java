@@ -16,10 +16,9 @@ import com.google.api.services.container.v1beta1.Container;
 import com.google.api.services.container.v1beta1.Container.Projects.Locations.Clusters.Create;
 import com.google.api.services.container.v1beta1.Container.Projects.Locations.Clusters.Get;
 import com.google.api.services.container.v1beta1.ContainerScopes;
-import com.google.api.services.container.v1beta1.model.ClientCertificateConfig;
 import com.google.api.services.container.v1beta1.model.Cluster;
 import com.google.api.services.container.v1beta1.model.CreateClusterRequest;
-import com.google.api.services.container.v1beta1.model.MasterAuth;
+import com.google.api.services.container.v1beta1.model.Operation;
 import com.google.auth.http.HttpCredentialsAdapter;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.hartwig.platinum.config.PlatinumConfiguration;
@@ -50,7 +49,8 @@ public class KubernetesCluster {
         this.kubernetesClient = kubernetesClient;
     }
 
-    public List<Job> submit(final PlatinumConfiguration configuration, final JsonKey jsonKey, final String outputBucketName) {
+    public List<Job> submit(final PlatinumConfiguration configuration, final JsonKey jsonKey, final String outputBucketName,
+            final String project, final String region, final String serviceAccountEmail) {
         Volume configMapVolume = new PipelineConfigMapVolume(configuration, kubernetesClient).create(CONFIG_MAP_NAME);
         Volume secretVolume = new PipelineServiceAccountSecretVolume(jsonKey, kubernetesClient).create(SERVICE_ACCOUNT_KEY_NAME);
 
@@ -66,17 +66,19 @@ public class KubernetesCluster {
                     .withNamespace(NAMESPACE)
                     .endMetadata()
                     .withSpec(new PipelineJob().create(new PipelineContainer(sample,
-                                    runName,
-                                    configuration.pipelineArguments(),
-                                    outputBucketName).create(CONFIG_MAP_NAME, SERVICE_ACCOUNT_KEY_NAME),
-                            configMapVolume, secretVolume))
+                            runName,
+                            configuration.pipelineArguments(),
+                            outputBucketName,
+                            project,
+                            serviceAccountEmail,
+                            region).create(CONFIG_MAP_NAME, SERVICE_ACCOUNT_KEY_NAME), configMapVolume, secretVolume))
                     .done());
         }
         return jobs;
     }
 
-    private static String fullPath(String runName) {
-        return "projects/hmf-pipeline-development/locations/europe-west4/clusters/" + runName + "-cluster";
+    private static String fullPath(final String project, final String region, final String runName) {
+        return String.format("projects/%s/locations/%s/clusters/%s-cluster", project, region, runName);
     }
 
     private static Optional<Cluster> find(final Container containerApi, final String path) throws IOException {
@@ -89,50 +91,60 @@ public class KubernetesCluster {
         }
     }
 
-    private static void create(final Container containerApi, final String parent, final String runName) {
+    private static void create(final Container containerApi, final String parent, final String project, final String region,
+            final String runName) {
         try {
             String clusterName = runName + "-cluster";
             Cluster newCluster = new Cluster();
             newCluster.setName(clusterName);
-            newCluster.setInitialNodeCount(3);
-            ClientCertificateConfig certificateConfig = new ClientCertificateConfig();
-            certificateConfig.setIssueClientCertificate(true);
-            newCluster.setMasterAuth(new MasterAuth());
-            newCluster.getMasterAuth().setClientCertificateConfig(certificateConfig);
+            newCluster.setInitialNodeCount(1);
             CreateClusterRequest createRequest = new CreateClusterRequest();
             createRequest.setCluster(newCluster);
             Create created = containerApi.projects().locations().clusters().create(parent, createRequest);
-            created.execute();
-            LOGGER.info("Cluster creation started");
-            boolean found = Failsafe.with(
-                    new RetryPolicy<>().withMaxDuration(ofMinutes(15)).withDelay(ofSeconds(15)).withMaxAttempts(-1).handleResult(null).handleResult(Boolean.FALSE)).get(() -> {
-                try {
-                    return "RUNNING".equals(containerApi.projects().locations().clusters().get(fullPath(runName)).execute().getStatus());
-                } catch (Exception e) {
-                    LOGGER.error("Exception While waiting for cluster create", e);
-                    return null;
-                }
-            });
+            Operation execute = created.execute();
+            LOGGER.info("Creating kubernetes cluster, this can take upwards of 5 minutes...");
+            Failsafe.with(new RetryPolicy<>().withMaxDuration(ofMinutes(15))
+                    .withDelay(ofSeconds(15))
+                    .withMaxAttempts(-1)
+                    .handleResult(null)
+                    .handleResult("RUNNING"))
+                    .onFailure(objectExecutionCompletedEvent -> LOGGER.info("Waiting on operation, status is [{}]",
+                            objectExecutionCompletedEvent.getResult()))
+                    .get(() -> containerApi.projects()
+                            .locations()
+                            .operations()
+                            .get(String.format("projects/%s/locations/%s/operations/%s", project, region, execute.getName()))
+                            .execute()
+                            .getStatus());
         } catch (Exception e) {
             throw new RuntimeException("Failed to create cluster", e);
         }
     }
 
-    public static KubernetesCluster findOrCreate(final String runName) {
+    public static KubernetesCluster findOrCreate(final String runName, final String project, final String region) {
         try {
-            Container container = new Container.Builder(GoogleNetHttpTransport.newTrustedTransport(), JacksonFactory.getDefaultInstance(),
-                    new HttpCredentialsAdapter(GoogleCredentials.getApplicationDefault().createScoped(singleton(ContainerScopes.CLOUD_PLATFORM)))).build();
+            Container container = new Container.Builder(GoogleNetHttpTransport.newTrustedTransport(),
+                    JacksonFactory.getDefaultInstance(),
+                    new HttpCredentialsAdapter(GoogleCredentials.getApplicationDefault()
+                            .createScoped(singleton(ContainerScopes.CLOUD_PLATFORM)))).setApplicationName("platinum").build();
 
             String clusterName = runName + "-cluster";
-            String parent = "projects/hmf-pipeline-development/locations/europe-west4";
-            if (find(container, fullPath(runName)).isEmpty()) {
-                create(container, parent, runName);
+            String parent = String.format("projects/%s/locations/%s", project, region);
+            if (find(container, fullPath(project, region, runName)).isEmpty()) {
+                create(container, parent, project, region, runName);
             }
-            ProcessBuilder processBuilder =
-                    new ProcessBuilder("/usr/bin/gcloud", "container", "clusters", "get-credentials", clusterName, "--zone", "europe-west4");
+            ProcessBuilder processBuilder = new ProcessBuilder("gcloud",
+                    "container",
+                    "clusters",
+                    "get-credentials",
+                    clusterName,
+                    "--region",
+                    region,
+                    "--project",
+                    project);
             Process process = processBuilder.inheritIO().start();
             process.waitFor();
-            processBuilder = new ProcessBuilder("/usr/bin/kubectl", "get", "pods");
+            processBuilder = new ProcessBuilder("kubectl", "get", "pods");
             process = processBuilder.inheritIO().start();
             process.waitFor();
 

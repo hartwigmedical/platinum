@@ -10,6 +10,9 @@
         </layout>
     </appender>
 
+    <logger name="com.hartwig">
+        <level value="INFO"/>
+    </logger>
     <root>
         <level value="WARN"/>
         <appender-ref ref="console"/>

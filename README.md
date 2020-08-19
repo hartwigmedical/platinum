@@ -1,32 +1,46 @@
 # Platinum
 
-This project is to enable running Pipeline5 at scale, using Kubernetes for orchestration, ie
-_P_ipe_L_ine _AT_ any _num_ber! It works by creating a Job in your Kubernetes cluster for each pair of samples you provide. 
-To use it:
+Platinum is a tool to run the HMF OncoAct pipeline from any GCP project for any number of samples in one easy command. 
 
-1. Run the `make_cluster.sh` script if you don't already have a Kubernetes cluster in mind
-2. Make a JSON file describing your inputs and arguments to the pipeline
-3. Execute the application passing your JSON file
+Internally platinum runs the Pipeline5 docker container on an ephemeral Kubernetes cluster.
 
-## Making the Cluster
+# Quickstart
 
-This is scripted and should work if you have the required tools installed and there are not any peculiarities about your GKE setup
-(custom networking, etc). The script should tell you if you are missing any dependencies or if anything fails.
+```shell script
+# PROJECT is your GCP Project
+# REGION is your closest GCP region
+# EXPERIMENT_NAME is some unique name for your experiment run 
+# input.json is an example input pointing at test data HMF has exposed for this demo
+./platinum configure -p PROJECT -r REGION
+./platinum run -n EXPERIMENT_NAME -p PROJECT -r REGION -i examples/quickstart/input.json
+gsutil ls gs://platinum-output-EXPERIMENT_NAME/
+```
 
-When this succeeds the machine you're executing on should be configured to connect to the new cluster via the `gcloud kubectl`
-component. 
+# Pre-Requisites
 
-## Making the JSON file
+Platinum runs on the Google Cloud Platform. We've tried to automate as much of the setup as possible, but there are still
+one or two things to configure.
 
-Platinum uses a JSON batch descriptor file to specify:
+To start you'll need:
+- [A GCP project](https://cloud.google.com/resource-manager/docs/creating-managing-projects)
+- An account within that project with the [Project Owner role](https://cloud.google.com/iam/docs/understanding-roles)
+- [A region](https://cloud.google.com/compute/docs/regions-zones) where you plan to store your data and run your workload (hint: pick the region closest to where your data currently resides)
 
-* Where your samples are and what their names are;
-* Where the output of the pipeline will go;
-* Arguments to pass to the invoked pipeline processes.
+# Configuring your GCP Project
 
-## Executing the Pipelines
+When you have your project setup, install the [gcloud SDK](https://cloud.google.com/sdk/docs/downloads-interactive).
 
-With the setup complete the Platinum application is run with the JSON file that was prepared above. The cluster setup script will
-have configured the `gcloud kubectl` component to connect to the new cluster it created. Platinum depends on the environment to
-have been setup so that getting a default client will connect to the correct cluster.
+There are a couple things requiring a one time configuration in your project:
+- Enabling private access such that your VMs will not be exposed to the public internet
+- Enabling the compute and kubernetes apis
 
+Checkout this repository on your local machine and run the following from the repo root:
+
+```shell script
+./platinum configure -p your_project -r your_region 
+```  
+
+# Configuring Input
+
+The HMF pipeline takes pair-end fastq as input. This input should be uploaded to a bucket in GCP before running platinum. When
+That is complete

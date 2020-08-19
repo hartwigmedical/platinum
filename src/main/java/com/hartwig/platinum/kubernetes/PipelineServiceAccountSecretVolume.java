@@ -26,6 +26,6 @@ public class PipelineServiceAccountSecretVolume {
                 .endMetadata()
                 .addToData(name, jsonKey.jsonBase64())
                 .done();
-        return new VolumeBuilder().withName(name).editOrNewConfigMap().withName(name).endConfigMap().build();
+        return new VolumeBuilder().withName(name).editOrNewSecret().withSecretName(name).endSecret().build();
     }
 }
