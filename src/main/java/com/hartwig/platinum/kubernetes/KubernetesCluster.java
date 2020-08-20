@@ -21,6 +21,7 @@ import com.google.api.services.container.v1beta1.model.CreateClusterRequest;
 import com.google.api.services.container.v1beta1.model.Operation;
 import com.google.auth.http.HttpCredentialsAdapter;
 import com.google.auth.oauth2.GoogleCredentials;
+import com.hartwig.platinum.Console;
 import com.hartwig.platinum.config.PlatinumConfiguration;
 import com.hartwig.platinum.iam.JsonKey;
 
@@ -57,12 +58,11 @@ public class KubernetesCluster {
         List<Job> jobs = new ArrayList<>();
 
         for (String sample : configuration.samples().keySet()) {
-            String jobName = String.format("platinum-%s-%s", this.runName, sample).toLowerCase();
             jobs.add(kubernetesClient.batch()
                     .jobs()
                     .createNew()
                     .withNewMetadata()
-                    .withName(jobName)
+                    .withName(sample.toLowerCase())
                     .withNamespace(NAMESPACE)
                     .endMetadata()
                     .withSpec(new PipelineJob().create(new PipelineContainer(sample,
@@ -101,10 +101,10 @@ public class KubernetesCluster {
             createRequest.setCluster(newCluster);
             Create created = containerApi.projects().locations().clusters().create(parent, createRequest);
             Operation execute = created.execute();
-            LOGGER.info("Creating new kubernetes cluster [{}] in project [{}] and region [{}], this can take upwards of 5 minutes...",
-                    newCluster.getName(),
-                    project,
-                    region);
+            LOGGER.info("Creating new kubernetes cluster {} in project {} and region {}, this can take upwards of 5 minutes...",
+                    Console.bold(newCluster.getName()),
+                    Console.bold(project),
+                    Console.bold(region));
             Failsafe.with(new RetryPolicy<>().withMaxDuration(ofMinutes(15))
                     .withDelay(ofSeconds(15))
                     .withMaxAttempts(-1)
@@ -149,7 +149,7 @@ public class KubernetesCluster {
             processBuilder = new ProcessBuilder("kubectl", "get", "pods");
             process = processBuilder.start();
             process.waitFor();
-            LOGGER.info("Connection to cluster [{}] configured via gcloud and kubectl", clusterName);
+            LOGGER.info("Connection to cluster {} configured via gcloud and kubectl", Console.bold(clusterName));
             return new KubernetesCluster(runName, new DefaultKubernetesClient());
         } catch (Exception e) {
             throw new RuntimeException("Failed to create cluster", e);

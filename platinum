@@ -18,14 +18,22 @@ function install {
 }
 
 function run {
-  #  gcloud auth login
-  #  gcloud auth application-default login
+    gcloud auth login
+    gcloud auth application-default login
     export SUPPRESS_GCLOUD_CREDS_WARNING=true
     JAR=./target/platinum-local-SNAPSHOT.jar
     if [ ! -f $JAR ]; then
       install
     fi
     java -jar $JAR "$@"
+}
+
+function status() {
+    kubectl get pods
+}
+
+function logs() {
+    kubectl logs $1
 }
 
 CMD=$1
@@ -46,5 +54,11 @@ configure)
   ;;
 run)
   run "$@"
+  ;;
+status)
+  status
+  ;;
+logs)
+  logs $1
   ;;
 esac

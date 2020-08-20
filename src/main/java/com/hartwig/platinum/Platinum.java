@@ -40,7 +40,7 @@ public class Platinum {
     }
 
     public void run() {
-        LOGGER.info("Starting platinum run with name [{}] and input [{}]", runName, input);
+        LOGGER.info("Starting platinum run with name {} and input {}", Console.bold(runName), Console.bold(input));
         PlatinumConfiguration configuration = PlatinumConfiguration.from(new File(input));
         PipelineServiceAccount serviceAccount = new PipelineServiceAccount(iam, new PipelineIamPolicy(resourceManager));
         String serviceAccountEmail = serviceAccount.findOrCreate(project, runName);
@@ -54,7 +54,7 @@ public class Platinum {
                         project,
                         region,
                         serviceAccountEmail);
-        LOGGER.info("[{}] pipelines started on GCP", configuration.samples().size());
-        LOGGER.info("You can monitor their progress with: \nkubectl get pods | grep {}", runName);
+        LOGGER.info("Platinum started [{}] pipelines on GCP", configuration.samples().size());
+        LOGGER.info("You can monitor their progress with: {}", Console.bold("./platinum status"));
     }
 }

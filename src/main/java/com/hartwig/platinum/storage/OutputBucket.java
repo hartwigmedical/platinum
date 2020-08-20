@@ -6,6 +6,7 @@ import com.google.cloud.storage.Bucket;
 import com.google.cloud.storage.BucketInfo;
 import com.google.cloud.storage.Storage;
 import com.google.cloud.storage.StorageRoles;
+import com.hartwig.platinum.Console;
 import com.hartwig.platinum.config.PlatinumConfiguration;
 
 import org.slf4j.Logger;
@@ -30,7 +31,7 @@ public class OutputBucket {
         String bucketName = BucketName.from(runName);
         Bucket outputBucket = storage.get(bucketName);
         if (outputBucket != null) {
-            LOGGER.info("Deleting existing bucket [{}]", outputBucket);
+            LOGGER.info("Deleting existing bucket {}", Console.bold(outputBucket.getName()));
             storage.delete(bucketName);
         }
         outputBucket = storage.create(BucketInfo.newBuilder(bucketName)
