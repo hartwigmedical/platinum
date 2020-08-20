@@ -1,6 +1,12 @@
 #!/usr/bin/env bash
 
 function configure() {
+  if [ $# -ne 2 ]; then
+    echo "Usage: platinum configure -r=<region> -p=<project>"
+    echo "-r=<region> GCP region where the network resides for enabling private access"
+    echo "-p=<project> GCP project where we'll enable the kubernetes and compute apis"
+    exit 1
+  fi
   gcloud auth login
   gcloud compute networks subnets update default --region=$2 --no-enable-private-ip-google-access
   gcloud services enable compute.googleapis.com --project $1
@@ -33,6 +39,7 @@ while getopts ':p:r:' flag; do
         *) ;;
     esac
 done
+
 case $CMD in
 configure)
   configure $project $region
