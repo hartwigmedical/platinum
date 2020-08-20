@@ -3,6 +3,7 @@ package com.hartwig.platinum.config;
 import java.io.File;
 import java.io.IOException;
 import java.util.Map;
+import java.util.Optional;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -17,17 +18,23 @@ import org.immutables.value.Value.Style;
 @Style(jdkOnly = true)
 @JsonDeserialize(as = ImmutablePlatinumConfiguration.class)
 public interface PlatinumConfiguration {
-    Map<String, String> pipelineArguments();
 
-    OutputConfiguration outputConfiguration();
+    Optional<String> cmek();
+
+    Map<String, String> argumentOverrides();
 
     Map<String, JsonNode> samples();
+
+    static ImmutablePlatinumConfiguration.Builder builder() {
+        return ImmutablePlatinumConfiguration.builder();
+    }
 
     static PlatinumConfiguration from(File inputFile) {
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.registerModule(new Jdk8Module());
         try {
-            return objectMapper.readValue(inputFile, new TypeReference<>() {});
+            return objectMapper.readValue(inputFile, new TypeReference<>() {
+            });
         } catch (IOException ioe) {
             throw new RuntimeException("Could not parse input", ioe);
         }

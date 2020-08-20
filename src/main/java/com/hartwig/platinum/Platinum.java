@@ -44,17 +44,17 @@ public class Platinum {
         PlatinumConfiguration configuration = PlatinumConfiguration.from(new File(input));
         PipelineServiceAccount serviceAccount = new PipelineServiceAccount(iam, new PipelineIamPolicy(resourceManager));
         String serviceAccountEmail = serviceAccount.findOrCreate(project, runName);
-        LOGGER.info("Created service account with email [{}].", serviceAccountEmail);
+
         ServiceAccountPrivateKey privateKey = new ServiceAccountPrivateKey(iam);
         JsonKey jsonKey = privateKey.create(project, serviceAccountEmail);
-        LOGGER.info("Created private key for service account [{}] with id [{}]", serviceAccountEmail, jsonKey.id());
         KubernetesCluster.findOrCreate(runName, project, region)
                 .submit(configuration,
                         jsonKey,
-                        OutputBucket.from(storage).findOrCreate(runName, configuration.outputConfiguration()),
+                        OutputBucket.from(storage).findOrCreate(runName, region, serviceAccountEmail, configuration),
                         project,
                         region,
                         serviceAccountEmail);
-        LOGGER.info("Submitted workloads to kubernetes");
+        LOGGER.info("[{}] pipelines started on GCP", configuration.samples().size());
+        LOGGER.info("You can monitor their progress with: \nkubectl get pods | grep {}", runName);
     }
 }

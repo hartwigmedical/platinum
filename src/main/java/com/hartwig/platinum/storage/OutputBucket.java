@@ -1,9 +1,12 @@
 package com.hartwig.platinum.storage;
 
+import com.google.cloud.Identity;
+import com.google.cloud.Policy;
 import com.google.cloud.storage.Bucket;
 import com.google.cloud.storage.BucketInfo;
 import com.google.cloud.storage.Storage;
-import com.hartwig.platinum.config.OutputConfiguration;
+import com.google.cloud.storage.StorageRoles;
+import com.hartwig.platinum.config.PlatinumConfiguration;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,8 +14,6 @@ import org.slf4j.LoggerFactory;
 public class OutputBucket {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(OutputBucket.class);
-    private static final String REUSE_MESSAGE =
-            "To reuse it either delete the " + "old bucket and re-run or update the configuration to match.";
 
     private final Storage storage;
 
@@ -24,58 +25,22 @@ public class OutputBucket {
         return new OutputBucket(storage);
     }
 
-    public String findOrCreate(final String runName, final OutputConfiguration configuration) {
+    public String findOrCreate(final String runName, final String region, final String serviceAccount,
+            final PlatinumConfiguration configuration) {
         String bucketName = BucketName.from(runName);
         Bucket outputBucket = storage.get(bucketName);
-        if (outputBucket == null) {
-            outputBucket = storage.create(BucketInfo.newBuilder(bucketName)
-                    .setIamConfiguration(BucketInfo.IamConfiguration.newBuilder().setIsUniformBucketLevelAccessEnabled(true).build())
-                    .setLocation(configuration.location())
-                    .setDefaultKmsKeyName(configuration.cmek().orElse(null))
-                    .build());
-        } else {
-            checkLocation(configuration, outputBucket);
-            checkCmek(configuration, outputBucket);
-            LOGGER.info("Bucket [{}] already existed in storage with matching location and CMEK, reusing.", outputBucket.getName());
+        if (outputBucket != null) {
+            LOGGER.info("Deleting existing bucket [{}]", outputBucket);
+            storage.delete(bucketName);
         }
+        outputBucket = storage.create(BucketInfo.newBuilder(bucketName)
+                .setIamConfiguration(BucketInfo.IamConfiguration.newBuilder().setIsUniformBucketLevelAccessEnabled(true).build())
+                .setLocation(region)
+                .setDefaultKmsKeyName(configuration.cmek().orElse(null))
+                .build());
+        Policy bucketPolicy = storage.getIamPolicy(bucketName);
+        storage.setIamPolicy(bucketName,
+                bucketPolicy.toBuilder().addIdentity(StorageRoles.admin(), Identity.serviceAccount(serviceAccount)).build());
         return outputBucket.getName();
-    }
-
-    private static void checkCmek(final OutputConfiguration configuration, final Bucket outputBucket) {
-        final String kmsKeyName = outputBucket.getDefaultKmsKeyName();
-        if (configuration.cmek().isEmpty() && kmsKeyName != null) {
-            throw cmekMismatchNoneConfigured(outputBucket);
-        } else if (configuration.cmek().map(k -> !k.equals(kmsKeyName)).orElse(false)) {
-            throw cmekMismatch(configuration, outputBucket);
-        }
-    }
-
-    private static void checkLocation(final OutputConfiguration configuration, final Bucket outputBucket) {
-        if (!configuration.location().equals(outputBucket.getLocation())) {
-            throw locationMismatch(configuration, outputBucket);
-        }
-    }
-
-    private static IllegalArgumentException cmekMismatch(final OutputConfiguration configuration, final Bucket outputBucket) {
-        return new IllegalArgumentException(String.format(
-                "Bucket [%s] has a CMEK key configured of [%s] which does not match the specified key of [%s]. ",
-                outputBucket.getName(),
-                outputBucket.getDefaultKmsKeyName(),
-                configuration.cmek().orElse("")) + REUSE_MESSAGE);
-    }
-
-    private static IllegalArgumentException cmekMismatchNoneConfigured(final Bucket outputBucket) {
-        return new IllegalArgumentException(String.format(
-                "Bucket [%s] has a CMEK key configured of [%s] but no key was configured for this run. ",
-                outputBucket.getName(),
-                outputBucket.getDefaultKmsKeyName()) + REUSE_MESSAGE);
-    }
-
-    private static IllegalArgumentException locationMismatch(final OutputConfiguration configuration, final Bucket outputBucket) {
-        return new IllegalArgumentException(String.format(
-                "Bucket [%s] already exists in a different location [%s] than the specified location of [%s]. " + REUSE_MESSAGE,
-                outputBucket.getName(),
-                outputBucket.getLocation(),
-                configuration.location()));
     }
 }

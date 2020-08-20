@@ -21,7 +21,9 @@ public class PipelineConfigMapVolume {
 
     public Volume create(final String name) {
         kubernetesClient.configMaps()
-                .createNew()
+                .inNamespace(KubernetesCluster.NAMESPACE)
+                .withName(name)
+                .createOrReplaceWithNew()
                 .addToData(configuration.samples().entrySet().stream().collect(toMap(Entry::getKey, e -> e.getValue().toString())))
                 .withNewMetadata()
                 .withName(name)

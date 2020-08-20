@@ -8,7 +8,7 @@ function configure() {
     exit 1
   fi
   gcloud auth login
-  gcloud compute networks subnets update default --region=$2 --no-enable-private-ip-google-access
+  gcloud compute networks subnets update default --region=$2 --enable-private-ip-google-access
   gcloud services enable compute.googleapis.com --project $1
   gcloud services enable container.googleapis.com --project $1
 }
@@ -18,8 +18,8 @@ function install {
 }
 
 function run {
-    gcloud auth login
-    gcloud auth application-default login
+  #  gcloud auth login
+  #  gcloud auth application-default login
     export SUPPRESS_GCLOUD_CREDS_WARNING=true
     JAR=./target/platinum-local-SNAPSHOT.jar
     if [ ! -f $JAR ]; then

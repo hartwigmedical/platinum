@@ -4,9 +4,14 @@ import java.io.IOException;
 import java.util.List;
 
 import com.google.api.services.iam.v1.Iam;
+import com.google.api.services.iam.v1.model.Binding;
 import com.google.api.services.iam.v1.model.CreateServiceAccountRequest;
 import com.google.api.services.iam.v1.model.ListServiceAccountsResponse;
+import com.google.api.services.iam.v1.model.Policy;
 import com.google.api.services.iam.v1.model.ServiceAccount;
+import com.google.api.services.iam.v1.model.SetIamPolicyRequest;
+import com.google.cloud.Identity;
+import com.google.common.collect.ImmutableList;
 
 public class PipelineServiceAccount {
 
@@ -33,7 +38,7 @@ public class PipelineServiceAccount {
                         .create(projectResourceName, new CreateServiceAccountRequest().setAccountId(serviceAccountName))
                         .execute();
             }
-        //    policy.apply(serviceAccount);
+            policy.apply(serviceAccount);
             return serviceAccount.getEmail();
         } catch (IOException e) {
             throw new RuntimeException(e);

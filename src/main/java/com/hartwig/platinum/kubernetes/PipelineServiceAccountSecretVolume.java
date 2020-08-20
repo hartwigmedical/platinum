@@ -19,12 +19,14 @@ public class PipelineServiceAccountSecretVolume {
 
     public Volume create(final String name) {
         kubernetesClient.secrets()
-                .createNew()
+                .inNamespace(KubernetesCluster.NAMESPACE)
+                .withName(name)
+                .createOrReplaceWithNew()
+                .addToData(name, jsonKey.jsonBase64())
                 .withNewMetadata()
                 .withName(name)
                 .withNamespace(KubernetesCluster.NAMESPACE)
                 .endMetadata()
-                .addToData(name, jsonKey.jsonBase64())
                 .done();
         return new VolumeBuilder().withName(name).editOrNewSecret().withSecretName(name).endSecret().build();
     }

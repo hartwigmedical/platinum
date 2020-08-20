@@ -15,6 +15,7 @@ public class PipelineIamPolicy {
 
     static final String COMPUTE_ADMIN = "roles/compute.admin";
     static final String STORAGE_ADMIN = "roles/storage.admin";
+    static final String SERVICE_ACCOUNT_USER = "roles/iam.serviceAccountUser";
     private final CloudResourceManager cloudResourceManager;
 
     public PipelineIamPolicy(final CloudResourceManager cloudResourceManager) {
@@ -25,7 +26,10 @@ public class PipelineIamPolicy {
         try {
             Policy existingPolicy =
                     cloudResourceManager.projects().getIamPolicy(serviceAccount.getProjectId(), new GetIamPolicyRequest()).execute();
-            existingPolicy.getBindings().addAll(List.of(binding(serviceAccount, COMPUTE_ADMIN), binding(serviceAccount, STORAGE_ADMIN)));
+            existingPolicy.getBindings()
+                    .addAll(List.of(binding(serviceAccount, COMPUTE_ADMIN),
+                            binding(serviceAccount, STORAGE_ADMIN),
+                            binding(serviceAccount, SERVICE_ACCOUNT_USER)));
             cloudResourceManager.projects()
                     .setIamPolicy(serviceAccount.getProjectId(), new SetIamPolicyRequest().setPolicy(existingPolicy))
                     .execute();

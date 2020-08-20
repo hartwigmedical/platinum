@@ -67,7 +67,7 @@ public class KubernetesCluster {
                     .endMetadata()
                     .withSpec(new PipelineJob().create(new PipelineContainer(sample,
                             runName,
-                            configuration.pipelineArguments(),
+                            configuration.argumentOverrides(),
                             outputBucketName,
                             project,
                             serviceAccountEmail,
@@ -86,7 +86,6 @@ public class KubernetesCluster {
             Get found = containerApi.projects().locations().clusters().get(path);
             return Optional.of(found.execute());
         } catch (GoogleJsonResponseException e) {
-            LOGGER.info("No cluster found at [{}]", path);
             return Optional.empty();
         }
     }
@@ -102,7 +101,10 @@ public class KubernetesCluster {
             createRequest.setCluster(newCluster);
             Create created = containerApi.projects().locations().clusters().create(parent, createRequest);
             Operation execute = created.execute();
-            LOGGER.info("Creating kubernetes cluster, this can take upwards of 5 minutes...");
+            LOGGER.info("Creating new kubernetes cluster [{}] in project [{}] and region [{}], this can take upwards of 5 minutes...",
+                    newCluster.getName(),
+                    project,
+                    region);
             Failsafe.with(new RetryPolicy<>().withMaxDuration(ofMinutes(15))
                     .withDelay(ofSeconds(15))
                     .withMaxAttempts(-1)
@@ -142,12 +144,12 @@ public class KubernetesCluster {
                     region,
                     "--project",
                     project);
-            Process process = processBuilder.inheritIO().start();
+            Process process = processBuilder.start();
             process.waitFor();
             processBuilder = new ProcessBuilder("kubectl", "get", "pods");
-            process = processBuilder.inheritIO().start();
+            process = processBuilder.start();
             process.waitFor();
-
+            LOGGER.info("Connection to cluster [{}] configured via gcloud and kubectl", clusterName);
             return new KubernetesCluster(runName, new DefaultKubernetesClient());
         } catch (Exception e) {
             throw new RuntimeException("Failed to create cluster", e);
