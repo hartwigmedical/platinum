@@ -8,7 +8,7 @@ function configure() {
     exit 1
   fi
   gcloud auth login
-  gcloud compute networks subnets update default --region=$2 --enable-private-ip-google-access
+  gcloud compute networks subnets update default --region=$2 --enable-private-ip-google-access --project $1
   gcloud services enable compute.googleapis.com --project $1
   gcloud services enable container.googleapis.com --project $1
 }
