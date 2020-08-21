@@ -104,8 +104,7 @@ This command will read your input json and create a platinum run in the project 
 should be a unique and meaningful name (no spaces or special chars) which will be used to identify all the cloud resources used
 for your run. 
 
-Platinum is asynchronous, as most of the time the run will be long-running and more practical to come back to later. To keep an
-eye on the progress use the following command:
+Platinum is asynchronous, you can keep eye on the progress use the following command:
 
 ```shell script
 Pauls-MacBook-Pro:platinum pwolfe$ ./platinum status
