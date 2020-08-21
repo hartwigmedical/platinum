@@ -27,12 +27,12 @@ public class PlatinumMain implements Callable<Integer> {
 
     @Option(names = { "-p" },
             required = true,
-            description = "")
+            description = "The GCP Project ID (not name!) where we'll run the pipelines.")
     private String project;
 
     @Option(names = { "-r" },
             required = true,
-            description = "")
+            description = "The GCP Region where we'll run the pipelines.")
     private String region;
 
     @Override

@@ -4,22 +4,26 @@ function configure() {
   if [ $# -ne 2 ]; then
     echo "Usage: platinum configure -r=<region> -p=<project>"
     echo "-r=<region> GCP region where the network resides for enabling private access"
-    echo "-p=<project> GCP project where we'll enable the kubernetes and compute apis"
+    echo "-p=<project> GCP project ID where we'll enable the kubernetes and compute apis"
     exit 1
   fi
   gcloud auth login
   gcloud compute networks subnets update default --region=$2 --enable-private-ip-google-access --project $1
   gcloud services enable compute.googleapis.com --project $1
   gcloud services enable container.googleapis.com --project $1
+  gcloud services enable cloudresourcemanager.googleapis.com --project $1
 }
 
 function install {
     ./mvnw clean install -DskipTests
 }
 
-function run {
+function login() {
     gcloud auth login
     gcloud auth application-default login
+}
+
+function run {
     export SUPPRESS_GCLOUD_CREDS_WARNING=true
     JAR=./target/platinum-local-SNAPSHOT.jar
     if [ ! -f $JAR ]; then
@@ -51,6 +55,9 @@ done
 case $CMD in
 configure)
   configure $project $region
+  ;;
+login)
+  login
   ;;
 run)
   run "$@"

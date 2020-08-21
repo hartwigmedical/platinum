@@ -12,10 +12,6 @@ To start you'll need:
 - An account within that project with the [Project Owner role](https://cloud.google.com/iam/docs/understanding-roles)
 - [A region](https://cloud.google.com/compute/docs/regions-zones) where you plan to store your data and run your workload (hint: pick the region closest to where your data currently resides)
 
-__IMPORTANT__
-There is one [GCP Quota](https://cloud.google.com/compute/quotas) which requires resizing to run even a single pipeline, the `Persistent Disk SSD` this should be raised to `2TB`.
-Follow the process described [here](https://cloud.google.com/compute/quotas#requesting_additional_quota).
-
 You'll also need a machine to checkout this repo and run platinum. Platinum requires the follwing to be installed: 
 * [Java 11](https://www.oracle.com/java/technologies/javase-jdk11-downloads.html).
 * [gcloud SDK](https://cloud.google.com/sdk/docs/downloads-interactive)
@@ -26,11 +22,12 @@ You'll also need a machine to checkout this repo and run platinum. Platinum requ
 Run the following from the root of this repo:
 
 ```shell script
-# PROJECT is your GCP Project
+# PROJECT is your GCP Project ID (not the name! You can find the ID of your project in the console)
 # REGION is your closest GCP region
 # EXPERIMENT_NAME is some unique name for your experiment run 
 # input.json is an example input pointing at test data HMF has exposed for this demo
 ./platinum configure -p PROJECT -r REGION
+./platinum login
 ./platinum run -n EXPERIMENT_NAME -p PROJECT -r REGION -i examples/quickstart/input.json
 ./platinum status
 # Keep checking this until you see the pod is complete
@@ -48,6 +45,21 @@ Checkout this repository on your local machine and run the following from the re
 ```shell script
 ./platinum configure -p your_project -r your_region 
 ```  
+
+You only need to run this once for a project and region where you want to run platinum.
+
+### Logging In
+
+You must "login" to GCP locally to configure the credentials platinum needs to work with GCP. 
+
+```shell script
+./platinum login
+``` 
+
+This command performs two logins, once as a user and another time as the application default. This ensures all 
+subsequent operations will use the correct credentials. 
+
+You should run this command at least once, and whenever you use different credentials to interact with GCP.
 
 ### Configuring Input
 
@@ -97,8 +109,6 @@ Use the following command to run platinum:
 ```shell script
 ./platinum run -n EXPERIMENT_NAME -p PROJECT -r REGION -i examples/quickstart/input.json
 ```
-
-Before doing anything you'll be prompted to login, twice. The first time logs you in as a user, the second as an application.
 
 This command will read your input json and create a platinum run in the project and region you've specified. EXPERIMENT_NAME 
 should be a unique and meaningful name (no spaces or special chars) which will be used to identify all the cloud resources used
