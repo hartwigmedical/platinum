@@ -48,8 +48,12 @@ function cleanup() {
     echo "[1;30m-r=<region>[0m GCP region where the cluster was created"
     exit 1
   fi
+  service_account=platinum-$1@$2.iam.gserviceaccount.com
   gcloud container clusters delete $1-cluster --region $region
-  gcloud iam service-accounts delete platinum-$1@$2.iam.gserviceaccount.com
+  gcloud iam service-accounts delete $service_account
+  gcloud projects remove-iam-policy-binding $2 --member=serviceAccount:$service_account --role=roles/iam.serviceAccountUser > /dev/null
+  gcloud projects remove-iam-policy-binding $2 --member=serviceAccount:$service_account --role=roles/compute.admin > /dev/null
+  gcloud projects remove-iam-policy-binding $2 --member=serviceAccount:$service_account --role=roles/storage.admin > /dev/null
 }
 
 CMD=$1
