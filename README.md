@@ -30,7 +30,9 @@ Run the following from the root of this repo:
 ./platinum login
 ./platinum run -n EXPERIMENT_NAME -p PROJECT -r REGION -i examples/quickstart/input.json
 ./platinum status
-# Keep checking this until you see the pod is complete
+# Keep checking this until you see the pod is complete. Then cleanup
+./platinum cleanup -n EXPERIMENT_NAME -p PROJECT -r REGION
+# Results are waiting in Google Cloud Storage
 gsutil ls gs://platinum-output-EXPERIMENT_NAME
 ```
 
@@ -132,6 +134,11 @@ Pauls-MacBook-Pro:platinum pwolfe$ ./platinum logs cpct12345678-5qb2s
 
 Once the run is complete, all results will end up in a bucket in your project, named of the format `gs://platinum-output-EXPERIMENT_NAME`.
 
+Make sure you clean up when the run is complete, as you now have a small Kubernetes cluster:
+
+```shell script
+./platinum cleanup -n EXPERIMENT_NAME -p PROJECT -r REGION
+```
 
 
 

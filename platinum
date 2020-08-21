@@ -2,9 +2,9 @@
 
 function configure() {
   if [ $# -ne 2 ]; then
-    echo "Usage: platinum configure -r=<region> -p=<project>"
-    echo "-r=<region> GCP region where the network resides for enabling private access"
-    echo "-p=<project> GCP project ID where we'll enable the kubernetes and compute apis"
+    echo "[1;30mUsage: platinum configure -r=<region> -p=<project>[0m"
+    echo "[1;30m-r=<region>[0m GCP region where the network resides for enabling private access"
+    echo "[1;30m-p=<project>[0m GCP project ID where we'll enable the kubernetes and compute apis"
     exit 1
   fi
   gcloud auth login
@@ -40,14 +40,27 @@ function logs() {
     kubectl logs $1
 }
 
+function cleanup() {
+  if [ $# -ne 3 ]; then
+    echo "[1;30mUsage: platinum cleanup -n=<run_name>[0m"
+    echo "[1;30m-n=<run_name>[0m Name of run for which you'd like to cleanup (created with platinum run -n <run_name>)"
+    echo "[1;30m-p=<project>[0m GCP project ID where the run was completed. Used to cleanup service accounts"
+    echo "[1;30m-r=<region>[0m GCP region where the cluster was created"
+    exit 1
+  fi
+  gcloud container clusters delete $1-cluster --region $region
+  gcloud iam service-accounts delete platinum-$1@$2.iam.gserviceaccount.com
+}
+
 CMD=$1
 shift
 project=""
 region=""
-while getopts ':p:r:' flag; do
+while getopts ':p:r:n:' flag; do
     case "${flag}" in
         p) project=${OPTARG} ;;
         r) region=${OPTARG} ;;
+        n) run_name=${OPTARG} ;;
         *) ;;
     esac
 done
@@ -67,5 +80,8 @@ status)
   ;;
 logs)
   logs $1
+  ;;
+cleanup)
+  cleanup $run_name $project $region
   ;;
 esac
