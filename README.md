@@ -12,14 +12,14 @@ To start you'll need:
 - An account within that project with the [Project Owner role](https://cloud.google.com/iam/docs/understanding-roles)
 - [A region](https://cloud.google.com/compute/docs/regions-zones) where you plan to store your data and run your workload (hint: pick the region closest to where your data currently resides)
 
-*IMPORTANT!*
+__IMPORTANT__
 There is one [GCP Quota](https://cloud.google.com/compute/quotas) which requires resizing to run even a single pipeline, the `Persistent Disk SSD` this should be raised to `2TB`.
 Follow the process described [here](https://cloud.google.com/compute/quotas#requesting_additional_quota).
 
 You'll also need a machine to checkout this repo and run platinum. Platinum requires the follwing to be installed: 
 * [Java 11](https://www.oracle.com/java/technologies/javase-jdk11-downloads.html).
-* [gcloud SDK]((https://cloud.google.com/sdk/docs/downloads-interactive)
-* [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/))
+* [gcloud SDK](https://cloud.google.com/sdk/docs/downloads-interactive)
+* [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/)
 
 ### Quickstart
 
