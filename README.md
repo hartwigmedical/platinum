@@ -98,7 +98,7 @@ Use the following command to run platinum:
 ./platinum run -n EXPERIMENT_NAME -p PROJECT -r REGION -i examples/quickstart/input.json
 ```
 
-Before doing anything you'll be prompted to login, twice 
+Before doing anything you'll be prompted to login, twice. The first time logs you in as a user, the second as an application.
 
 This command will read your input json and create a platinum run in the project and region you've specified. EXPERIMENT_NAME 
 should be a unique and meaningful name (no spaces or special chars) which will be used to identify all the cloud resources used
