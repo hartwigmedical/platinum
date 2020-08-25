@@ -9,31 +9,35 @@ one or two things to configure.
 
 To start you'll need:
 - [A GCP project](https://cloud.google.com/resource-manager/docs/creating-managing-projects)
-- An account within that project with the [Project Owner role](https://cloud.google.com/iam/docs/understanding-roles)
-- [A region](https://cloud.google.com/compute/docs/regions-zones) where you plan to store your data and run your workload (hint: pick the region closest to where your data currently resides)
+- An account within that project with the [Owner role](https://cloud.google.com/iam/docs/understanding-roles). 
+- [A region](https://cloud.google.com/compute/docs/regions-zones) where you plan to store your data and run your workload 
+  (hint: pick the region closest to where your data currently resides)
 
-You'll also need a machine to checkout this repo and run platinum. Platinum requires the follwing to be installed: 
+You'll also need a machine to checkout this repo and run Platinum with
+these installed:
 * [Java 11](https://www.oracle.com/java/technologies/javase-jdk11-downloads.html).
 * [gcloud SDK](https://cloud.google.com/sdk/docs/downloads-interactive)
+  (configured to access your new project)
 * [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/)
 
 ### Quickstart
 
-Run the following from the root of this repo:
+Run the following from the root of this repo where `examples/quickstart/input.json` is your input
+file (make sure to adjust and uncomment the `export` lines):
 
 ```shell script
-# PROJECT is your GCP Project ID (not the name! You can find the ID of your project in the console)
-# REGION is your closest GCP region
-# EXPERIMENT_NAME is some unique name for your experiment run 
+# export PROJECT=$(gcloud projects list | grep 'your project name from above' | awk '{print $1}') 
+# export REGION='your region'
+# export EXPERIMENT_NAME='experiment_name'
 # input.json is an example input pointing at test data HMF has exposed for this demo
-./platinum configure -p PROJECT -r REGION
+./platinum configure -p $PROJECT -r $REGION
 ./platinum login
-./platinum run -n EXPERIMENT_NAME -p PROJECT -r REGION -i examples/quickstart/input.json
+./platinum run -n $EXPERIMENT_NAME -p $PROJECT -r $REGION -i examples/quickstart/input.json
 ./platinum status
 # Keep checking this until you see the pod is complete. Then cleanup
-./platinum cleanup -n EXPERIMENT_NAME -p PROJECT -r REGION
+./platinum cleanup -n $EXPERIMENT_NAME -p $PROJECT -r $REGION
 # Results are waiting in Google Cloud Storage
-gsutil ls gs://platinum-output-EXPERIMENT_NAME
+gsutil ls gs://platinum-output-$EXPERIMENT_NAME
 ```
 
 ### Configuring your GCP Project
