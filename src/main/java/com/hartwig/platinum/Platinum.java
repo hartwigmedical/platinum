@@ -20,6 +20,7 @@ import com.hartwig.platinum.iam.PipelineIamPolicy;
 import com.hartwig.platinum.iam.PipelineServiceAccount;
 import com.hartwig.platinum.iam.ServiceAccountPrivateKey;
 import com.hartwig.platinum.kubernetes.KubernetesClusterProvider;
+import com.hartwig.platinum.kubernetes.ProcessRunner;
 import com.hartwig.platinum.storage.OutputBucket;
 
 import org.slf4j.Logger;
@@ -61,7 +62,7 @@ public class Platinum {
             Container container = new Container.Builder(GoogleNetHttpTransport.newTrustedTransport(),
                     JacksonFactory.getDefaultInstance(),
                     new HttpCredentialsAdapter(GoogleCredentials.getApplicationDefault().createScoped(Set.of(ContainerScopes.CLOUD_PLATFORM)))).setApplicationName("platinum").build();
-            new KubernetesClusterProvider(container).findOrCreate(runName, project, region)
+            new KubernetesClusterProvider(container, new ProcessRunner()).findOrCreate(runName, project, region)
                     .submit(configuration,
                             jsonKey,
                             OutputBucket.from(storage).findOrCreate(runName, region, serviceAccountEmail, configuration),

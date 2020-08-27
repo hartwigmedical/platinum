@@ -2,6 +2,7 @@ package com.hartwig.platinum.kubernetes;
 
 import static java.time.Duration.ofMinutes;
 import static java.time.Duration.ofSeconds;
+import static java.util.List.of;
 
 import java.io.IOException;
 import java.util.Optional;
@@ -24,10 +25,12 @@ import net.jodah.failsafe.RetryPolicy;
 
 public class KubernetesClusterProvider {
     private static final Logger LOGGER = LoggerFactory.getLogger(KubernetesClusterProvider.class);
-    private Container containerApi;
+    private final Container containerApi;
+    private final ProcessRunner processRunner;
 
-    public KubernetesClusterProvider(final Container containerApi) {
+    public KubernetesClusterProvider(final Container containerApi, final ProcessRunner processRunner) {
         this.containerApi = containerApi;
+        this.processRunner = processRunner;
     }
 
     private Optional<Cluster> find(final String path) throws IOException {
@@ -84,20 +87,13 @@ public class KubernetesClusterProvider {
             if (find(fullPath(project, region, runName)).isEmpty()) {
                 create(containerApi, parent, project, region, runName);
             }
-            ProcessBuilder processBuilder = new ProcessBuilder("gcloud",
-                    "container",
-                    "clusters",
-                    "get-credentials",
-                    clusterName,
-                    "--region",
-                    region,
-                    "--project",
-                    project);
-            Process process = processBuilder.start();
-            process.waitFor();
-            processBuilder = new ProcessBuilder("kubectl", "get", "pods");
-            process = processBuilder.start();
-            process.waitFor();
+            if (!processRunner.execute(of("gcloud", "container", "clusters", "get-credentials", clusterName,
+                    "--region", region, "--project", project))) {
+                throw new RuntimeException("Failed to get credentials for cluster");
+            }
+            if (!processRunner.execute(of("kubectl", "get", "pods"))) {
+                throw new RuntimeException("Failed to run kubectl command against cluster");
+            }
             LOGGER.info("Connection to cluster {} configured via gcloud and kubectl", Console.bold(clusterName));
             return new KubernetesCluster(runName, new DefaultKubernetesClient());
         } catch (Exception e) {
