@@ -10,6 +10,7 @@ import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -33,7 +34,6 @@ import org.mockito.ArgumentMatcher;
 
 public class KubernetesClusterProviderTest {
     private Container container;
-    private Projects projects;
     private Locations locations;
     private Clusters clusters;
     private ProcessRunner processRunner;
@@ -42,9 +42,9 @@ public class KubernetesClusterProviderTest {
 
     @Before
     public void setup() {
+        final Projects projects = mock(Projects.class);
         processRunner = mock(ProcessRunner.class);
         container = mock(Container.class);
-        projects = mock(Projects.class);
         locations = mock(Locations.class);
         clusters = mock(Clusters.class);
         when(container.projects()).thenReturn(projects);
@@ -90,8 +90,27 @@ public class KubernetesClusterProviderTest {
     }
 
     @Test
-    public void shouldPollUntilCreateClusterOperationHasCompleted() {
+    public void shouldPollUntilCreateClusterOperationHasCompleted() throws Exception {
+        Get foundOperation = mock(Get.class);
+        Create created = mock(Create.class);
+        Operation executedCreate = mock(Operation.class);
 
+        when(clusters.get(anyString())).thenReturn(foundOperation);
+        when(foundOperation.execute()).thenThrow(GoogleJsonResponseException.class);
+        when(clusters.create(eq(format("projects/%s/locations/%s", project, region)), any())).thenReturn(created);
+        when(created.execute()).thenReturn(executedCreate);
+        when(executedCreate.getName()).thenReturn("created");
+
+        Operations operations = mock(Operations.class);
+        Operations.Get operationsGet = mock(Operations.Get.class);
+        Operation executedOperationsGet = mock(Operation.class);
+        when(locations.operations()).thenReturn(operations);
+        when(operations.get(anyString())).thenReturn(operationsGet);
+        when(operationsGet.execute()).thenReturn(executedOperationsGet);
+        when(executedOperationsGet.getStatus()).thenReturn(null).thenReturn("RUNNING").thenReturn("DONE");
+
+        new KubernetesClusterProvider(container, processRunner).findOrCreate("runName", project, region);
+        verify(executedOperationsGet, times(3)).getStatus();
     }
 
     @Test
