@@ -8,9 +8,10 @@ Platinum runs on the Google Cloud Platform. We've tried to automate as much of t
 one or two things to configure.
 
 To start you'll need:
-- [A GCP project](https://cloud.google.com/resource-manager/docs/creating-managing-projects). 
-  the Quickstart. An account within that project with the [Owner role](https://cloud.google.com/iam/docs/understanding-roles).
-  See `Configuring your GCP Account` below for more information. 
+- A GCP account. You can get started with the credit they offer and a
+  credit card (for verification). See Google's [docs](https://cloud.google.com/free/docs/gcp-free-tier).
+- [A GCP project](https://cloud.google.com/resource-manager/docs/creating-managing-projects) 
+  and a user within that project with the [Owner role](https://cloud.google.com/iam/docs/understanding-roles).
 - [A region](https://cloud.google.com/compute/docs/regions-zones) where you plan to store your data and run your workload 
   (hint: pick the region closest to where your data currently resides)
 
@@ -40,28 +41,6 @@ file (make sure to adjust and uncomment the `export` lines):
 # Results are waiting in Google Cloud Storage
 gsutil ls gs://platinum-output-$EXPERIMENT_NAME
 ```
-
-### Configuring your GCP Account
-
-Google makes it easy to start up a GCP project using their "free" tier,
-which also comes with some starter credit. Unfortuantely this is not quite
-enough for running Platinum because GCP's default quotas are insufficient.
-
-You can sign up via the free offering initially but make sure you upgrade
-your account before trying to run Platinum:
-
-* Make sure you're logged in as the user under which the project was
-  created, not just another Owner
-* There is an upgrade button on the right-hand side. You may need to
-  provide credit card or bank account details.
-* It may be a business day after you create the account before you can
-  upgrade it or request quota increases, so keep this in mind if you've got
-  a tight deadline.
-
-You'll also probably want to increase some quotas. Easiest is to run Platinum 
-once you've got the account ready and then watch the logs for complaints
-about quotas being exhausted and increase as needed. The defaults are very
-conservative and will work but the pipeline will run faster with more resourves.
 
 ### Configuring your GCP Project
 
