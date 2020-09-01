@@ -6,9 +6,9 @@ function bold() {
 
 function configure() {
     if [ $# -ne 2 ]; then
-        echo "$(bold "USAGE: $0 configure -r=<region> -p=<project>")"
-        echo "$(bold "  -r=<region>") GCP region where the network resides for enabling private access"
-        echo "$(bold "  -p=<project>") GCP project ID where we'll enable the Kubernetes and compute APIs"
+        echo "$(bold "USAGE: $0 configure -r <region> -p <project>")"
+        echo "$(bold "  -r <region>") GCP region where the network resides for enabling private access"
+        echo "$(bold "  -p <project>") GCP project ID where we'll enable the Kubernetes and compute APIs"
         exit 1
     fi
     gcloud auth login
@@ -46,10 +46,10 @@ function logs() {
 
 function cleanup() {
     if [ $# -ne 3 ]; then
-        echo "$(bold "USAGE: platinum cleanup -n=<run_name>")"
-        echo "$(bold "  -n=<run_name>") Name of run for which you'd like to cleanup (created with platinum run -n <run_name>)"
-        echo "$(bold "  -p=<project>") GCP project ID where the run was completed. Used to cleanup service accounts"
-        echo "$(bold "  -r=<region>") GCP region where the cluster was created"
+        echo "$(bold "USAGE: platinum cleanup -n <run_name>")"
+        echo "$(bold "  -n <run_name>") Name of run for which you'd like to cleanup (created with platinum run -n <run_name>)"
+        echo "$(bold "  -p <project>") GCP project ID where the run was completed. Used to cleanup service accounts"
+        echo "$(bold "  -r <region>") GCP region where the cluster was created"
         exit 1
     fi
     service_account="platinum-${1}@${2}.iam.gserviceaccount.com"
