@@ -1,17 +1,21 @@
 #!/usr/bin/env bash
 
+function bold() {
+    echo "[1;30m${@}[0m"
+}
+
 function configure() {
-  if [ $# -ne 2 ]; then
-    echo "[1;30mUsage: platinum configure -r=<region> -p=<project>[0m"
-    echo "[1;30m-r=<region>[0m GCP region where the network resides for enabling private access"
-    echo "[1;30m-p=<project>[0m GCP project ID where we'll enable the kubernetes and compute apis"
-    exit 1
-  fi
-  gcloud auth login
-  gcloud compute networks subnets update default --region=$2 --enable-private-ip-google-access --project $1
-  gcloud services enable compute.googleapis.com --project $1
-  gcloud services enable container.googleapis.com --project $1
-  gcloud services enable cloudresourcemanager.googleapis.com --project $1
+    if [ $# -ne 2 ]; then
+        echo "$(bold "USAGE: $0 configure -r <region> -p <project>")"
+        echo "$(bold "  -r <region>") GCP region where the network resides for enabling private access"
+        echo "$(bold "  -p <project>") GCP project ID where we'll enable the Kubernetes and compute APIs"
+        exit 1
+    fi
+    gcloud auth login
+    gcloud compute networks subnets update default --region=$2 --enable-private-ip-google-access --project $1
+    for service in compute container cloudresourcemanager; do
+        gcloud services enable ${service}.googleapis.com --project $1
+    done
 }
 
 function install {
@@ -27,7 +31,7 @@ function run {
     export SUPPRESS_GCLOUD_CREDS_WARNING=true
     JAR=./target/platinum-local-SNAPSHOT.jar
     if [ ! -f $JAR ]; then
-      install
+        install
     fi
     java -jar $JAR "$@"
 }
@@ -41,19 +45,19 @@ function logs() {
 }
 
 function cleanup() {
-  if [ $# -ne 3 ]; then
-    echo "[1;30mUsage: platinum cleanup -n=<run_name>[0m"
-    echo "[1;30m-n=<run_name>[0m Name of run for which you'd like to cleanup (created with platinum run -n <run_name>)"
-    echo "[1;30m-p=<project>[0m GCP project ID where the run was completed. Used to cleanup service accounts"
-    echo "[1;30m-r=<region>[0m GCP region where the cluster was created"
-    exit 1
-  fi
-  service_account=platinum-$1@$2.iam.gserviceaccount.com
-  gcloud container clusters delete $1-cluster --region $region
-  gcloud iam service-accounts delete $service_account
-  gcloud projects remove-iam-policy-binding $2 --member=serviceAccount:$service_account --role=roles/iam.serviceAccountUser > /dev/null
-  gcloud projects remove-iam-policy-binding $2 --member=serviceAccount:$service_account --role=roles/compute.admin > /dev/null
-  gcloud projects remove-iam-policy-binding $2 --member=serviceAccount:$service_account --role=roles/storage.admin > /dev/null
+    if [ $# -ne 3 ]; then
+        echo "$(bold "USAGE: platinum cleanup -n <run_name>")"
+        echo "$(bold "  -n <run_name>") Name of run for which you'd like to cleanup (created with platinum run -n <run_name>)"
+        echo "$(bold "  -p <project>") GCP project ID where the run was completed. Used to cleanup service accounts"
+        echo "$(bold "  -r <region>") GCP region where the cluster was created"
+        exit 1
+    fi
+    service_account="platinum-${1}@${2}.iam.gserviceaccount.com"
+    gcloud container clusters delete $1-cluster --region $region
+    gcloud iam service-accounts delete $service_account
+    for role in iam.serviceAccountUser compute.admin storage.admin; do
+        gcloud projects remove-iam-policy-binding $2 --member=serviceAccount:$service_account --role=roles/${role} >/dev/null
+    done
 }
 
 CMD=$1
@@ -71,21 +75,25 @@ done
 
 case $CMD in
 configure)
-  configure $project $region
-  ;;
+    configure $project $region
+    ;;
 login)
-  login
-  ;;
+    login
+    ;;
 run)
-  run "$@"
-  ;;
+    run "$@"
+    ;;
 status)
-  status
-  ;;
+    status
+    ;;
 logs)
-  logs $1
-  ;;
+    logs $1
+    ;;
 cleanup)
-  cleanup $run_name $project $region
-  ;;
+    cleanup $run_name $project $region
+    ;;
+*)
+    echo "Unknown command \"${CMD}\", provide one of [configure|login|run|status|logs|cleanup]"
+    exit 1
+    ;;
 esac
