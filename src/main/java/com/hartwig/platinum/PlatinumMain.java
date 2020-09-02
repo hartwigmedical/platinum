@@ -15,12 +15,12 @@ import picocli.CommandLine.Option;
 public class PlatinumMain implements Callable<Integer> {
     private static final Logger LOGGER = LoggerFactory.getLogger(PlatinumMain.class);
 
-    @Option(names = { "-n"},
+    @Option(names = { "-n" },
             required = true,
             description = "The name of the run, used in output bucket and cluster naming")
     private String runName;
 
-    @Option(names = { "-i"},
+    @Option(names = { "-i" },
             required = true,
             description = "JSON file that contains arguments to be passed to the pipeline jobs and a list of samples")
     private String inputJson;
@@ -40,10 +40,11 @@ public class PlatinumMain implements Callable<Integer> {
         try {
             new Platinum(runName,
                     inputJson,
-                    StorageOptions.getDefaultInstance().getService(),
+                    StorageOptions.newBuilder().setProjectId(project).build().getService(),
                     IamProvider.get(),
                     ResourceManagerProvider.get(),
-                    project, region).run();
+                    project,
+                    region).run();
             return 0;
         } catch (Exception e) {
             LOGGER.error("Unexpected exception", e);
