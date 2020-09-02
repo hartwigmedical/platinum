@@ -5,6 +5,9 @@ import java.util.concurrent.Callable;
 import com.google.cloud.storage.StorageOptions;
 import com.hartwig.platinum.iam.IamProvider;
 import com.hartwig.platinum.iam.ResourceManagerProvider;
+import com.hartwig.platinum.kubernetes.ContainerProvider;
+import com.hartwig.platinum.kubernetes.KubernetesClusterProvider;
+import com.hartwig.platinum.kubernetes.ProcessRunner;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,11 +43,12 @@ public class PlatinumMain implements Callable<Integer> {
         try {
             new Platinum(runName,
                     inputJson,
+                    project,
+                    region,
                     StorageOptions.newBuilder().setProjectId(project).build().getService(),
                     IamProvider.get(),
                     ResourceManagerProvider.get(),
-                    project,
-                    region).run();
+                    new KubernetesClusterProvider(ContainerProvider.get(), new ProcessRunner())).run();
             return 0;
         } catch (Exception e) {
             LOGGER.error("Unexpected exception", e);
