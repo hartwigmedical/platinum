@@ -13,7 +13,6 @@ import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.VolumeMountBuilder;
 
 public class PipelineContainer {
-
     private final static String SAMPLES_PATH = "/samples";
     private final static String SECRETS_PATH = "/secrets";
     private static final String IMAGE = "hartwigmedicalfoundation/pipeline5:platinum";
@@ -41,26 +40,28 @@ public class PipelineContainer {
         Container container = new Container();
         container.setImage(IMAGE);
         container.setName(containerName);
-        List<String> arguments = ImmutableList.<String>builder().add("/pipeline5.sh")
+        List<String> nonOverrideableArgs = List.of("/pipeline5.sh",
+                "-set_id",
+                sample,
+                "-sample_json",
+                format("%s/%s", SAMPLES_PATH, sample),
+                "-output_bucket",
+                outputBucket,
+                "-private_key_path",
+                format("%s/%s", SECRETS_PATH, serviceAccountKeySecretName),
+                "-project",
+                project,
+                "-region",
+                region,
+                "-service_account_email",
+                serviceAccountEmail,
+                "-run_id",
+                runName);
+         List<String> overrideableDefaults = List.of("-profile", "public", "-output_cram", "false");
+         List<String> arguments = ImmutableList.<String>builder()
+                .addAll(nonOverrideableArgs)
                 .addAll(argumentPairs.entrySet().stream().flatMap(e -> Stream.of(e.getKey(), e.getValue())).collect(Collectors.toList()))
-                .add("-profile",
-                        "public",
-                        "-set_id",
-                        sample,
-                        "-sample_json",
-                        format("%s/%s", SAMPLES_PATH, sample),
-                        "-output_bucket",
-                        outputBucket,
-                        "-private_key_path",
-                        format("%s/%s", SECRETS_PATH, serviceAccountKeySecretName),
-                        "-project",
-                        project,
-                        "-region",
-                        region,
-                        "-service_account_email",
-                        serviceAccountEmail,
-                        "-run_id",
-                        runName)
+                .addAll(overrideableDefaults)
                 .build();
         container.setCommand(arguments);
         container.setVolumeMounts(List.of(new VolumeMountBuilder().withMountPath(SAMPLES_PATH).withName(configMapName).build(),
