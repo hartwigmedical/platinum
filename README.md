@@ -28,10 +28,10 @@ Run the following from the root of this repo where `examples/quickstart/input.js
 file (make sure to adjust and uncomment the `export` lines):
 
 ```shell script
-# export PROJECT=$(gcloud projects list | grep 'your project name from above' | awk '{print $1}') 
-# export REGION='your region'
-# export EXPERIMENT_NAME='experiment_name'
-# input.json is an example input pointing at test data HMF has exposed for this demo
+export PROJECT=$(gcloud projects list | grep 'your project name from above' | awk '{print $1}') 
+export REGION='your region'
+# Experiment name is just a unique id we'll use to name resources. Call it anything for now.
+export EXPERIMENT_NAME='experiment_name'
 ./platinum configure -p $PROJECT -r $REGION
 ./platinum login
 ./platinum run -n $EXPERIMENT_NAME -p $PROJECT -r $REGION -i examples/quickstart/input.json
