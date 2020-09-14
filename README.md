@@ -1,6 +1,6 @@
 # Platinum
 
-Platinum is a tool to run the HMF cancer analysis pipeline for any number of tumor samples in one easy command.
+Platinum is a tool to run the [HMF cancer analysis pipeline](https://github.com/hartwigmedical/pipeline5) for any number of tumor samples in one easy command.
 
 -> TODO (PEPR)
 The HMF cancer analysis pipeline is a comprehensive pipeline specifically designed for analysing WGS data with the following properties:
