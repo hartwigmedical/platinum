@@ -20,12 +20,14 @@ The following tables describe which external tools and resources are used by Pla
 ### Resources used by Platinum
 Resource  | Purpose
 ---|---
-[<img src="logos/docm.png" title="Database of Curated Mutations" height=50>](http://www.docm.info)  | TODO 
+[<img src="logos/grc.jpg" title="Genome Reference Consortium" height=50>](https://www.ncbi.nlm.nih.gov/grc)  | TODO
+[<img src="logos/ensembl.png" title="Ensembl" height=50>](http://www.ensembl.org)  | TODO
+[<img src="logos/civic.png" title="Clinical Interpretations of Variants in Cancer" height=50>](https://civicdb.org)  | TODO
+[<img src="logos/docm.png" title="Database of Curated Mutations" height=50>](http://www.docm.info)  | TODO
+[<img src="logos/cgi.png" title="Cancer Genome Interpreter" height=50>](https://www.cancergenomeinterpreter.org)  | TODO
+[<img src="logos/virushostdb.png" title="Virus Host DB" height=50>](https://www.genome.jp/virushostdb)  | TODO
+ 
 
-### External tools used by Platinum
-Tool  | Description | Owner
----|---|---
-TODO  | TODO | TODO
 
 ## Before you begin
 
