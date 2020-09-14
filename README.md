@@ -20,7 +20,7 @@ The following tables describe which external tools and resources are used by Pla
 ### Resources used by Platinum
 Resource  | Description | Owner
 ---|---|---
-[<img src="logos/docm.png" title="Database of Curated Mutations" height=100 width=200>](http://www.docm.info)  | TODO | TODO
+[<img src="logos/docm.png" title="Database of Curated Mutations" height=100>](http://www.docm.info)  | TODO | TODO
 
 ### External tools used by Platinum
 Tool  | Description | Owner
