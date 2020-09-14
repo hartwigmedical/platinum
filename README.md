@@ -18,9 +18,9 @@ The pipeline images available through Platinum depend on free-to-use and open-so
 The following tables describe which external tools and resources are used by Platinum and hence by any user of Platinum. 
 
 ### Resources used by Platinum
-Resource  | Description | Owner
----|---|---
-[<img src="logos/docm.png" title="Database of Curated Mutations" height=100>](http://www.docm.info)  | TODO | TODO
+Resource  | Purpose
+---|---
+[<img src="logos/docm.png" title="Database of Curated Mutations" height=50>](http://www.docm.info)  | TODO 
 
 ### External tools used by Platinum
 Tool  | Description | Owner
