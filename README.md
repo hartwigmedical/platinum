@@ -15,17 +15,24 @@ In addition to the HMF algorithms, Platinum depends on a number of resources (da
 -> END TODO (PEPR)
 
 The pipeline images available through Platinum depend on free-to-use and open-source resources exclusively such that Platinum comes with no restrictions for end-users.
-The following tables describe which external tools and resources are used by Platinum and hence by any user of Platinum. 
+The following tables describe which external tools and resources are used by Platinum and hence by any user of Platinum, along with a link to their license. 
 
 ### Resources used by Platinum
-Resource  | Purpose
----|---
-[<img src="logos/grc.jpg" title="Genome Reference Consortium" height=50>](https://www.ncbi.nlm.nih.gov/grc)  | TODO
-[<img src="logos/ensembl.png" title="Ensembl" height=50>](http://www.ensembl.org)  | TODO
-[<img src="logos/civic.png" title="Clinical Interpretations of Variants in Cancer" height=50>](https://civicdb.org)  | TODO
-[<img src="logos/docm.png" title="Database of Curated Mutations" height=50>](http://www.docm.info)  | TODO
-[<img src="logos/cgi.png" title="Cancer Genome Interpreter" height=50>](https://www.cancergenomeinterpreter.org)  | TODO
-[<img src="logos/virushostdb.png" title="Virus Host DB" height=50>](https://www.genome.jp/virushostdb)  | TODO
+Resource  | Purpose | License
+:-:|:-:|:-:
+[<img src="logos/grc.jpg" title="Genome Reference Consortium" height=50>](https://www.ncbi.nlm.nih.gov/grc)  | TODO | TODO
+[<img src="logos/ensembl.png" title="Ensembl" height=50>](http://www.ensembl.org)  | TODO  | TODO
+[<img src="logos/civic.png" title="Clinical Interpretations of Variants in Cancer" height=50>](https://civicdb.org)  | TODO | TODO
+[<img src="logos/docm.png" title="Database of Curated Mutations" height=50>](http://www.docm.info)  | TODO | TODO
+[<img src="logos/cgi.png" title="Cancer Genome Interpreter" height=50>](https://www.cancergenomeinterpreter.org)  | TODO | TODO
+ClinVar | TODO | TODO
+[<img src="logos/virushostdb.png" title="Virus Host DB" height=50>](https://www.genome.jp/virushostdb)  | TODO | TODO
+RepeatMasker | TODO | TODO
+UCSC | TODO | TODO
+GIAB | TODO | TODO
+SnpEFF | TODO | TODO
+ENCODE | TODO | TODO
+ 
  
 
 
