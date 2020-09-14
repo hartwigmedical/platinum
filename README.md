@@ -20,7 +20,7 @@ The following tables describe which external tools and resources are used by Pla
 ### Resources used by Platinum
 Resource  | Description | Owner
 ---|---|---
-![alt text](https://github.com/hartwigmedical/platinum/tree/master/logos/docm.png)  | TODO | TODO
+![alt text](https://github.com/hartwigmedical/platinum/blob/master/logos/docm.png "Database of Curated Mutations")  | TODO | TODO
 
 ### External tools used by Platinum
 Tool  | Description | Owner
