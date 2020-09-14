@@ -9,12 +9,12 @@ The HMF cancer analysis pipeline is a comprehensive pipeline specifically design
  - The tumor data can be analysed against any number of reference samples (including no reference sample in which case pipeline will run in "tumor-only" mode).
  - Both HG19 and HG38 are supported.
   
--> END TODO (PEPR)
-
 The HMF pipeline primarily uses algorithms developed by HMF and for which the code is open-sourced and available via [hmftools](https://github.com/hartwigmedical/hmftools).
 In addition to the HMF algorithms, Platinum depends on a number of resources (databases) and some external tools and algorithms.
 
-The pipeline images available through Platinum use free-to-use and open-source resources and tools exclusively such that Platinum comes with no restrictions for end-users.
+-> END TODO (PEPR)
+
+The pipeline images available through Platinum depend on free-to-use and open-source resources exclusively such that Platinum comes with no restrictions for end-users.
 The following tables describe which external tools and resources are used by Platinum and hence by any user of Platinum. 
 
 ### Resources used by Platinum
