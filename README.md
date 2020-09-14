@@ -1,6 +1,7 @@
 # Platinum
 
 Platinum is a tool to run the HMF cancer analysis pipeline for any number of tumor samples in one easy command. 
+
 The HMF pipeline primarily uses algorithms developed by HMF and for which the code is open-sourced and available via [hmftools](https://github.com/hartwigmedical/hmftools)
 In addition to the HMF algorithms, Platinum depends on a number of resources (databases) and some external tools and algorithms.
 
