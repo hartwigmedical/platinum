@@ -12,7 +12,7 @@ The HMF pipeline primarily uses algorithms developed by HMF and for which the co
 In addition to the HMF algorithms, Platinum depends on a number of resources (databases) and some external tools and algorithms.
 
 The pipeline images available through Platinum depend only on free-to-use and open-source resources such that Platinum comes with no restrictions for end-users.
-The following tables describe which external resources are used by Platinum and hence by any user of Platinum, along with a link to their license. 
+The following tables describe which external resources are used by Platinum and hence by any user of Platinum, along with a link to their disclaimer when available. 
 
 ### Resources used by Platinum
 Resource | Purpose | Disclaimer
