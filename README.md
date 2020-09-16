@@ -22,7 +22,7 @@ Resource  | Purpose | License
 [<img src="logos/civic.png" title="Clinical Interpretations of Variants in Cancer" height=50>](https://civicdb.org)  | TODO | TODO
 [<img src="logos/docm.png" title="Database of Curated Mutations" height=50>](http://www.docm.info)  | TODO | TODO
 [<img src="logos/cgi.png" title="Cancer Genome Interpreter" height=50>](https://www.cancergenomeinterpreter.org)  | TODO | TODO
-[<img src="logos/clinvar.png" title="ClinVar" height=50>](https://www.ncbi.nlm.nih.gov/clinvar/)| TODO | TODO
+[<img src="logos/clinvar.jpg" title="ClinVar" height=50>](https://www.ncbi.nlm.nih.gov/clinvar/)| TODO | TODO
 [<img src="logos/virushostdb.png" title="Virus Host DB" height=50>](https://www.genome.jp/virushostdb)  | TODO | TODO
 [<img src="logos/repeatmasker.png" title="Repeat Masker" height=50>](http://www.repeatmasker.org) | TODO | TODO
 [<img src="logos/ucsc.png" title="UCSC" height=50>](https://genome.ucsc.edu)| TODO | TODO
