@@ -3,8 +3,9 @@
 Platinum is a tool to run the [HMF cancer analysis pipeline](https://github.com/hartwigmedical/pipeline5) for any number of tumor samples in one easy command.
 
 The HMF cancer analysis pipeline is a comprehensive pipeline specifically designed for analysing WGS tumor data with the following properties:
- - FASTQ is assumed to be available for the sample(s) and is the starting point of the pipeline. 
- - In addition to the tumor sample, any number of reference samples can be provided where zero reference samples is a special case of "tumor-only" mode. 
+ - FASTQ is assumed to be available for the sample(s) and is the starting point for the pipeline. 
+ - In addition to the tumor sample, any number of reference samples can be provided.
+  - Zero reference samples is a special case of "tumor-only" mode. 
  - Both HG19 and HG38 reference genomes are supported throughout the pipeline and lead to comparable analysis quality.  
   
 The HMF pipeline primarily uses algorithms developed by HMF and for which the code is open-sourced and available via [hmftools](https://github.com/hartwigmedical/hmftools).
@@ -21,13 +22,13 @@ Resource  | Purpose | License
 [<img src="logos/civic.png" title="Clinical Interpretations of Variants in Cancer" height=50>](https://civicdb.org)  | TODO | TODO
 [<img src="logos/docm.png" title="Database of Curated Mutations" height=50>](http://www.docm.info)  | TODO | TODO
 [<img src="logos/cgi.png" title="Cancer Genome Interpreter" height=50>](https://www.cancergenomeinterpreter.org)  | TODO | TODO
-ClinVar | TODO | TODO
+[<img src="logos/clinvar.png" title="ClinVar" height=50>](https://www.ncbi.nlm.nih.gov/clinvar/)| TODO | TODO
 [<img src="logos/virushostdb.png" title="Virus Host DB" height=50>](https://www.genome.jp/virushostdb)  | TODO | TODO
-RepeatMasker | TODO | TODO
-UCSC | TODO | TODO
-GIAB | TODO | TODO
-SnpEFF | TODO | TODO
-ENCODE | TODO | TODO
+[<img src="logos/repeatmasker.png" title="Repeat Masker" height=50>](http://www.repeatmasker.org) | TODO | TODO
+[<img src="logos/ucsc.png" title="UCSC" height=50>](https://genome.ucsc.edu)| TODO | TODO
+[<img src="logos/giab.png" title="Genome in a Bottle" height=50>](https://www.nist.gov/programs-projects/genome-bottle) | TODO | TODO
+[<img src="logos/snpeff.jpg" title="SnpEFF" height=50>](http://snpeff.sourceforge.net/) | TODO | TODO
+[<img src="logos/encode.jpg" title="ENCODE" height=50>](https://www.encodeproject.org) | TODO | TODO
  
  
 
