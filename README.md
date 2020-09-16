@@ -16,19 +16,19 @@ The following tables describe which external resources are used by Platinum and 
 
 ### Resources used by Platinum
 Resource  | Purpose | Disclaimer
-:-:|:-:|:-:
-[<img src="logos/grc.png" title="Genome Reference Consortium" height=50>](https://www.ncbi.nlm.nih.gov/grc)  | TODO | N/A
-[<img src="logos/ensembl.png" title="Ensembl" height=50>](http://www.ensembl.org)  | The ensembl database is used extensively throughout our algorithms: <br/> - The exome is roughly defined as the exons of all canonical transcripts of all genes as defined by ensembl <br/> - Protein features and splice data used for interpretation of structural variants is gathered via ensembl | [link](http://www.ensembl.org/info/about/legal/disclaimer.html)
-[<img src="logos/civic.png" title="Clinical Interpretations of Variants in Cancer" height=50>](https://civicdb.org)  | TODO | [link](https://civic.readthedocs.io/en/latest/about.html)
-[<img src="logos/docm.png" title="Database of Curated Mutations" height=50>](http://www.docm.info)  | TODO | [link](http://www.docm.info/about)
-[<img src="logos/cgi.png" title="Cancer Genome Interpreter" height=50>](https://www.cancergenomeinterpreter.org)  | TODO | [link](https://www.cancergenomeinterpreter.org/about)
-[<img src="logos/clinvar.png" title="ClinVar" height=50>](https://www.ncbi.nlm.nih.gov/clinvar/)| TODO | [link](https://www.ncbi.nlm.nih.gov/clinvar/intro/)
-[<img src="logos/virushostdb.png" title="Virus Host DB" height=50>](https://www.genome.jp/virushostdb)  | TODO | [link](https://www.genome.jp/virushostdb/note.html)
-[<img src="logos/repeatmasker.png" title="Repeat Masker" height=50>](http://www.repeatmasker.org) | TODO | N/A
-[<img src="logos/ucsc.png" title="UCSC" height=50>](https://genome.ucsc.edu)| TODO | [link](https://genome.ucsc.edu/conditions.html)
-[<img src="logos/giab.png" title="Genome in a Bottle" height=50>](https://www.nist.gov/programs-projects/genome-bottle) | TODO | N/A
-[<img src="logos/snpeff.png" title="SnpEFF" height=50>](http://snpeff.sourceforge.net/) | TODO | [link](https://pcingola.github.io/SnpEff/SnpEff.html#license)
-[<img src="logos/encode.png" title="ENCODE" height=50>](https://www.encodeproject.org) | TODO | [link](https://www.encodeproject.org/help/citing-encode/)
+:-:|---|:-:
+[<img src="logos/grc.png" title="Genome Reference Consortium" height=50>](https://www.ncbi.nlm.nih.gov/grc)  | The reference genome (HG19 or HG38) used in nearly every step of the pipeline is maintained by GRC| N/A
+[<img src="logos/ensembl.png" title="Ensembl" height=50>](http://www.ensembl.org)  | The ensembl database is used extensively throughout our algorithms: <br/> - The exome is roughly defined as the exons of all canonical transcripts of all genes as defined by ensembl <br/> - Protein features and splice data used for interpretation of structural variants is gathered via ensembl. | [link](http://www.ensembl.org/info/about/legal/disclaimer.html)
+[<img src="logos/civic.png" title="Clinical Interpretations of Variants in Cancer" height=50>](https://civicdb.org)  | CIViC is a knowledgebase containing (pathogenic) mutations and linking them to treatments. In terms of the pipeline, CIViC's list of pathogenic variants contribute to the hotspot list used as our most sensitive calling tier and used for downstream interpretation. | [link](https://civic.readthedocs.io/en/latest/about.html)
+[<img src="logos/docm.png" title="Database of Curated Mutations" height=50>](http://www.docm.info)  | DoCM is a knowledgebase containing (pathogenic) mutations. In terms of the pipeline, DoCM's list of pathogenic variants contribute to the hotspot list used as our most sensitive calling tier and used for downstream interpretation. | [link](http://www.docm.info/about)
+[<img src="logos/cgi.png" title="Cancer Genome Interpreter" height=50>](https://www.cancergenomeinterpreter.org)  | CGI is a knowledgebase containing (pathogenic) mutations and linking them to treatments. In terms of the pipeline, CGI's list of pathogenic variants contribute to the hotspot list used as our most sensitive calling tier and used for downstream interpretation. | [link](https://www.cancergenomeinterpreter.org/about)
+[<img src="logos/clinvar.png" title="ClinVar" height=50>](https://www.ncbi.nlm.nih.gov/clinvar/)| ClinVar contains evidence on pathogenicity of variants and is used for determining the pathogenicity of germline variants (in case a reference sample is supplied). | [link](https://www.ncbi.nlm.nih.gov/clinvar/intro/)
+[<img src="logos/virushostdb.png" title="Virus Host DB" height=50>](https://www.genome.jp/virushostdb)  | The pipeline searches for evidence of viral integrations in the tumor DNA. The database from Virus Host DB is used as the source for viruses to look for. | [link](https://www.genome.jp/virushostdb/note.html)
+[<img src="logos/repeatmasker.png" title="Repeat Masker" height=50>](http://www.repeatmasker.org) | The repeat masker database is largely derived from the GRC reference genome and is annotated to interpret single end breaks in the DNA. By mapping the other end of a single end break to known repeat masks we hope to figure out where a single break leads to. | N/A
+[<img src="logos/ucsc.png" title="UCSC" height=50>](https://genome.ucsc.edu)| The pipeline uses UCSC's definition of replication timing of parts of the DNA to able to distinguish variants in parts of the DNA that replicate early versus variants in parts that replicate late. | [link](https://genome.ucsc.edu/conditions.html)
+[<img src="logos/giab.png" title="Genome in a Bottle" height=50>](https://www.nist.gov/programs-projects/genome-bottle) | From the GIAB consortium the pipeline uses the high confidence regions of the genome. We lower thresholds when calling variants in a high confidence region vs low confidence region. | N/A
+[<img src="logos/snpeff.png" title="SnpEff" height=50>](http://snpeff.sourceforge.net/) | SnpEff maintains a local database largely derived from ensembl and GRC, which the pipeline uses to annotate variants in terms of coding impact. | [link](https://pcingola.github.io/SnpEff/SnpEff.html#license)
+[<img src="logos/encode.png" title="ENCODE" height=50>](https://www.encodeproject.org) | From ENCODE, the pipeline uses a list of regions in the DNA for which we should not call structural variants | [link](https://www.encodeproject.org/help/citing-encode/)
  
  
 
