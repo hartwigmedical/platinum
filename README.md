@@ -15,9 +15,9 @@ The pipeline images available through Platinum depend only on free-to-use and op
 The following tables describe which external resources are used by Platinum and hence by any user of Platinum, along with a link to their license. 
 
 ### Resources used by Platinum
-Resource &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; | Purpose | Disclaimer
+Resource | Purpose | Disclaimer
 :-:|---|:-:
-[<img src="logos/grc.png" title="Genome Reference Consortium" height=50>](https://www.ncbi.nlm.nih.gov/grc)  | GRC makes available the human reference genome (HG19 or HG38) used in nearly every step of the pipeline. | N/A
+[<img src="logos/grc.png" title="Genome Reference Consortium" width=200>](https://www.ncbi.nlm.nih.gov/grc)  | GRC makes available the human reference genome (HG19 or HG38) used in nearly every step of the pipeline. | N/A
 [<img src="logos/ensembl.png" title="Ensembl" height=50>](http://www.ensembl.org)  | The ensembl database is used extensively throughout our algorithms: <br/> - The exome is roughly defined as the exons of all canonical transcripts of all genes as defined in ensembl <br/> - Protein features and splice data used for interpretation of structural variants is gathered via ensembl. | [link](http://www.ensembl.org/info/about/legal/disclaimer.html)
 [<img src="logos/civic.png" title="Clinical Interpretations of Variants in Cancer" height=50>](https://civicdb.org)  | CIViC is a knowledgebase containing (pathogenic) mutations and linking them to treatments. In terms of the pipeline, CIViC's list of pathogenic variants contribute to the hotspot list used as our most sensitive calling tier and used for downstream interpretation of drivers. | [link](https://civic.readthedocs.io/en/latest/about.html)
 [<img src="logos/docm.png" title="Database of Curated Mutations" height=50>](http://www.docm.info)  | DoCM is a knowledgebase containing (pathogenic) mutations. In terms of the pipeline, DoCM's list of pathogenic variants contribute to the hotspot list used as our most sensitive calling tier and used for downstream interpretation of drivers. | [link](http://www.docm.info/about)
