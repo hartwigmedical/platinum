@@ -28,7 +28,7 @@ Resource  | Purpose | License
 [<img src="logos/ucsc.png" title="UCSC" height=50>](https://genome.ucsc.edu)| TODO | TODO
 [<img src="logos/giab.png" title="Genome in a Bottle" height=50>](https://www.nist.gov/programs-projects/genome-bottle) | TODO | TODO
 [<img src="logos/snpeff.png" title="SnpEFF" height=50>](http://snpeff.sourceforge.net/) | TODO | TODO
-[<img src="logos/encode.jpg" title="ENCODE" height=50>](https://www.encodeproject.org) | TODO | TODO
+[<img src="logos/encode.png" title="ENCODE" height=50>](https://www.encodeproject.org) | TODO | TODO
  
  
 
