@@ -4,7 +4,7 @@ Platinum is a tool to run the [HMF cancer analysis pipeline](https://github.com/
 
 The HMF cancer analysis pipeline is a comprehensive pipeline specifically designed for analysing WGS tumor data with the following properties and constraints:
  - FASTQ is assumed to be available for the sample(s) and is the starting point for the pipeline. 
- - In addition to the tumor sample, any number of reference samples can be provided.
+ - Any number of reference samples can be provided to be used as a reference for the tumor DNA.
     - Zero reference samples is a special case of "tumor-only" mode. 
  - Both HG19 and HG38 reference genomes are supported throughout the pipeline and lead to comparable analysis quality.  
   
