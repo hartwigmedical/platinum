@@ -2,20 +2,16 @@
 
 Platinum is a tool to run the [HMF cancer analysis pipeline](https://github.com/hartwigmedical/pipeline5) for any number of tumor samples in one easy command.
 
--> TODO (PEPR)
-
 The HMF cancer analysis pipeline is a comprehensive pipeline specifically designed for analysing WGS tumor data with the following properties:
- - FASTQ is the starting point for the analysis.
- - The tumor data can be analysed against any number of reference samples (including no reference sample in which case pipeline will run in "tumor-only" mode).
- - Both HG19 and HG38 are supported.
+ - FASTQ is assumed to be available for the sample(s) and is the starting point of the pipeline. 
+ - In addition to the tumor sample, any number of reference samples can be provided where zero reference samples is a special case of "tumor-only" mode. 
+ - Both HG19 and HG38 reference genomes are supported throughout the pipeline and lead to comparable analysis quality.  
   
 The HMF pipeline primarily uses algorithms developed by HMF and for which the code is open-sourced and available via [hmftools](https://github.com/hartwigmedical/hmftools).
 In addition to the HMF algorithms, Platinum depends on a number of resources (databases) and some external tools and algorithms.
 
--> END TODO (PEPR)
-
-The pipeline images available through Platinum depend on free-to-use and open-source resources exclusively such that Platinum comes with no restrictions for end-users.
-The following tables describe which external tools and resources are used by Platinum and hence by any user of Platinum, along with a link to their license. 
+The pipeline images available through Platinum depend only on free-to-use and open-source resources such that Platinum comes with no restrictions for end-users.
+The following tables describe which external resources are used by Platinum and hence by any user of Platinum, along with a link to their license. 
 
 ### Resources used by Platinum
 Resource  | Purpose | License
