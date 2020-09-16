@@ -31,9 +31,7 @@ Resource | Purpose | Disclaimer
 [<img src="logos/encode.png" title="ENCODE">](https://www.encodeproject.org) | ENCODE database is used for blacklisting regions for structural variant calling. | [link](https://www.encodeproject.org/help/citing-encode/)
  
  
-
-
-## Before you begin
+## Technical Guide
 
 Platinum runs on the Google Cloud Platform. We've tried to automate as much of the setup as possible, but there are still
 one or two things to configure.
@@ -102,8 +100,8 @@ You should run this command at least once, and whenever you use different creden
 
 ### Configuring Input
 
-The HMF pipeline takes pair-end fastq as input. This input should be uploaded to a bucket in [Google Cloud Storage](https://cloud.google.com/storage) (GCS) before running platinum. 
-Once the input fastq is in GCS you define a JSON configuration in the following format.
+The HMF pipeline takes pair-end FASTQ as input. This input should be uploaded to a bucket in [Google Cloud Storage](https://cloud.google.com/storage) (GCS) before running platinum. 
+Once the input FASTQ is in GCS you define a JSON configuration in the following format.
 
 Notes:
 - Reference in this context is our internal terminology for the blood or normal sample.
