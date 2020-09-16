@@ -18,10 +18,7 @@ The following tables describe which external resources are used by Platinum and 
 Resource  | Purpose | Disclaimer
 :-:|:-:|:-:
 [<img src="logos/grc.png" title="Genome Reference Consortium" height=50>](https://www.ncbi.nlm.nih.gov/grc)  | TODO | N/A
-[<img src="logos/ensembl.png" title="Ensembl" height=50>](http://www.ensembl.org)  | The ensembl database is used extensively throughout our algorithms: 
-    <br/> - The exome is roughly defined as the exons of all canonical transcripts of all genes as defined by ensembl 
-    <br/> - Protein features and splice data used for interpretation of structural variants is gathered via ensembl
-    | [link](http://www.ensembl.org/info/about/legal/disclaimer.html)
+[<img src="logos/ensembl.png" title="Ensembl" height=50>](http://www.ensembl.org)  | The ensembl database is used extensively throughout our algorithms: <br/> - The exome is roughly defined as the exons of all canonical transcripts of all genes as defined by ensembl <br/> - Protein features and splice data used for interpretation of structural variants is gathered via ensembl | [link](http://www.ensembl.org/info/about/legal/disclaimer.html)
 [<img src="logos/civic.png" title="Clinical Interpretations of Variants in Cancer" height=50>](https://civicdb.org)  | TODO | [link](https://civic.readthedocs.io/en/latest/about.html)
 [<img src="logos/docm.png" title="Database of Curated Mutations" height=50>](http://www.docm.info)  | TODO | [link](http://www.docm.info/about)
 [<img src="logos/cgi.png" title="Cancer Genome Interpreter" height=50>](https://www.cancergenomeinterpreter.org)  | TODO | [link](https://www.cancergenomeinterpreter.org/about)
