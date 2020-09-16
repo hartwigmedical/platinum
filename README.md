@@ -15,20 +15,20 @@ The pipeline images available through Platinum depend only on free-to-use and op
 The following tables describe which external resources are used by Platinum and hence by any user of Platinum, along with a link to their license. 
 
 ### Resources used by Platinum
-Resource  | Purpose | License
+Resource  | Purpose | Disclaimer
 :-:|:-:|:-:
-[<img src="logos/grc.png" title="Genome Reference Consortium" height=50>](https://www.ncbi.nlm.nih.gov/grc)  | TODO | TODO
-[<img src="logos/ensembl.png" title="Ensembl" height=50>](http://www.ensembl.org)  | TODO  | TODO
-[<img src="logos/civic.png" title="Clinical Interpretations of Variants in Cancer" height=50>](https://civicdb.org)  | TODO | TODO
-[<img src="logos/docm.png" title="Database of Curated Mutations" height=50>](http://www.docm.info)  | TODO | TODO
-[<img src="logos/cgi.png" title="Cancer Genome Interpreter" height=50>](https://www.cancergenomeinterpreter.org)  | TODO | TODO
-[<img src="logos/clinvar.png" title="ClinVar" height=50>](https://www.ncbi.nlm.nih.gov/clinvar/)| TODO | TODO
-[<img src="logos/virushostdb.png" title="Virus Host DB" height=50>](https://www.genome.jp/virushostdb)  | TODO | TODO
-[<img src="logos/repeatmasker.png" title="Repeat Masker" height=50>](http://www.repeatmasker.org) | TODO | TODO
-[<img src="logos/ucsc.png" title="UCSC" height=50>](https://genome.ucsc.edu)| TODO | TODO
-[<img src="logos/giab.png" title="Genome in a Bottle" height=50>](https://www.nist.gov/programs-projects/genome-bottle) | TODO | TODO
-[<img src="logos/snpeff.png" title="SnpEFF" height=50>](http://snpeff.sourceforge.net/) | TODO | TODO
-[<img src="logos/encode.png" title="ENCODE" height=50>](https://www.encodeproject.org) | TODO | TODO
+[<img src="logos/grc.png" title="Genome Reference Consortium" height=50>](https://www.ncbi.nlm.nih.gov/grc)  | TODO | N/A
+[<img src="logos/ensembl.png" title="Ensembl" height=50>](http://www.ensembl.org)  | TODO  | [link](http://www.ensembl.org/info/about/legal/disclaimer.html)
+[<img src="logos/civic.png" title="Clinical Interpretations of Variants in Cancer" height=50>](https://civicdb.org)  | TODO | [link](https://civic.readthedocs.io/en/latest/about.html)
+[<img src="logos/docm.png" title="Database of Curated Mutations" height=50>](http://www.docm.info)  | TODO | [link](http://www.docm.info/about)
+[<img src="logos/cgi.png" title="Cancer Genome Interpreter" height=50>](https://www.cancergenomeinterpreter.org)  | TODO | [link](https://www.cancergenomeinterpreter.org/about)
+[<img src="logos/clinvar.png" title="ClinVar" height=50>](https://www.ncbi.nlm.nih.gov/clinvar/)| TODO | [link](https://www.ncbi.nlm.nih.gov/clinvar/intro/)
+[<img src="logos/virushostdb.png" title="Virus Host DB" height=50>](https://www.genome.jp/virushostdb)  | TODO | [link](https://www.genome.jp/virushostdb/note.html)
+[<img src="logos/repeatmasker.png" title="Repeat Masker" height=50>](http://www.repeatmasker.org) | TODO | N/A
+[<img src="logos/ucsc.png" title="UCSC" height=50>](https://genome.ucsc.edu)| TODO | [link](https://genome.ucsc.edu/conditions.html)
+[<img src="logos/giab.png" title="Genome in a Bottle" height=50>](https://www.nist.gov/programs-projects/genome-bottle) | TODO | N/A
+[<img src="logos/snpeff.png" title="SnpEFF" height=50>](http://snpeff.sourceforge.net/) | TODO | [link](https://pcingola.github.io/SnpEff/SnpEff.html#license)
+[<img src="logos/encode.png" title="ENCODE" height=50>](https://www.encodeproject.org) | TODO | [link](https://www.encodeproject.org/help/citing-encode/)
  
  
 
