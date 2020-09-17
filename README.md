@@ -8,7 +8,7 @@ The HMF cancer analysis pipeline is a comprehensive pipeline specifically design
     - Do note that some individual algorithms support zero and/or multiple reference samples to allow "tumor-only" mode.
  - Both HG19 and HG38 reference genomes are supported throughout the pipeline and lead to comparable analysis quality.  
   
-The HMF pipeline primarily uses algorithms developed by HMF and for which the code is open-sourced and available via [hmftools](https://github.com/hartwigmedical/hmftools).
+The HMF pipeline primarily uses algorithms developed by HMF open-source and available via [hmftools](https://github.com/hartwigmedical/hmftools).
 In addition to the HMF algorithms, Platinum depends on a number of resources (databases) and some external tools and algorithms.
 
 The pipeline images available through Platinum depend only on free-to-use and open-source resources such that Platinum comes with no restrictions for end-users.
@@ -100,7 +100,7 @@ You should run this command at least once, and whenever you use different creden
 
 ### Configuring Input
 
-The HMF pipeline takes pair-end FASTQ as input. This input should be uploaded to a bucket in [Google Cloud Storage](https://cloud.google.com/storage) (GCS) before running platinum. 
+The HMF pipeline takes paired-end FASTQ as input. This input should be uploaded to a bucket in [Google Cloud Storage](https://cloud.google.com/storage) (GCS) before running platinum. 
 Once the input FASTQ is in GCS you define a JSON configuration in the following format.
 
 Notes:
