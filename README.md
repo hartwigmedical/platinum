@@ -41,10 +41,9 @@ Resource | Purpose | Disclaimer
 [<img src="logos/clinvar.png" title="ClinVar" height=150>](https://www.ncbi.nlm.nih.gov/clinvar/)| ClinVar contains evidence on pathogenicity of variants and is used for determining the pathogenicity of germline variants (in case a reference sample is supplied). | [link](https://www.ncbi.nlm.nih.gov/clinvar/intro/)
 [<img src="logos/virushostdb.png" title="Virus Host DB">](https://www.genome.jp/virushostdb)  | The pipeline searches for evidence of viral integrations in the tumor DNA. The database from Virus Host DB is used as the source for which viruses to look for. | [link](https://www.genome.jp/virushostdb/note.html)
 [<img src="logos/repeatmasker.png" title="Repeat Masker">](http://www.repeatmasker.org) | The repeat masker database is largely derived from the GRC reference genome. This is used to interpret single end breaks in the DNA by mapping the other side of a single end break against a number of repeat masks.   | N/A
-[<img src="logos/ucsc.png" title="UCSC">](https://genome.ucsc.edu)| The pipeline uses Hela replication timing to annotate the replication timing of structural variant breakends | [link](https://genome.ucsc.edu/conditions.html)
 [<img src="logos/giab.png" title="Genome in a Bottle">](https://www.nist.gov/programs-projects/genome-bottle) | The GIAB consortium's NA12878 high confidence regions are used by the pipeline. Thresholds are lowered when calling variants in a high confidence region vs a low confidence region. | N/A
 [<img src="logos/snpeff.png" title="SnpEff">](http://snpeff.sourceforge.net/) | SnpEff maintains a database largely derived from ensembl and GRC, which the pipeline uses to annotate variants in terms of coding impact. | [link](https://pcingola.github.io/SnpEff/SnpEff.html#license)
-[<img src="logos/encode.png" title="ENCODE">](https://www.encodeproject.org) | ENCODE database is used for blacklisting regions for structural variant calling. | [link](https://www.encodeproject.org/help/citing-encode/)
+[<img src="logos/encode.png" title="ENCODE">](https://www.encodeproject.org) | ENCODE database is used for blacklisting regions for structural variant calling. Hela replication timing is also used to annotate the replication timing of structural variant breakends| [link](https://www.encodeproject.org/help/citing-encode/)
  
 ### Cost and Performance
 
