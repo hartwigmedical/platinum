@@ -1,5 +1,16 @@
 # Platinum
 
+- [About Platinum](#about-platinum)
+  * [Introduction](#introduction)
+  * [Resources used by Platinum](#resources-used-by-platinum)
+  * [Cost and Performance](#cost-and-performance)
+- [Running Platinum](#technical-guide)
+  * [Quickstart](#quickstart)
+  * [Configuring your GCP Project](#configuring-your-gcp-project)
+  * [Logging In](#logging-in)
+  * [Configuring Input](#configuring-input)
+  * [Running Platinum](#running-platinum)
+
 Platinum is a tool to run the [HMF cancer analysis pipeline](https://github.com/hartwigmedical/pipeline5) for any number of tumor samples in one easy command.
 
 The HMF cancer analysis pipeline is a comprehensive pipeline specifically designed for analysing WGS tumor data with the following properties and constraints:
@@ -30,8 +41,29 @@ Resource | Purpose | Disclaimer
 [<img src="logos/snpeff.png" title="SnpEff">](http://snpeff.sourceforge.net/) | SnpEff maintains a database largely derived from ensembl and GRC, which the pipeline uses to annotate variants in terms of coding impact. | [link](https://pcingola.github.io/SnpEff/SnpEff.html#license)
 [<img src="logos/encode.png" title="ENCODE">](https://www.encodeproject.org) | ENCODE database is used for blacklisting regions for structural variant calling. | [link](https://www.encodeproject.org/help/citing-encode/)
  
+### Cost and Performance
+
+Different inputs can lead to variation in cost and runtime, but to give some indication of what to expect, we have benchmarked Platinum against COLO829:
+* Reference DNA 30x depth and 4 lanes
+* Tumor DNA 90x depth and 4 lanes
+* The following minimum quotas:
+
+Quota | Value |
+----- | ------ |
+CPU   | 768
+CPU_ALL_REGIONS | 768 |
+PREEMPTIBLE_LOCAL_SSD_TOTAL_GB | 9TB |
+PERSISTENT_DISK_SSD_GB | 1TB |
+
+With these settings we get a cost of approximare €20 and runtime of 15 hours.
+
+When evaluating your own performance, a few things to keep in mind:
+- We do every FASTQ lane in parallel, so consolidating into less lanes (for instance, after converting back from BAM) will increase runtime.
+- We use [pre-emptible VMs](https://cloud.google.com/compute/docs/instances/preemptible) to save cost. These can be preempted (stopped and reclaimed) by Google, adding to the total runtime. 
+The pipeline will handle preemptions and its well worth it for the cost impact. 
+- New projects and GCP accounts are constrained by small quotas. You can request to (raise them through the console)[https://cloud.google.com/compute/quotas].
  
-## Technical Guide
+## Running Platinum
 
 Platinum runs on the Google Cloud Platform. We've tried to automate as much of the setup as possible, but there are still
 one or two things to configure.
