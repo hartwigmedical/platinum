@@ -65,7 +65,7 @@ When evaluating your own performance, a few things to keep in mind:
 - We map every FASTQ lane to the reference genome in parallel, so consolidating into less lanes (for instance, after converting back from BAM) will increase runtime.
 - We use [pre-emptible VMs](https://cloud.google.com/compute/docs/instances/preemptible) to save cost. These can be pre-empted (stopped and reclaimed) by Google, adding to the total runtime. 
 The pipeline will handle pre-emptions and its well worth it for the cost impact. 
-- New projects and GCP accounts are constrained by small quotas. You can request to (raise them through the console)[https://cloud.google.com/compute/quotas].
+- New projects and GCP accounts are constrained by small quotas. You can request to [raise them through the console](https://cloud.google.com/compute/quotas]).
  
 ## Running Platinum
 
