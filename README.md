@@ -227,10 +227,10 @@ In our 4 ref + 4 tumor lane benchmark, the peak lasts approx. 45 minutes.
 
 Quota | Peak | Description |
 --- | --- | --- |
-CPU | 96 x # of lanes | Each lane is aligned individually on a 96 core VM. While we use preemptible VMs, CPU count is still contrained by this quota.|
-CPU_ALL_REGIONS |  96 x # of lanes | Each lane is aligned individually on a 96 core VM. While we use preemptible VMs, CPU count is still contrained by this quota. |
-PREEMPTIBLE_LOCAL_SSD_TOTAL_GB | 1.125TB | Local SSDs can be attaches to a VM in 375Gb increments. Attaching 3 local SSDs to each VM ensures we have enough space for the input, output and temporary files involved in alignment and somatic calling. |
-PERSISTENT_DISK_SSD_GB | 200GB | Used for the O/S of each VM, along with HMF resources and tools |
+CPU | 96 x # of lanes | Each lane is aligned individually on a 96 core VM. While we use preemptible VMs, CPU count in the selected region is still contrained by this quota.|
+CPU_ALL_REGIONS |  96 x # of lanes | This quota is another limit on CPUs, but also includes any CPUs used in other regions |
+PREEMPTIBLE_LOCAL_SSD_TOTAL_GB | 1.125 TB  x # of lanes  | Local SSDs can be attaches to a VM in 375Gb increments. Attaching 3 local SSDs to each VM ensures we have enough space for the input, output and temporary files involved in alignment and somatic calling. |
+PERSISTENT_DISK_SSD_GB | 200GB  x # of lanes  | Used for the O/S of each VM, along with HMF resources and tools |
 
 Getting large quota increases can be difficult if you have a new GCP account without a billing track record. Also, quotas are generally allocated for sustained use, 
 and not the bursty requirements of running a large pipeline. You may need to contact Google in order to explain your requirements. If you are having trouble getting
