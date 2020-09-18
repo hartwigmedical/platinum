@@ -11,6 +11,7 @@
   * [Logging In](#logging-in)
   * [Configuring Input](#configuring-input)
   * [Running Pipelines](#running-pipelines)
+  * [Scaling Up](#scaling-up)
 
 ## About Platinum
 
@@ -50,7 +51,7 @@ Resource | Purpose | Disclaimer
 Different inputs can lead to variation in cost and runtime, but to give some indication of what to expect, we have benchmarked Platinum against COLO829:
 * Reference DNA 30x depth and 4 lanes
 * Tumor DNA 100x depth and 4 lanes
-* The following minimum quotas:
+* The following minimum quotas (see [Scaling Up](#scaling-up) for more info on Quotas)
 
 Quota | Value |
 ----- | ------ |
@@ -65,7 +66,7 @@ When evaluating your own performance, a few things to keep in mind:
 - We map every FASTQ lane to the reference genome in parallel, so consolidating into less lanes (for instance, after converting back from BAM) will increase runtime.
 - We use [pre-emptible VMs](https://cloud.google.com/compute/docs/instances/preemptible) to save cost. These can be pre-empted (stopped and reclaimed) by Google, adding to the total runtime. 
 The pipeline will handle pre-emptions and its well worth it for the cost impact. 
-- New projects and GCP accounts are constrained by small quotas. You can request to [raise them through the console](https://cloud.google.com/compute/quotas]).
+- New projects and GCP accounts are constrained by small quotas. You can request to [raise them through the console](https://cloud.google.com/compute/quotas).
  
 ## Running Platinum
 
@@ -213,5 +214,24 @@ Make sure you clean up when the run is complete, as you now have a small Kuberne
 ./platinum cleanup -n EXPERIMENT_NAME -p PROJECT -r REGION
 ```
 
+### Scaling Up
 
+Using GCP infrastructure, Platinum can run all your pipelines in parallel, giving you the same total runtime with 1000 tumors as a single tumor. 
+That said, to take advantage your GCP project must have been granted enough quota to support your workload. Here we review the quota limits
+frequently reached by Platinum and appropriate values to request from google.  
 
+First, please review GCP's documentation on [Raising Quotas](https://cloud.google.com/compute/quotas) and the request process. 
+
+An overview of the key quota limits are defined below. All the peaks occur during the alignment process, which uses many VMs with large core counts.
+In our 4 ref + 4 tumor lane benchmark, the peak lasts approx. 45 minutes.  
+
+Quota | Peak | Description |
+--- | --- | --- |
+CPU | 96 x # of lanes | Each lane is aligned individually on a 96 core VM. While we use preemptible VMs, CPU count is still contrained by this quota.|
+CPU_ALL_REGIONS |  96 x # of lanes | Each lane is aligned individually on a 96 core VM. While we use preemptible VMs, CPU count is still contrained by this quota. |
+PREEMPTIBLE_LOCAL_SSD_TOTAL_GB | 1.125TB | Local SSDs can be attaches to a VM in 375Gb increments. Attaching 3 local SSDs to each VM ensures we have enough space for the input, output and temporary files involved in alignment and somatic calling. |
+PERSISTENT_DISK_SSD_GB | 200GB | Used for the O/S of each VM, along with HMF resources and tools |
+
+Getting large quota increases can be difficult if you have a new GCP account without a billing track record. Also, quotas are generally allocated for sustained use, 
+and not the bursty requirements of running a large pipeline. You may need to contact Google in order to explain your requirements. If you are having trouble getting
+the quotas you need for a large experiment, please reach out to us and we can help put you in touch with the right people. 
