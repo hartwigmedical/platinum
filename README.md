@@ -21,7 +21,7 @@ Platinum is a tool to run the [HMF cancer analysis pipeline](https://github.com/
 The HMF cancer analysis pipeline is a comprehensive pipeline specifically designed for analysing WGS tumor data with the following properties and constraints:
  - FASTQ is assumed to be available for the sample(s) and is the starting point for the pipeline. 
  - The pipeline assumes that the tumor DNA sample is analysed against a single reference DNA sample.
-    - Do note that some individual algorithms support zero and/or multiple reference samples to allow "tumor-only" mode.
+    - Do note that some individual algorithms support zero and/or multiple reference samples to allow "tumor-only" mode. These modes are not supported yet throughout the entire platinum process though.
  - Both HG19 and HG38 reference genomes are supported throughout the pipeline and lead to comparable analysis quality.  
   
 The HMF pipeline primarily uses algorithms developed by HMF open-source and available via [hmftools](https://github.com/hartwigmedical/hmftools).
@@ -49,7 +49,7 @@ Resource | Purpose | Disclaimer
 
 Different inputs can lead to variation in cost and runtime, but to give some indication of what to expect, we have benchmarked Platinum against COLO829:
 * Reference DNA 30x depth and 4 lanes
-* Tumor DNA 90x depth and 4 lanes
+* Tumor DNA 100x depth and 4 lanes
 * The following minimum quotas:
 
 Quota | Value |
@@ -59,12 +59,12 @@ CPU_ALL_REGIONS | 768 |
 PREEMPTIBLE_LOCAL_SSD_TOTAL_GB | 9TB |
 PERSISTENT_DISK_SSD_GB | 1TB |
 
-With these settings we get a cost of approximare €20 and runtime of 15 hours.
+With these settings we get a cost of approximately €20 and runtime of 15 hours.
 
 When evaluating your own performance, a few things to keep in mind:
-- We do every FASTQ lane in parallel, so consolidating into less lanes (for instance, after converting back from BAM) will increase runtime.
-- We use [pre-emptible VMs](https://cloud.google.com/compute/docs/instances/preemptible) to save cost. These can be preempted (stopped and reclaimed) by Google, adding to the total runtime. 
-The pipeline will handle preemptions and its well worth it for the cost impact. 
+- We map every FASTQ lane to the reference genome in parallel, so consolidating into less lanes (for instance, after converting back from BAM) will increase runtime.
+- We use [pre-emptible VMs](https://cloud.google.com/compute/docs/instances/preemptible) to save cost. These can be pre-empted (stopped and reclaimed) by Google, adding to the total runtime. 
+The pipeline will handle pre-emptions and its well worth it for the cost impact. 
 - New projects and GCP accounts are constrained by small quotas. You can request to (raise them through the console)[https://cloud.google.com/compute/quotas].
  
 ## Running Platinum
@@ -177,7 +177,7 @@ Notes:
 }
 ```
 
-### Running Platinum
+### Running Pipelines
 
 Use the following command to run platinum:
 
