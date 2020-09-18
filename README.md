@@ -4,12 +4,17 @@
   * [Introduction](#introduction)
   * [Resources used by Platinum](#resources-used-by-platinum)
   * [Cost and Performance](#cost-and-performance)
-- [Running Platinum](#technical-guide)
+- [Running Platinum](#running-platinum)
+  * [Before You Begin](#before-you-begin)
   * [Quickstart](#quickstart)
   * [Configuring your GCP Project](#configuring-your-gcp-project)
   * [Logging In](#logging-in)
   * [Configuring Input](#configuring-input)
-  * [Running Platinum](#running-platinum)
+  * [Running Pipelines](#running-pipelines)
+
+## About Platinum
+
+### Introduction
 
 Platinum is a tool to run the [HMF cancer analysis pipeline](https://github.com/hartwigmedical/pipeline5) for any number of tumor samples in one easy command.
 
@@ -64,6 +69,8 @@ The pipeline will handle preemptions and its well worth it for the cost impact.
 - New projects and GCP accounts are constrained by small quotas. You can request to (raise them through the console)[https://cloud.google.com/compute/quotas].
  
 ## Running Platinum
+
+### Before You Begin
 
 Platinum runs on the Google Cloud Platform. We've tried to automate as much of the setup as possible, but there are still
 one or two things to configure.
