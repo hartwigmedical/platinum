@@ -32,7 +32,7 @@ The pipeline images available through Platinum depend only on free-to-use and op
 The following tables describe which external resources are used by Platinum and hence by any user of Platinum, along with a link to their disclaimer/notes and/or publication when available. 
 
 ### Resources used by Platinum
-Resource | Purpose | Disclaimer
+Resource | Purpose | References
 :-:|---|:-:
 [<img src="logos/grc.png" title="Genome Reference Consortium" height=100>](https://www.ncbi.nlm.nih.gov/grc)  | GRC makes available the human reference genome (HG19 or HG38) used in nearly every step of the pipeline. | N/A
 [<img src="logos/ensembl.png" title="Ensembl">](http://www.ensembl.org)  | The ensembl database is used extensively throughout our algorithms as the source for all gene and transcript annotations. | [disclaimer](http://www.ensembl.org/info/about/legal/disclaimer.html)
