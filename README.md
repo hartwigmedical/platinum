@@ -72,10 +72,7 @@ The pipeline will handle pre-emptions and its well worth it for the cost impact.
 
 ### Before You Begin
 
-Platinum runs on the Google Cloud Platform. We've tried to automate as much of the setup as possible, but there are still
-one or two things to configure.
-
-To start you'll need:
+Platinum runs on the Google Cloud Platform. To start you'll need:
 - A GCP account. You can get started with the credit they offer and a
   credit card (for verification). See Google's [docs](https://cloud.google.com/free/docs/gcp-free-tier).
 - [A GCP project](https://cloud.google.com/resource-manager/docs/creating-managing-projects) 
@@ -93,7 +90,7 @@ these installed:
 ### Quickstart
 
 Run the following from the root of this repo where `examples/quickstart/input.json` is your input
-file (make sure to adjust and uncomment the `export` lines):
+file (make sure to adjust the `export` lines):
 
 ```shell script
 export PROJECT=$(gcloud projects list | grep 'your project name from above' | awk '{print $1}') 
@@ -216,7 +213,7 @@ Make sure you clean up when the run is complete, as you now have a small Kuberne
 
 ### Scaling Up
 
-Using GCP infrastructure, Platinum can run all your pipelines in parallel, giving you the same total runtime with 1000 tumors as a single tumor. 
+Using GCP infrastructure, Platinum can run all your pipelines in parallel, giving you the same total runtime with 1000 samples as a single sample. 
 That said, to take advantage your GCP project must have been granted enough quota to support your workload. Here we review the quota limits
 frequently reached by Platinum and appropriate values to request from google.  
 
