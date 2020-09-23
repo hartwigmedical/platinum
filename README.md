@@ -140,7 +140,7 @@ The HMF pipeline takes paired-end FASTQ as input. This input should be uploaded 
 Once the input FASTQ is in GCS you define a JSON configuration in the following format.
 
 Notes:
-- Reference in this context is our internal terminology for the blood or normal sample.
+- Reference in this context is our internal terminology for the "normal" sample (which acts as "non-tumor reference" to the tumor sample).
 - The first part of the path is the bucket, with no `gs://` prefix.
 
 
