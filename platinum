@@ -55,9 +55,6 @@ function cleanup() {
     service_account="platinum-${1}@${2}.iam.gserviceaccount.com"
     gcloud container clusters delete $1-cluster --region $region --project $2
     gcloud iam service-accounts delete $service_account --project $2
-    for role in iam.serviceAccountUser compute.admin storage.admin; do
-        gcloud projects remove-iam-policy-binding $2 --member=serviceAccount:$service_account --role=roles/${role} >/dev/null
-    done
 }
 
 CMD=$1
