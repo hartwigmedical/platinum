@@ -45,11 +45,13 @@ public class KubernetesCluster {
                     .endMetadata()
                     .withSpec(new PipelineJob().create(new PipelineContainer(sample,
                             runName,
-                            configuration.argumentOverrides(),
-                            outputBucketName,
-                            project,
-                            serviceAccountEmail,
-                            region).create(CONFIG_MAP_NAME, SERVICE_ACCOUNT_KEY_NAME), configMapVolume, secretVolume))
+                            new PipelineArguments(configuration.argumentOverrides(),
+                                    outputBucketName,
+                                    project,
+                                    serviceAccountEmail,
+                                    region,
+                                    sample,
+                                    runName)).create(CONFIG_MAP_NAME, SERVICE_ACCOUNT_KEY_NAME), configMapVolume, secretVolume))
                     .done());
         }
         return jobs;

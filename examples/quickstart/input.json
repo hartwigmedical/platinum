@@ -1,4 +1,8 @@
-{"samples": {
+{
+  "argumentOverrides": {
+    "run_germline_caller": false
+  },
+  "samples": {
     "CPCT12345678": {
       "tumor": {
         "type": "TUMOR",
