@@ -30,8 +30,8 @@ In addition to the HMF algorithms, Platinum depends on a number of resources (da
 
 #### Disclaimer
 
- - Platinum is exclusively based on open source code and databases that are free to be used without any restriction. However, the databases that are distributed as 
- part of Platinum are not owned by HMF and their licenses could change. Below table lists all institutions from which we distribute data along with a link to their disclaimer and/or about and/or publication.
+ - Platinum aims to be based exclusively on open source code and databases that are free from any restrictions. However, the databases that are distributed as 
+ part of Platinum are not owned by HMF and their licenses could change. Below table lists all institutions from which we distribute data along with a link to their disclaimer and/or about and/or publication. 
  - HMF is not responsible for the interpretation of the output of our pipeline. 
 
 ### Resources used by Platinum
