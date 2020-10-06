@@ -28,8 +28,11 @@ The HMF cancer analysis pipeline is a comprehensive pipeline specifically design
 The HMF pipeline primarily uses algorithms developed by HMF open-source and available via [hmftools](https://github.com/hartwigmedical/hmftools).
 In addition to the HMF algorithms, Platinum depends on a number of resources (databases) and some external tools and algorithms.
 
-The pipeline images available through Platinum depend only on free-to-use and open-source resources such that Platinum comes with no restrictions for end-users.
-The following tables describe which external resources are used by Platinum and hence by any user of Platinum, along with a link to their disclaimer/notes and/or publication when available. 
+#### Disclaimer
+
+ - Platinum is exclusively based on open source code and databases that are free to be used without any restriction. However, the databases that are distributed as 
+ part of Platinum are not owned by HMF and their licenses could change. Below table lists all institutions from which we distribute data along with a link to their disclaimer and/or about and/or publication.
+ - HMF is not responsible for the interpretation of the output of our pipeline. 
 
 ### Resources used by Platinum
 Resource | Purpose | References
