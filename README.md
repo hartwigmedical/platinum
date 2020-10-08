@@ -235,3 +235,32 @@ PERSISTENT_DISK_SSD_GB | 200GB  x # of lanes  | Used for the O/S of each VM, alo
 Getting large quota increases can be difficult if you have a new GCP account without a billing track record. Also, quotas are generally allocated for sustained use, 
 and not the bursty requirements of running a large pipeline. You may need to contact Google in order to explain your requirements. If you are having trouble getting
 the quotas you need for a large experiment, please reach out to us and we can help put you in touch with the right people. 
+
+### Re-running Platinum
+
+Platinum can also re-use the output of a complete run to facilitate running new version on old data. When re-run platinum will leave input
+data in place, but replace existing data when new output is available. You may want to make a backup of your initial data before running
+again.  
+
+To configure this add the following to your JSON and be sure to use the same project and experiment name when running platinum.
+
+```json
+{
+  "argumentOverrides": {
+    "starting_point": "calling_complete"
+  },
+  "samples": {
+...
+  }
+}
+```
+
+The following starting points are supported, in order, as each starting point logically proceeds the others. See the [HMF cancer analysis pipeline](https://github.com/hartwigmedical/pipeline5)
+documentation for a complete description of all stages.
+
+Starting Point | Description
+--- | ---
+alignment_complete | Skip alignment and use persisted BAM files, WGS metrics and flagstats
+calling_complete | Skip germline, small variant, and structural variant calling, as well as cobalt and amber and use their persisted output
+gripss_complete | Skip gripss, the structural caller filtering and annotation.
+purple_complete | Skips purple, and only runs the final tertiary steps.
