@@ -12,6 +12,7 @@
   * [Configuring Input](#configuring-input)
   * [Running Pipelines](#running-pipelines)
   * [Scaling Up](#scaling-up)
+  * [Re-running Platinum](#re-running-platinum)
 
 ## About Platinum
 
