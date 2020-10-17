@@ -3,6 +3,7 @@ package com.hartwig.platinum.kubernetes;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.hartwig.platinum.GcpConfiguration;
 import com.hartwig.platinum.config.PlatinumConfiguration;
 import com.hartwig.platinum.iam.JsonKey;
 
@@ -17,7 +18,6 @@ public class KubernetesCluster {
 
     private static final String CONFIG_MAP_NAME = "sample";
     private static final String SERVICE_ACCOUNT_KEY_NAME = "service-account-key";
-    private static final Logger LOGGER = LoggerFactory.getLogger(KubernetesCluster.class);
     private final String runName;
     private final KubernetesClient kubernetesClient;
 
@@ -29,7 +29,7 @@ public class KubernetesCluster {
     }
 
     public List<Job> submit(final PlatinumConfiguration configuration, final JsonKey jsonKey, final String outputBucketName,
-            final String project, final String region, final String serviceAccountEmail) {
+            final GcpConfiguration gcpConfiguration, final String serviceAccountEmail) {
         Volume configMapVolume = new PipelineConfigMapVolume(configuration, kubernetesClient).create(CONFIG_MAP_NAME);
         Volume secretVolume = new PipelineServiceAccountSecretVolume(jsonKey, kubernetesClient).create(SERVICE_ACCOUNT_KEY_NAME);
 
@@ -47,11 +47,10 @@ public class KubernetesCluster {
                             runName,
                             new PipelineArguments(configuration.argumentOverrides(),
                                     outputBucketName,
-                                    project,
                                     serviceAccountEmail,
-                                    region,
                                     sample,
-                                    runName)).create(CONFIG_MAP_NAME, SERVICE_ACCOUNT_KEY_NAME), configMapVolume, secretVolume))
+                                    runName,
+                                    gcpConfiguration)).create(CONFIG_MAP_NAME, SERVICE_ACCOUNT_KEY_NAME), configMapVolume, secretVolume))
                     .done());
         }
         return jobs;

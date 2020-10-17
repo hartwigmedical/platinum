@@ -27,6 +27,8 @@ import com.google.api.services.container.v1beta1.Container.Projects.Locations.Cl
 import com.google.api.services.container.v1beta1.Container.Projects.Locations.Operations;
 import com.google.api.services.container.v1beta1.model.Cluster;
 import com.google.api.services.container.v1beta1.model.Operation;
+import com.hartwig.platinum.GcpConfiguration;
+import com.hartwig.platinum.ImmutableGcpConfiguration;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -39,6 +41,7 @@ public class KubernetesClusterProviderTest {
     private ProcessRunner processRunner;
     private String project;
     private String region;
+    private ImmutableGcpConfiguration configuration;
 
     @Before
     public void setup() {
@@ -54,13 +57,14 @@ public class KubernetesClusterProviderTest {
 
         project = "project";
         region = "region";
+        configuration = GcpConfiguration.builder().project(project).region(region).build();
     }
 
     @Test
     public void shouldReturnExistingInstanceIfFound() throws IOException {
         mocksForClusterExists();
 
-        new KubernetesClusterProvider(container, processRunner).findOrCreate("runName", project, region);
+        new KubernetesClusterProvider(container, processRunner).findOrCreate("runName", configuration);
         verify(clusters).get(anyString());
         verify(clusters, never()).create(any(), any());
     }
@@ -85,7 +89,7 @@ public class KubernetesClusterProviderTest {
         when(operationsGet.execute()).thenReturn(executedOperationsGet);
         when(executedOperationsGet.getStatus()).thenReturn("DONE");
 
-        new KubernetesClusterProvider(container, processRunner).findOrCreate("runName", project, region);
+        new KubernetesClusterProvider(container, processRunner).findOrCreate("runName", configuration);
         verify(created).execute();
     }
 
@@ -109,7 +113,7 @@ public class KubernetesClusterProviderTest {
         when(operationsGet.execute()).thenReturn(executedOperationsGet);
         when(executedOperationsGet.getStatus()).thenReturn(null).thenReturn("RUNNING").thenReturn("DONE");
 
-        new KubernetesClusterProvider(container, processRunner).findOrCreate("runName", project, region);
+        new KubernetesClusterProvider(container, processRunner).findOrCreate("runName", configuration);
         verify(executedOperationsGet, times(3)).getStatus();
     }
 
@@ -118,7 +122,7 @@ public class KubernetesClusterProviderTest {
         mocksForClusterExists();
         when(processRunner.execute(argThat(isListStartingWith("gcloud")))).thenReturn(false);
         try {
-            new KubernetesClusterProvider(container, processRunner).findOrCreate("runName", project, region);
+            new KubernetesClusterProvider(container, processRunner).findOrCreate("runName", configuration);
             fail("Expected an exception");
         } catch (RuntimeException e) {
             // OK
@@ -130,7 +134,7 @@ public class KubernetesClusterProviderTest {
         mocksForClusterExists();
         when(processRunner.execute(anyList())).thenReturn(true).thenReturn(false);
         try {
-            new KubernetesClusterProvider(container, processRunner).findOrCreate("runName", project, region);
+            new KubernetesClusterProvider(container, processRunner).findOrCreate("runName", configuration);
             fail("Expected an exception");
         } catch (RuntimeException e) {
             // OK

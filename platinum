@@ -5,14 +5,19 @@ function bold() {
 }
 
 function configure() {
-    if [ $# -ne 2 ]; then
-        echo "$(bold "USAGE: $0 configure -r <region> -p <project>")"
-        echo "$(bold "  -r <region>") GCP region where the network resides for enabling private access"
+    if [ $# -lt 2 ]; then
+        echo "$(bold "USAGE: $0 configure -r <region> -p <project> [-s <subnet>]")"
         echo "$(bold "  -p <project>") GCP project ID where we'll enable the Kubernetes and compute APIs"
+        echo "$(bold "  -r <region>") GCP region where the network resides for enabling private access"
+        echo "$(bold "  -s <subnet>") VPC subnet for enabling private access (Optional, default is default)"
         exit 1
     fi
+    subnet="default"
+    if [ ! -z $3 ]; then
+      subnet=$3
+    fi
     gcloud auth login
-    gcloud compute networks subnets update default --region=$2 --enable-private-ip-google-access --project $1
+    gcloud compute networks subnets update $3 --region=$2 --enable-private-ip-google-access --project $1
     for service in compute container cloudresourcemanager; do
         gcloud services enable ${service}.googleapis.com --project $1
     done
@@ -69,18 +74,20 @@ CMD=$1
 shift
 project=""
 region=""
-while getopts ':p:r:n:' flag; do
+subnet=""
+while getopts ':p:r:n:s:' flag; do
     case "${flag}" in
         p) project=${OPTARG} ;;
         r) region=${OPTARG} ;;
         n) run_name=${OPTARG} ;;
+        s) subnet=${OPTARG} ;;
         *) ;;
     esac
 done
 
 case $CMD in
 configure)
-    configure $project $region
+    configure $project $region $subnet
     ;;
 login)
     login

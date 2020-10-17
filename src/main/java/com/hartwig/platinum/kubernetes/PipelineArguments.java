@@ -9,26 +9,25 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import com.google.common.collect.ImmutableMap;
+import com.hartwig.platinum.GcpConfiguration;
 
 public class PipelineArguments {
 
     private final Map<String, String> overrides;
     private final String outputBucket;
-    private final String project;
     private final String serviceAccountEmail;
-    private final String region;
     private final String sample;
     private final String runName;
+    private final GcpConfiguration gcpConfiguration;
 
-    public PipelineArguments(final Map<String, String> overrides, final String outputBucket, final String project,
-            final String serviceAccountEmail, final String region, final String sample, final String runName) {
+    public PipelineArguments(final Map<String, String> overrides, final String outputBucket, final String serviceAccountEmail,
+            final String sample, final String runName, final GcpConfiguration gcpConfiguration) {
         this.overrides = overrides;
         this.outputBucket = outputBucket;
-        this.project = project;
         this.serviceAccountEmail = serviceAccountEmail;
-        this.region = region;
         this.sample = sample;
         this.runName = runName;
+        this.gcpConfiguration = gcpConfiguration;
     }
 
     public List<String> asCommand(final String samplesPath, final String secretsPath, final String serviceAccountKeySecretName) {
@@ -48,8 +47,11 @@ public class PipelineArguments {
                 .put("-sample_json", format("%s/%s", samplesPath, sample))
                 .put("-output_bucket", outputBucket)
                 .put("-private_key_path", format("%s/%s", secretsPath, serviceAccountKeySecretName))
-                .put("-project", project)
-                .put("-region", region)
+                .put("-project", gcpConfiguration.project())
+                .put("-region", gcpConfiguration.region())
+                .put("-network", gcpConfiguration.network())
+                .put("-subnet", gcpConfiguration.subnet())
+                .put("-network_tags", String.join(",", gcpConfiguration.networkTags()))
                 .put("-service_account_email", serviceAccountEmail)
                 .put("-run_id", runName)
                 .build();

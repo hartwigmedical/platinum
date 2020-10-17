@@ -1,5 +1,6 @@
 package com.hartwig.platinum;
 
+import java.util.List;
 import java.util.concurrent.Callable;
 
 import com.google.cloud.storage.StorageOptions;
@@ -38,17 +39,37 @@ public class PlatinumMain implements Callable<Integer> {
             description = "The GCP Region where we'll run the pipelines.")
     private String region;
 
+    @Option(names = { "--network" },
+            defaultValue = "default",
+            description = "The network in which all compute resources should be created (pipeline and GKE)")
+    private String network;
+
+    @Option(names = { "--subnet" },
+            defaultValue = "default",
+            description = "The subnet in which all compute resources should be created (pipeline and GKE)")
+    private String subnet;
+
+    @Option(names = { "--network_tags" },
+            split = ",",
+            description = "Comma delimited list of network tags to be applied to GKE and pipeline resources")
+    private List<String> networkTags;
+
     @Override
     public Integer call() {
         try {
             new Platinum(runName,
                     inputJson,
-                    project,
-                    region,
                     StorageOptions.newBuilder().setProjectId(project).build().getService(),
                     IamProvider.get(),
                     ResourceManagerProvider.get(),
-                    new KubernetesClusterProvider(ContainerProvider.get(), new ProcessRunner())).run();
+                    new KubernetesClusterProvider(ContainerProvider.get(), new ProcessRunner()),
+                    GcpConfiguration.builder()
+                            .project(project)
+                            .region(region)
+                            .network(network)
+                            .subnet(subnet)
+                            .networkTags(networkTags)
+                            .build()).run();
             return 0;
         } catch (Exception e) {
             LOGGER.error("Unexpected exception", e);

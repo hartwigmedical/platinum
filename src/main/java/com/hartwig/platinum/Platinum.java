@@ -26,34 +26,32 @@ public class Platinum {
     private final Iam iam;
     private final CloudResourceManager resourceManager;
     private final KubernetesClusterProvider clusterProvider;
-    private final String project;
-    private final String region;
+    private final GcpConfiguration gcpConfiguration;
 
-    public Platinum(final String runName, final String input, final String project, final String region, final Storage storage,
-            final Iam iam, final CloudResourceManager resourceManager, final KubernetesClusterProvider clusterProvider) {
+    public Platinum(final String runName, final String input, final Storage storage, final Iam iam,
+            final CloudResourceManager resourceManager, final KubernetesClusterProvider clusterProvider,
+            final GcpConfiguration gcpConfiguration) {
         this.runName = runName;
         this.input = input;
         this.storage = storage;
         this.iam = iam;
         this.resourceManager = resourceManager;
         this.clusterProvider = clusterProvider;
-        this.project = project;
-        this.region = region;
+        this.gcpConfiguration = gcpConfiguration;
     }
 
     public void run() {
         LOGGER.info("Starting platinum run with name {} and input {}", Console.bold(runName), Console.bold(input));
         PlatinumConfiguration configuration = PlatinumConfiguration.from(new File(input));
         PipelineServiceAccount serviceAccount = new PipelineServiceAccount(iam, new PipelineIamPolicy(resourceManager));
-        String serviceAccountEmail = serviceAccount.findOrCreate(project, runName);
+        String serviceAccountEmail = serviceAccount.findOrCreate(gcpConfiguration.project(), runName);
         ServiceAccountPrivateKey privateKey = new ServiceAccountPrivateKey(iam);
-        JsonKey jsonKey = privateKey.create(project, serviceAccountEmail);
-        clusterProvider.findOrCreate(runName, project, region)
+        JsonKey jsonKey = privateKey.create(gcpConfiguration.project(), serviceAccountEmail);
+        clusterProvider.findOrCreate(runName, gcpConfiguration)
                 .submit(configuration,
                         jsonKey,
-                        OutputBucket.from(storage).findOrCreate(runName, region, serviceAccountEmail, configuration),
-                        project,
-                        region,
+                        OutputBucket.from(storage).findOrCreate(runName, gcpConfiguration.region(), serviceAccountEmail, configuration),
+                        gcpConfiguration,
                         serviceAccountEmail);
         LOGGER.info("Platinum started [{}] pipelines on GCP", configuration.samples().size());
         LOGGER.info("You can monitor their progress with: {}", Console.bold("./platinum status"));
