@@ -1,5 +1,6 @@
 package com.hartwig.platinum;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Callable;
 
@@ -68,7 +69,7 @@ public class PlatinumMain implements Callable<Integer> {
                             .region(region)
                             .network(network)
                             .subnet(subnet)
-                            .networkTags(networkTags)
+                            .networkTags(networkTags != null ? networkTags : Collections.emptyList())
                             .build()).run();
             return 0;
         } catch (Exception e) {

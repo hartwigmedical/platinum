@@ -60,7 +60,9 @@ public class KubernetesEngine {
             newCluster.setNetwork(gcpConfiguration.networkUrl());
             newCluster.setSubnetwork(gcpConfiguration.subnetUrl());
             NodeConfig nodeConfig = new NodeConfig();
-            nodeConfig.setTags(gcpConfiguration.networkTags());
+            if (!gcpConfiguration.networkTags().isEmpty()) {
+                nodeConfig.setTags(gcpConfiguration.networkTags());
+            }
             newCluster.setNodeConfig(nodeConfig);
             CreateClusterRequest createRequest = new CreateClusterRequest();
             createRequest.setCluster(newCluster);

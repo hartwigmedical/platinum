@@ -43,7 +43,7 @@ public class PipelineArguments {
     }
 
     private Map<String, String> fixed(final String samplesPath, final String secretsPath, final String serviceAccountKeySecretName) {
-        return ImmutableMap.<String, String>builder().put("-set_id", sample)
+        ImmutableMap.Builder<String, String> builder = ImmutableMap.<String, String>builder().put("-set_id", sample)
                 .put("-sample_json", format("%s/%s", samplesPath, sample))
                 .put("-output_bucket", outputBucket)
                 .put("-private_key_path", format("%s/%s", secretsPath, serviceAccountKeySecretName))
@@ -51,9 +51,10 @@ public class PipelineArguments {
                 .put("-region", gcpConfiguration.region())
                 .put("-network", gcpConfiguration.networkUrl())
                 .put("-subnet", gcpConfiguration.subnetUrl())
-                .put("-network_tags", String.join(",", gcpConfiguration.networkTags()))
                 .put("-service_account_email", serviceAccountEmail)
-                .put("-run_id", runName)
-                .build();
+                .put("-run_id", runName);
+        if (!gcpConfiguration.networkTags().isEmpty()) {
+            builder.put("-network_tags", String.join(",", gcpConfiguration.networkTags()));
+        } return builder.build();
     }
 }
