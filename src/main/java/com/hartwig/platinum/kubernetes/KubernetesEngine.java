@@ -6,7 +6,6 @@ import static java.time.Duration.ofSeconds;
 import static java.util.List.of;
 
 import java.io.IOException;
-import java.util.List;
 import java.util.Optional;
 
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
@@ -15,9 +14,9 @@ import com.google.api.services.container.v1beta1.Container.Projects.Locations.Cl
 import com.google.api.services.container.v1beta1.Container.Projects.Locations.Clusters.Get;
 import com.google.api.services.container.v1beta1.model.Cluster;
 import com.google.api.services.container.v1beta1.model.CreateClusterRequest;
-import com.google.api.services.container.v1beta1.model.NetworkConfig;
 import com.google.api.services.container.v1beta1.model.NodeConfig;
 import com.google.api.services.container.v1beta1.model.Operation;
+import com.google.api.services.container.v1beta1.model.PrivateClusterConfig;
 import com.hartwig.platinum.Console;
 import com.hartwig.platinum.GcpConfiguration;
 
@@ -28,12 +27,12 @@ import io.fabric8.kubernetes.client.DefaultKubernetesClient;
 import net.jodah.failsafe.Failsafe;
 import net.jodah.failsafe.RetryPolicy;
 
-public class KubernetesClusterProvider {
-    private static final Logger LOGGER = LoggerFactory.getLogger(KubernetesClusterProvider.class);
+public class KubernetesEngine {
+    private static final Logger LOGGER = LoggerFactory.getLogger(KubernetesEngine.class);
     private final Container containerApi;
     private final ProcessRunner processRunner;
 
-    public KubernetesClusterProvider(final Container containerApi, final ProcessRunner processRunner) {
+    public KubernetesEngine(final Container containerApi, final ProcessRunner processRunner) {
         this.containerApi = containerApi;
         this.processRunner = processRunner;
     }
@@ -58,11 +57,8 @@ public class KubernetesClusterProvider {
             Cluster newCluster = new Cluster();
             newCluster.setName(clusterName);
             newCluster.setInitialNodeCount(1);
-            newCluster.setNetwork(format("%s/global/networks/%s", apiBaseUrl(gcpConfiguration.project()), gcpConfiguration.network()));
-            newCluster.setSubnetwork(format("%s/regions/%s/subnetworks/%s",
-                    apiBaseUrl(gcpConfiguration.project()),
-                    gcpConfiguration.region(),
-                    gcpConfiguration.subnet()));
+            newCluster.setNetwork(gcpConfiguration.networkUrl());
+            newCluster.setSubnetwork(gcpConfiguration.subnetUrl());
             NodeConfig nodeConfig = new NodeConfig();
             nodeConfig.setTags(gcpConfiguration.networkTags());
             newCluster.setNodeConfig(nodeConfig);
@@ -95,6 +91,10 @@ public class KubernetesClusterProvider {
         }
     }
 
+    private static boolean isUrl(final GcpConfiguration gcpConfiguration) {
+        return gcpConfiguration.network().startsWith("projects");
+    }
+
     public KubernetesCluster findOrCreate(final String runName, final GcpConfiguration gcpConfiguration) {
         try {
             String clusterName = runName + "-cluster";
@@ -121,9 +121,5 @@ public class KubernetesClusterProvider {
         } catch (Exception e) {
             throw new RuntimeException("Failed to create cluster", e);
         }
-    }
-
-    private static String apiBaseUrl(final String projectName) {
-        return format("https://www.googleapis.com/compute/v1/projects/%s", projectName);
     }
 }

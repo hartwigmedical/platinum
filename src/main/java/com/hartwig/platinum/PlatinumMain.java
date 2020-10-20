@@ -7,7 +7,7 @@ import com.google.cloud.storage.StorageOptions;
 import com.hartwig.platinum.iam.IamProvider;
 import com.hartwig.platinum.iam.ResourceManagerProvider;
 import com.hartwig.platinum.kubernetes.ContainerProvider;
-import com.hartwig.platinum.kubernetes.KubernetesClusterProvider;
+import com.hartwig.platinum.kubernetes.KubernetesEngine;
 import com.hartwig.platinum.kubernetes.ProcessRunner;
 
 import org.slf4j.Logger;
@@ -62,7 +62,7 @@ public class PlatinumMain implements Callable<Integer> {
                     StorageOptions.newBuilder().setProjectId(project).build().getService(),
                     IamProvider.get(),
                     ResourceManagerProvider.get(),
-                    new KubernetesClusterProvider(ContainerProvider.get(), new ProcessRunner()),
+                    new KubernetesEngine(ContainerProvider.get(), new ProcessRunner()),
                     GcpConfiguration.builder()
                             .project(project)
                             .region(region)

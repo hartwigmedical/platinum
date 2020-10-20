@@ -10,7 +10,7 @@ import com.hartwig.platinum.iam.JsonKey;
 import com.hartwig.platinum.iam.PipelineIamPolicy;
 import com.hartwig.platinum.iam.PipelineServiceAccount;
 import com.hartwig.platinum.iam.ServiceAccountPrivateKey;
-import com.hartwig.platinum.kubernetes.KubernetesClusterProvider;
+import com.hartwig.platinum.kubernetes.KubernetesEngine;
 import com.hartwig.platinum.storage.OutputBucket;
 
 import org.slf4j.Logger;
@@ -25,18 +25,18 @@ public class Platinum {
     private final Storage storage;
     private final Iam iam;
     private final CloudResourceManager resourceManager;
-    private final KubernetesClusterProvider clusterProvider;
+    private final KubernetesEngine kubernetesEngine;
     private final GcpConfiguration gcpConfiguration;
 
     public Platinum(final String runName, final String input, final Storage storage, final Iam iam,
-            final CloudResourceManager resourceManager, final KubernetesClusterProvider clusterProvider,
+            final CloudResourceManager resourceManager, final KubernetesEngine clusterProvider,
             final GcpConfiguration gcpConfiguration) {
         this.runName = runName;
         this.input = input;
         this.storage = storage;
         this.iam = iam;
         this.resourceManager = resourceManager;
-        this.clusterProvider = clusterProvider;
+        this.kubernetesEngine = clusterProvider;
         this.gcpConfiguration = gcpConfiguration;
     }
 
@@ -47,7 +47,7 @@ public class Platinum {
         String serviceAccountEmail = serviceAccount.findOrCreate(gcpConfiguration.project(), runName);
         ServiceAccountPrivateKey privateKey = new ServiceAccountPrivateKey(iam);
         JsonKey jsonKey = privateKey.create(gcpConfiguration.project(), serviceAccountEmail);
-        clusterProvider.findOrCreate(runName, gcpConfiguration)
+        kubernetesEngine.findOrCreate(runName, gcpConfiguration)
                 .submit(configuration,
                         jsonKey,
                         OutputBucket.from(storage).findOrCreate(runName, gcpConfiguration.region(), serviceAccountEmail, configuration),

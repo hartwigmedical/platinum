@@ -34,7 +34,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentMatcher;
 
-public class KubernetesClusterProviderTest {
+public class KubernetesEngineTest {
     private Container container;
     private Locations locations;
     private Clusters clusters;
@@ -64,7 +64,7 @@ public class KubernetesClusterProviderTest {
     public void shouldReturnExistingInstanceIfFound() throws IOException {
         mocksForClusterExists();
 
-        new KubernetesClusterProvider(container, processRunner).findOrCreate("runName", configuration);
+        new KubernetesEngine(container, processRunner).findOrCreate("runName", configuration);
         verify(clusters).get(anyString());
         verify(clusters, never()).create(any(), any());
     }
@@ -89,7 +89,7 @@ public class KubernetesClusterProviderTest {
         when(operationsGet.execute()).thenReturn(executedOperationsGet);
         when(executedOperationsGet.getStatus()).thenReturn("DONE");
 
-        new KubernetesClusterProvider(container, processRunner).findOrCreate("runName", configuration);
+        new KubernetesEngine(container, processRunner).findOrCreate("runName", configuration);
         verify(created).execute();
     }
 
@@ -113,7 +113,7 @@ public class KubernetesClusterProviderTest {
         when(operationsGet.execute()).thenReturn(executedOperationsGet);
         when(executedOperationsGet.getStatus()).thenReturn(null).thenReturn("RUNNING").thenReturn("DONE");
 
-        new KubernetesClusterProvider(container, processRunner).findOrCreate("runName", configuration);
+        new KubernetesEngine(container, processRunner).findOrCreate("runName", configuration);
         verify(executedOperationsGet, times(3)).getStatus();
     }
 
@@ -122,7 +122,7 @@ public class KubernetesClusterProviderTest {
         mocksForClusterExists();
         when(processRunner.execute(argThat(isListStartingWith("gcloud")))).thenReturn(false);
         try {
-            new KubernetesClusterProvider(container, processRunner).findOrCreate("runName", configuration);
+            new KubernetesEngine(container, processRunner).findOrCreate("runName", configuration);
             fail("Expected an exception");
         } catch (RuntimeException e) {
             // OK
@@ -134,7 +134,7 @@ public class KubernetesClusterProviderTest {
         mocksForClusterExists();
         when(processRunner.execute(anyList())).thenReturn(true).thenReturn(false);
         try {
-            new KubernetesClusterProvider(container, processRunner).findOrCreate("runName", configuration);
+            new KubernetesEngine(container, processRunner).findOrCreate("runName", configuration);
             fail("Expected an exception");
         } catch (RuntimeException e) {
             // OK
