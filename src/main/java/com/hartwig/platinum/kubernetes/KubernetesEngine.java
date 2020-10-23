@@ -69,11 +69,13 @@ public class KubernetesEngine {
             }
 
             if (gcpConfiguration.privateCluster()) {
-                newCluster.setPrivateCluster(true)
-                        .setPrivateClusterConfig(new PrivateClusterConfig().setEnablePrivateEndpoint(true)
-                                .setEnablePrivateNodes(true)
-                                .setMasterIpv4CidrBlock("172.16.0.32/28"))
-                        .setIpAllocationPolicy(new IPAllocationPolicy().setUseIpAliases(true));
+                PrivateClusterConfig privateClusterConfig = new PrivateClusterConfig();
+                privateClusterConfig.setEnablePrivateEndpoint(true);
+                privateClusterConfig.setEnablePrivateNodes(true);
+                privateClusterConfig.setMasterIpv4CidrBlock("172.16.0.32/28");
+                newCluster.setPrivateCluster(true);
+                newCluster.setPrivateClusterConfig(privateClusterConfig);
+                newCluster.setIpAllocationPolicy(new IPAllocationPolicy().setUseIpAliases(true));
             }
 
             CreateClusterRequest createRequest = new CreateClusterRequest();
