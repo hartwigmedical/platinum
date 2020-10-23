@@ -17,7 +17,7 @@ function configure() {
       subnet=$3
     fi
     gcloud auth login
-    gcloud compute networks subnets update $3 --region=$2 --enable-private-ip-google-access --project $1
+    gcloud compute networks subnets update $subnet --region=$2 --enable-private-ip-google-access --project $1
     for service in compute container cloudresourcemanager; do
         gcloud services enable ${service}.googleapis.com --project $1
     done
