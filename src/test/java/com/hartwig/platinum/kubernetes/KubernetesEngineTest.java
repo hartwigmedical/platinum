@@ -57,7 +57,7 @@ public class KubernetesEngineTest {
 
         project = "project";
         region = "region";
-        configuration = GcpConfiguration.builder().project(project).region(region).build();
+        configuration = GcpConfiguration.builder().project(project).region(region).privateCluster(false).build();
     }
 
     @Test

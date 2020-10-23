@@ -45,6 +45,6 @@ public class PipelineArgumentsTest {
                 "email",
                 "sample",
                 "run",
-                GcpConfiguration.builder().region("region").project("project").build());
+                GcpConfiguration.builder().region("region").project("project").privateCluster(false).build());
     }
 }

@@ -12,8 +12,12 @@ import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.services.container.v1beta1.Container;
 import com.google.api.services.container.v1beta1.Container.Projects.Locations.Clusters.Create;
 import com.google.api.services.container.v1beta1.Container.Projects.Locations.Clusters.Get;
+import com.google.api.services.container.v1beta1.model.ClientCertificateConfig;
 import com.google.api.services.container.v1beta1.model.Cluster;
 import com.google.api.services.container.v1beta1.model.CreateClusterRequest;
+import com.google.api.services.container.v1beta1.model.IPAllocationPolicy;
+import com.google.api.services.container.v1beta1.model.MasterAuth;
+import com.google.api.services.container.v1beta1.model.NetworkConfig;
 import com.google.api.services.container.v1beta1.model.NodeConfig;
 import com.google.api.services.container.v1beta1.model.Operation;
 import com.google.api.services.container.v1beta1.model.PrivateClusterConfig;
@@ -59,11 +63,21 @@ public class KubernetesEngine {
             newCluster.setInitialNodeCount(1);
             newCluster.setNetwork(gcpConfiguration.networkUrl());
             newCluster.setSubnetwork(gcpConfiguration.subnetUrl());
-            NodeConfig nodeConfig = new NodeConfig();
+
             if (!gcpConfiguration.networkTags().isEmpty()) {
-                nodeConfig.setTags(gcpConfiguration.networkTags());
+                newCluster.setNodeConfig(new NodeConfig().setTags(gcpConfiguration.networkTags()));
             }
-            newCluster.setNodeConfig(nodeConfig);
+
+            if (gcpConfiguration.privateCluster()) {
+                newCluster.setPrivateCluster(true)
+                        .setPrivateClusterConfig(new PrivateClusterConfig().setEnablePrivateEndpoint(true)
+                                .setEnablePrivateNodes(true)
+                                .setMasterIpv4CidrBlock("172.16.0.32/28"))
+                        .setIpAllocationPolicy(new IPAllocationPolicy().setUseIpAliases(true))
+                        .setMasterAuth(new MasterAuth().setClientCertificateConfig(new ClientCertificateConfig().setIssueClientCertificate(
+                                false)));
+            }
+
             CreateClusterRequest createRequest = new CreateClusterRequest();
             createRequest.setCluster(newCluster);
             Create created = containerApi.projects().locations().clusters().create(parent, createRequest);
@@ -91,10 +105,6 @@ public class KubernetesEngine {
         } catch (Exception e) {
             throw new RuntimeException("Failed to create cluster", e);
         }
-    }
-
-    private static boolean isUrl(final GcpConfiguration gcpConfiguration) {
-        return gcpConfiguration.network().startsWith("projects");
     }
 
     public KubernetesCluster findOrCreate(final String runName, final GcpConfiguration gcpConfiguration) {

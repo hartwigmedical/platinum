@@ -15,6 +15,8 @@ public interface GcpConfiguration {
 
     String region();
 
+    boolean privateCluster();
+
     @Value.Default
     default String network() {
         return DEFAULT_NETWORK_NAME;

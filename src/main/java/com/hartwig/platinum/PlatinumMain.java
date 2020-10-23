@@ -55,6 +55,11 @@ public class PlatinumMain implements Callable<Integer> {
             description = "Comma delimited list of network tags to be applied to GKE and pipeline resources")
     private List<String> networkTags;
 
+    @Option(names = { "--private_cluster" },
+            description = "When specified platinum will create a private K8 cluster with no public internet access. "
+                    + "It will only be accessible from instances within the VPC network.")
+    private boolean privateCluster;
+
     @Override
     public Integer call() {
         try {
@@ -70,6 +75,7 @@ public class PlatinumMain implements Callable<Integer> {
                             .network(network)
                             .subnet(subnet)
                             .networkTags(networkTags != null ? networkTags : Collections.emptyList())
+                            .privateCluster(privateCluster)
                             .build()).run();
             return 0;
         } catch (Exception e) {
