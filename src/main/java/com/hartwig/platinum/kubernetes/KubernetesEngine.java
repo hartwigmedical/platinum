@@ -73,9 +73,7 @@ public class KubernetesEngine {
                         .setPrivateClusterConfig(new PrivateClusterConfig().setEnablePrivateEndpoint(true)
                                 .setEnablePrivateNodes(true)
                                 .setMasterIpv4CidrBlock("172.16.0.32/28"))
-                        .setIpAllocationPolicy(new IPAllocationPolicy().setUseIpAliases(true))
-                        .setMasterAuth(new MasterAuth().setClientCertificateConfig(new ClientCertificateConfig().setIssueClientCertificate(
-                                false)));
+                        .setIpAllocationPolicy(new IPAllocationPolicy().setUseIpAliases(true));
             }
 
             CreateClusterRequest createRequest = new CreateClusterRequest();
