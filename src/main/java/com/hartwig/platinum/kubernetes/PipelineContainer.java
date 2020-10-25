@@ -16,7 +16,7 @@ import io.fabric8.kubernetes.api.model.VolumeMountBuilder;
 public class PipelineContainer {
     private final static String SAMPLES_PATH = "/samples";
     private final static String SECRETS_PATH = "/secrets";
-    private static final String IMAGE = "hartwigmedicalfoundation/pipeline5:platinum";
+    private static final String IMAGE = "eu.gcr.io/hmf-images/pipeline5:platinum";
     private final String sample;
     private final String runName;
     private final PipelineArguments arguments;
