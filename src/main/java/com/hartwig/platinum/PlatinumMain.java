@@ -2,6 +2,7 @@ package com.hartwig.platinum;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.Callable;
 
 import com.google.cloud.storage.StorageOptions;
@@ -60,6 +61,14 @@ public class PlatinumMain implements Callable<Integer> {
                     + "It will only be accessible from instances within the VPC network.")
     private boolean privateCluster;
 
+    @Option(names = { "--secondary_range_name_pods" },
+            description = "The secondary range name used by pods when launching the cluster in a shared VPC setup.")
+    private String secondaryRangeNamePods;
+
+    @Option(names = { "--secondary_range_name_services" },
+            description = "The secondary range name used by services when launching the cluster in a shared VPC setup.")
+    private String secondaryRangeNameServices;
+
     @Override
     public Integer call() {
         try {
@@ -76,6 +85,8 @@ public class PlatinumMain implements Callable<Integer> {
                             .subnet(subnet)
                             .networkTags(networkTags != null ? networkTags : Collections.emptyList())
                             .privateCluster(privateCluster)
+                            .secondaryRangeNamePods(Optional.ofNullable(secondaryRangeNamePods))
+                            .secondaryRangeNameServices(Optional.ofNullable(secondaryRangeNameServices))
                             .build()).run();
             return 0;
         } catch (Exception e) {

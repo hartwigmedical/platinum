@@ -67,7 +67,7 @@ public class KubernetesEngine {
             if (!gcpConfiguration.networkTags().isEmpty()) {
                 newCluster.setNodeConfig(new NodeConfig().setTags(gcpConfiguration.networkTags()));
             }
-
+            IPAllocationPolicy ipAllocationPolicy = new IPAllocationPolicy();
             if (gcpConfiguration.privateCluster()) {
                 PrivateClusterConfig privateClusterConfig = new PrivateClusterConfig();
                 privateClusterConfig.setEnablePrivateEndpoint(true);
@@ -75,8 +75,13 @@ public class KubernetesEngine {
                 privateClusterConfig.setMasterIpv4CidrBlock("172.16.0.32/28");
                 newCluster.setPrivateCluster(true);
                 newCluster.setPrivateClusterConfig(privateClusterConfig);
-                newCluster.setIpAllocationPolicy(new IPAllocationPolicy().setUseIpAliases(true));
+                ipAllocationPolicy.setUseIpAliases(true);
             }
+            if (gcpConfiguration.secondaryRangeNamePods().isPresent() && gcpConfiguration.secondaryRangeNameServices().isPresent()) {
+                ipAllocationPolicy.setClusterSecondaryRangeName(gcpConfiguration.secondaryRangeNamePods().get());
+                ipAllocationPolicy.setServicesSecondaryRangeName(gcpConfiguration.secondaryRangeNameServices().get());
+            }
+            newCluster.setIpAllocationPolicy(ipAllocationPolicy);
 
             CreateClusterRequest createRequest = new CreateClusterRequest();
             createRequest.setCluster(newCluster);

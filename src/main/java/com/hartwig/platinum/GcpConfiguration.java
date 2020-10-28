@@ -3,6 +3,7 @@ package com.hartwig.platinum;
 import static java.lang.String.format;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.immutables.value.Value;
 
@@ -16,6 +17,10 @@ public interface GcpConfiguration {
     String region();
 
     boolean privateCluster();
+
+    Optional<String> secondaryRangeNamePods();
+
+    Optional<String> secondaryRangeNameServices();
 
     @Value.Default
     default String network() {
