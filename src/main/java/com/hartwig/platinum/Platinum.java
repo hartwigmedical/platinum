@@ -29,8 +29,7 @@ public class Platinum {
     private final GcpConfiguration gcpConfiguration;
 
     public Platinum(final String runName, final String input, final Storage storage, final Iam iam,
-            final CloudResourceManager resourceManager, final KubernetesEngine clusterProvider,
-            final GcpConfiguration gcpConfiguration) {
+            final CloudResourceManager resourceManager, final KubernetesEngine clusterProvider, final GcpConfiguration gcpConfiguration) {
         this.runName = runName;
         this.input = input;
         this.storage = storage;
@@ -47,12 +46,11 @@ public class Platinum {
         String serviceAccountEmail = serviceAccount.findOrCreate(gcpConfiguration.project(), runName);
         ServiceAccountPrivateKey privateKey = new ServiceAccountPrivateKey(iam);
         JsonKey jsonKey = privateKey.create(gcpConfiguration.project(), serviceAccountEmail);
-        kubernetesEngine.findOrCreate(runName, gcpConfiguration)
-                .submit(configuration,
-                        jsonKey,
-                        OutputBucket.from(storage).findOrCreate(runName, gcpConfiguration.region(), serviceAccountEmail, configuration),
-                        gcpConfiguration,
-                        serviceAccountEmail);
+        kubernetesEngine.findOrCreate(runName,
+                gcpConfiguration,
+                jsonKey,
+                OutputBucket.from(storage).findOrCreate(runName, gcpConfiguration.region(), serviceAccountEmail, configuration),
+                serviceAccountEmail).submit(configuration);
         LOGGER.info("Platinum started [{}] pipelines on GCP", configuration.samples().size());
         LOGGER.info("You can monitor their progress with: {}", Console.bold("./platinum status"));
     }

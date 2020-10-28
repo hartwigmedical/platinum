@@ -2,22 +2,22 @@ package com.hartwig.platinum.kubernetes;
 
 import com.hartwig.platinum.iam.JsonKey;
 
-import org.immutables.value.internal.$processor$.meta.$FactoryMirror;
-
 import io.fabric8.kubernetes.api.model.Volume;
 import io.fabric8.kubernetes.api.model.VolumeBuilder;
 import io.fabric8.kubernetes.client.KubernetesClient;
 
-public class PipelineServiceAccountSecretVolume {
+public class PipelineServiceAccountSecretVolume implements KubernetesComponent<Volume> {
     private final JsonKey jsonKey;
     private final KubernetesClient kubernetesClient;
+    private final String name;
 
-    public PipelineServiceAccountSecretVolume(final JsonKey jsonKey, final KubernetesClient kubernetesClient) {
+    public PipelineServiceAccountSecretVolume(final JsonKey jsonKey, final KubernetesClient kubernetesClient, final String name) {
         this.jsonKey = jsonKey;
         this.kubernetesClient = kubernetesClient;
+        this.name = name;
     }
 
-    public Volume create(final String name) {
+    public Volume asKubernetes() {
         kubernetesClient.secrets()
                 .inNamespace(KubernetesCluster.NAMESPACE)
                 .withName(name)

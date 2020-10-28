@@ -2,37 +2,37 @@ package com.hartwig.platinum.kubernetes;
 
 import static java.lang.String.format;
 
-import static com.hartwig.platinum.config.OverrideableArguments.*;
-
 import java.util.List;
-import java.util.Map;
-
-import com.google.common.collect.ImmutableMap;
-import com.hartwig.platinum.config.OverrideableArguments;
 
 import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.VolumeMountBuilder;
 
-public class PipelineContainer {
+public class PipelineContainer implements KubernetesComponent<Container> {
     private final static String SAMPLES_PATH = "/samples";
     private final static String SECRETS_PATH = "/secrets";
     private static final String IMAGE = "eu.gcr.io/hmf-images/pipeline5:platinum";
-    private final String sample;
+    private final SampleArgument sample;
     private final String runName;
     private final PipelineArguments arguments;
+    private final String serviceAccountKeySecretName;
+    private final String configMapName;
 
-    public PipelineContainer(final String sample, final String runName, final PipelineArguments arguments) {
+    public PipelineContainer(final SampleArgument sample, final String runName, final PipelineArguments arguments,
+            final String serviceAccountKeySecretName, final String configMapName) {
         this.sample = sample;
         this.runName = runName;
         this.arguments = arguments;
+        this.serviceAccountKeySecretName = serviceAccountKeySecretName;
+        this.configMapName = configMapName;
     }
 
-    Container create(final String configMapName, final String serviceAccountKeySecretName) {
+    @Override
+    public Container asKubernetes() {
         String containerName = format("%s-%s", runName, sample).toLowerCase();
         Container container = new Container();
         container.setImage(IMAGE);
         container.setName(containerName);
-        List<String> command = arguments.asCommand(SAMPLES_PATH, SECRETS_PATH, serviceAccountKeySecretName);
+        List<String> command = arguments.asCommand(sample, SECRETS_PATH, serviceAccountKeySecretName);
         container.setCommand(command);
         container.setVolumeMounts(List.of(new VolumeMountBuilder().withMountPath(SAMPLES_PATH).withName(configMapName).build(),
                 new VolumeMountBuilder().withMountPath(SECRETS_PATH).withName(serviceAccountKeySecretName).build()));

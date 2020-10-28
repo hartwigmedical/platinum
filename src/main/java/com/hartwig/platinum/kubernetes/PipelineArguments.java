@@ -16,23 +16,22 @@ public class PipelineArguments {
     private final Map<String, String> overrides;
     private final String outputBucket;
     private final String serviceAccountEmail;
-    private final String sample;
     private final String runName;
     private final GcpConfiguration gcpConfiguration;
 
     public PipelineArguments(final Map<String, String> overrides, final String outputBucket, final String serviceAccountEmail,
-            final String sample, final String runName, final GcpConfiguration gcpConfiguration) {
+            final String runName, final GcpConfiguration gcpConfiguration) {
         this.overrides = overrides;
         this.outputBucket = outputBucket;
         this.serviceAccountEmail = serviceAccountEmail;
-        this.sample = sample;
         this.runName = runName;
         this.gcpConfiguration = gcpConfiguration;
     }
 
-    public List<String> asCommand(final String samplesPath, final String secretsPath, final String serviceAccountKeySecretName) {
+    public List<String> asCommand(final SampleArgument sampleArgument, final String secretsPath, final String serviceAccountKeySecretName) {
         return of(Map.of("-profile", "public", "-output_cram", "false")).override(of(addDashesIfNeeded()))
-                .override(of(fixed(samplesPath, secretsPath, serviceAccountKeySecretName)))
+                .override(of(fixed(secretsPath, serviceAccountKeySecretName)))
+                .override(of(Map.of(sampleArgument.argument(), sampleArgument.value())))
                 .asCommand("/pipeline5.sh");
     }
 
@@ -42,10 +41,8 @@ public class PipelineArguments {
                 .collect(Collectors.toMap(e -> e.getKey().startsWith("-") ? e.getKey() : "-" + e.getKey(), Map.Entry::getValue));
     }
 
-    private Map<String, String> fixed(final String samplesPath, final String secretsPath, final String serviceAccountKeySecretName) {
-        ImmutableMap.Builder<String, String> builder = ImmutableMap.<String, String>builder().put("-set_id", sample)
-                .put("-sample_json", format("%s/%s", samplesPath, sample))
-                .put("-output_bucket", outputBucket)
+    private Map<String, String> fixed(final String secretsPath, final String serviceAccountKeySecretName) {
+        ImmutableMap.Builder<String, String> builder = ImmutableMap.<String, String>builder().put("-output_bucket", outputBucket)
                 .put("-private_key_path", format("%s/%s", secretsPath, serviceAccountKeySecretName))
                 .put("-project", gcpConfiguration.project())
                 .put("-region", gcpConfiguration.region())
@@ -55,6 +52,7 @@ public class PipelineArguments {
                 .put("-run_id", runName);
         if (!gcpConfiguration.networkTags().isEmpty()) {
             builder.put("-network_tags", String.join(",", gcpConfiguration.networkTags()));
-        } return builder.build();
+        }
+        return builder.build();
     }
 }

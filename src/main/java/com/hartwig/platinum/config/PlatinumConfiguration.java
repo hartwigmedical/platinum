@@ -2,6 +2,7 @@ package com.hartwig.platinum.config;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -25,6 +26,8 @@ public interface PlatinumConfiguration {
 
     Map<String, JsonNode> samples();
 
+    List<String> biopsies();
+
     static ImmutablePlatinumConfiguration.Builder builder() {
         return ImmutablePlatinumConfiguration.builder();
     }
@@ -33,11 +36,17 @@ public interface PlatinumConfiguration {
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.registerModule(new Jdk8Module());
         try {
-            return objectMapper.readValue(inputFile, new TypeReference<>() {
+            PlatinumConfiguration platinumConfiguration = objectMapper.readValue(inputFile, new TypeReference<>() {
             });
+            if (!platinumConfiguration.samples().isEmpty() && !platinumConfiguration.biopsies().isEmpty()) {
+                throw new IllegalArgumentException("Cannot specify both a list of sample jsons and a list of biopsies. "
+                        + "Split this configuration into two platinum runs.");
+            }
+            return platinumConfiguration;
         } catch (IOException ioe) {
             throw new RuntimeException("Could not parse input", ioe);
         }
+
     }
 }
 
