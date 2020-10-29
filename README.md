@@ -31,10 +31,11 @@ In addition to the HMF algorithms, Platinum depends on a number of resources (da
 
 #### Disclaimer
 
- - Platinum aims to be based exclusively on open source code and databases that are free from any restrictions. However, the databases that are distributed as 
- part of Platinum are not owned by HMF and their licenses could change. Below table lists all institutions from which we distribute data along with a link to their disclaimer and/or about and/or publication. 
- - HMF is not responsible for the interpretation of the output of our pipeline. 
-
+ - Platinum aims to be based exclusively on open source code and databases that are free from any restrictions. However, the databases that are distributed as part of Platinum are not owned by HMF and their licenses could change. Below table lists all institutions from which we distribute data along with a link to their disclaimer and/or about and/or publication.
+ - HMF offers Platinum and the HMF cancer analysis pipeline on an ‘as-is’ basis.
+ - HMF assumes no liability whatsoever for general, special, incidental, consequential or any other type of damages arising out of the use or inability to use Platinum or a failure of Platinum to operate with any other programs. In as far as not yet sufficiently stipulated above, HMF expressly assumes no liability or responsibility whatsoever for the quality of the data that is being used in running Platinum or for the final configuration of the GCP project used by Platinum including anything related to security and encryption of data and any damages that may arise as a result thereof.
+ - HMF furthermore is not responsible for and assumes no liability whatsoever for damages resulting from the interpretation of the output of the HMF cancer analysis pipeline and the medical and/or scientific conclusions that are drawn on the basis of such interpretation.
+ 
 ### Resources used by Platinum
 Resource | Purpose | References
 :-:|---|:-:
