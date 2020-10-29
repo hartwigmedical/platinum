@@ -6,6 +6,7 @@ import static java.time.Duration.ofSeconds;
 import static java.util.List.of;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Optional;
 
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
@@ -63,6 +64,7 @@ public class KubernetesEngine {
             newCluster.setInitialNodeCount(1);
             newCluster.setNetwork(gcpConfiguration.networkUrl());
             newCluster.setSubnetwork(gcpConfiguration.subnetUrl());
+            newCluster.setLocations(gcpConfiguration.zones());
 
             if (!gcpConfiguration.networkTags().isEmpty()) {
                 newCluster.setNodeConfig(new NodeConfig().setTags(gcpConfiguration.networkTags()));

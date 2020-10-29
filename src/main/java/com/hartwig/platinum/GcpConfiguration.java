@@ -18,6 +18,8 @@ public interface GcpConfiguration {
 
     boolean privateCluster();
 
+    List<String> zones();
+
     Optional<String> secondaryRangeNamePods();
 
     Optional<String> secondaryRangeNameServices();

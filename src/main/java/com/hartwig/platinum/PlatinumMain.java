@@ -61,6 +61,11 @@ public class PlatinumMain implements Callable<Integer> {
                     + "It will only be accessible from instances within the VPC network.")
     private boolean privateCluster;
 
+    @Option(names = { "--zones" },
+            split = ",",
+            description = "A list of zones within the region in which to make cluster nodes.")
+    private List<String> zones;
+
     @Option(names = { "--secondary_range_name_pods" },
             description = "The secondary range name used by pods when launching the cluster in a shared VPC setup.")
     private String secondaryRangeNamePods;
@@ -68,6 +73,7 @@ public class PlatinumMain implements Callable<Integer> {
     @Option(names = { "--secondary_range_name_services" },
             description = "The secondary range name used by services when launching the cluster in a shared VPC setup.")
     private String secondaryRangeNameServices;
+
 
     @Override
     public Integer call() {
@@ -87,6 +93,7 @@ public class PlatinumMain implements Callable<Integer> {
                             .privateCluster(privateCluster)
                             .secondaryRangeNamePods(Optional.ofNullable(secondaryRangeNamePods))
                             .secondaryRangeNameServices(Optional.ofNullable(secondaryRangeNameServices))
+                            .zones(zones != null ? zones : Collections.emptyList())
                             .build()).run();
             return 0;
         } catch (Exception e) {
