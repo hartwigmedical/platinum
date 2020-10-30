@@ -1,29 +1,24 @@
 package com.hartwig.platinum.kubernetes;
 
-import static java.lang.String.format;
 import static java.time.Duration.ofMinutes;
 import static java.time.Duration.ofSeconds;
 import static java.util.List.of;
 
 import java.io.IOException;
-import java.util.List;
 import java.util.Optional;
 
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.services.container.v1beta1.Container;
 import com.google.api.services.container.v1beta1.Container.Projects.Locations.Clusters.Create;
 import com.google.api.services.container.v1beta1.Container.Projects.Locations.Clusters.Get;
-import com.google.api.services.container.v1beta1.model.ClientCertificateConfig;
 import com.google.api.services.container.v1beta1.model.Cluster;
 import com.google.api.services.container.v1beta1.model.CreateClusterRequest;
 import com.google.api.services.container.v1beta1.model.IPAllocationPolicy;
-import com.google.api.services.container.v1beta1.model.MasterAuth;
-import com.google.api.services.container.v1beta1.model.NetworkConfig;
 import com.google.api.services.container.v1beta1.model.NodeConfig;
 import com.google.api.services.container.v1beta1.model.Operation;
 import com.google.api.services.container.v1beta1.model.PrivateClusterConfig;
 import com.hartwig.platinum.Console;
-import com.hartwig.platinum.GcpConfiguration;
+import com.hartwig.platinum.config.GcpConfiguration;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -74,7 +69,7 @@ public class KubernetesEngine {
                 PrivateClusterConfig privateClusterConfig = new PrivateClusterConfig();
                 privateClusterConfig.setEnablePrivateEndpoint(true);
                 privateClusterConfig.setEnablePrivateNodes(true);
-                privateClusterConfig.setMasterIpv4CidrBlock("172.16.0.32/28");
+                privateClusterConfig.setMasterIpv4CidrBlock(gcpConfiguration.masterIpv4CidrBlock());
                 newCluster.setPrivateCluster(true);
                 newCluster.setPrivateClusterConfig(privateClusterConfig);
                 ipAllocationPolicy.setUseIpAliases(true);
@@ -91,8 +86,8 @@ public class KubernetesEngine {
             Operation execute = created.execute();
             LOGGER.info("Creating new kubernetes cluster {} in project {} and region {}, this can take upwards of 5 minutes...",
                     Console.bold(newCluster.getName()),
-                    Console.bold(gcpConfiguration.project()),
-                    Console.bold(gcpConfiguration.region()));
+                    Console.bold(gcpConfiguration.projectOrThrow()),
+                    Console.bold(gcpConfiguration.regionOrThrow()));
             Failsafe.with(new RetryPolicy<>().withMaxDuration(ofMinutes(15))
                     .withDelay(ofSeconds(15))
                     .withMaxAttempts(-1)
@@ -104,8 +99,8 @@ public class KubernetesEngine {
                             .locations()
                             .operations()
                             .get(String.format("projects/%s/locations/%s/operations/%s",
-                                    gcpConfiguration.project(),
-                                    gcpConfiguration.region(),
+                                    gcpConfiguration.projectOrThrow(),
+                                    gcpConfiguration.regionOrThrow(),
                                     execute.getName()))
                             .execute()
                             .getStatus());
@@ -117,8 +112,8 @@ public class KubernetesEngine {
     public KubernetesCluster findOrCreate(final String runName, final GcpConfiguration gcpConfiguration) {
         try {
             String clusterName = runName + "-cluster";
-            String parent = String.format("projects/%s/locations/%s", gcpConfiguration.project(), gcpConfiguration.region());
-            if (find(fullPath(gcpConfiguration.project(), gcpConfiguration.region(), runName)).isEmpty()) {
+            String parent = String.format("projects/%s/locations/%s", gcpConfiguration.projectOrThrow(), gcpConfiguration.regionOrThrow());
+            if (find(fullPath(gcpConfiguration.projectOrThrow(), gcpConfiguration.regionOrThrow(), runName)).isEmpty()) {
                 create(containerApi, parent, gcpConfiguration, runName);
             }
             if (!processRunner.execute(of("gcloud",
@@ -127,9 +122,9 @@ public class KubernetesEngine {
                     "get-credentials",
                     clusterName,
                     "--region",
-                    gcpConfiguration.region(),
+                    gcpConfiguration.regionOrThrow(),
                     "--project",
-                    gcpConfiguration.project()))) {
+                    gcpConfiguration.projectOrThrow()))) {
                 throw new RuntimeException("Failed to get credentials for cluster");
             }
             if (!processRunner.execute(of("kubectl", "get", "pods"))) {

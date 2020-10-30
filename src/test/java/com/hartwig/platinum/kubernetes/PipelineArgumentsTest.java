@@ -5,7 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.util.List;
 import java.util.Map;
 
-import com.hartwig.platinum.GcpConfiguration;
+import com.hartwig.platinum.config.GcpConfiguration;
 
 import org.junit.Test;
 

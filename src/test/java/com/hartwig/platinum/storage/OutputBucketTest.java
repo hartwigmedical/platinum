@@ -12,6 +12,7 @@ import com.google.cloud.storage.BlobInfo;
 import com.google.cloud.storage.Bucket;
 import com.google.cloud.storage.BucketInfo;
 import com.google.cloud.storage.Storage;
+import com.hartwig.platinum.config.GcpConfiguration;
 import com.hartwig.platinum.config.PlatinumConfiguration;
 
 import org.junit.Before;
@@ -25,7 +26,8 @@ public class OutputBucketTest {
     private static final String BUCKET_NAME = "platinum-output-test";
     public static final String REGION = "europe-west4";
     private static final String SERVICE_ACCOUNT = "sa@sa.com";
-    private static final PlatinumConfiguration CONFIGURATION = PlatinumConfiguration.builder().build();
+    private static final PlatinumConfiguration CONFIGURATION =
+            PlatinumConfiguration.builder().gcp(GcpConfiguration.builder().build()).build();
     private static final String CMEK_KEY = "/location/of/key";
     private Storage storage;
     private Bucket bucket;

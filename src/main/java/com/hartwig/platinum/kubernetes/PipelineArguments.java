@@ -9,7 +9,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import com.google.common.collect.ImmutableMap;
-import com.hartwig.platinum.GcpConfiguration;
+import com.hartwig.platinum.config.GcpConfiguration;
 
 public class PipelineArguments {
 
@@ -47,8 +47,8 @@ public class PipelineArguments {
                 .put("-sample_json", format("%s/%s", samplesPath, sample))
                 .put("-output_bucket", outputBucket)
                 .put("-private_key_path", format("%s/%s", secretsPath, serviceAccountKeySecretName))
-                .put("-project", gcpConfiguration.project())
-                .put("-region", gcpConfiguration.region())
+                .put("-project", gcpConfiguration.projectOrThrow())
+                .put("-region", gcpConfiguration.regionOrThrow())
                 .put("-network", gcpConfiguration.networkUrl())
                 .put("-subnet", gcpConfiguration.subnetUrl())
                 .put("-service_account_email", serviceAccountEmail)

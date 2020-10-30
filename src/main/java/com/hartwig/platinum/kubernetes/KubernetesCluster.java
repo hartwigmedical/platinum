@@ -3,12 +3,9 @@ package com.hartwig.platinum.kubernetes;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.hartwig.platinum.GcpConfiguration;
+import com.hartwig.platinum.config.GcpConfiguration;
 import com.hartwig.platinum.config.PlatinumConfiguration;
 import com.hartwig.platinum.iam.JsonKey;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import io.fabric8.kubernetes.api.model.Volume;
 import io.fabric8.kubernetes.api.model.batch.Job;
