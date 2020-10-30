@@ -12,11 +12,13 @@ public class PipelineJob implements KubernetesComponent<JobSpec> {
     private final Container container;
     private final Volume config;
     private final Volume secret;
+    private final Volume jks;
 
-    public PipelineJob(final Container container, final Volume config, final Volume secret) {
+    public PipelineJob(final Container container, final Volume config, final Volume secret, final Volume jks) {
         this.container = container;
         this.config = config;
         this.secret = secret;
+        this.jks = jks;
     }
 
     @Override
@@ -26,7 +28,7 @@ public class PipelineJob implements KubernetesComponent<JobSpec> {
                 .withNewSpec()
                 .withContainers(container)
                 .withRestartPolicy("Never")
-                .withVolumes(List.of(config, secret))
+                .withVolumes(List.of(config, secret, jks))
                 .endSpec()
                 .endTemplate()
                 .build();

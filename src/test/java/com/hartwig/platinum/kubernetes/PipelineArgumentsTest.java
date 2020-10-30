@@ -36,13 +36,13 @@ public class PipelineArgumentsTest {
     }
 
     private List<String> asCommand(final PipelineArguments victim) {
-        return victim.asCommand("/samples", "/secrets", "key.json");
+        return victim.asCommand(SampleArgument.sampleJson("sample"), "/secrets", "key.json");
     }
 
     private PipelineArguments createVictimWithOverrides(final String s, final String value) {
         return new PipelineArguments(Map.of(s, value),
                 "output",
                 "email", "run",
-                GcpConfiguration.builder().region("region").project("project").privateCluster(false).build());
+                GcpConfiguration.builder().region("region").project("project").privateCluster(false).build(), null);
     }
 }

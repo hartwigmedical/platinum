@@ -29,6 +29,7 @@ import com.google.api.services.container.v1beta1.model.Cluster;
 import com.google.api.services.container.v1beta1.model.Operation;
 import com.hartwig.platinum.GcpConfiguration;
 import com.hartwig.platinum.ImmutableGcpConfiguration;
+import com.hartwig.platinum.iam.JsonKey;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -64,7 +65,11 @@ public class KubernetesEngineTest {
     public void shouldReturnExistingInstanceIfFound() throws IOException {
         mocksForClusterExists();
 
-        new KubernetesEngine(container, processRunner).findOrCreate("runName", configuration);
+        new KubernetesEngine(container, processRunner).findOrCreate("runName",
+                configuration,
+                JsonKey.of("id", "json"),
+                "bucket",
+                "service_account");
         verify(clusters).get(anyString());
         verify(clusters, never()).create(any(), any());
     }
@@ -89,7 +94,11 @@ public class KubernetesEngineTest {
         when(operationsGet.execute()).thenReturn(executedOperationsGet);
         when(executedOperationsGet.getStatus()).thenReturn("DONE");
 
-        new KubernetesEngine(container, processRunner).findOrCreate("runName", configuration);
+        new KubernetesEngine(container, processRunner).findOrCreate("runName",
+                configuration,
+                JsonKey.of("id", "json"),
+                "bucket",
+                "service_account");
         verify(created).execute();
     }
 
@@ -113,7 +122,11 @@ public class KubernetesEngineTest {
         when(operationsGet.execute()).thenReturn(executedOperationsGet);
         when(executedOperationsGet.getStatus()).thenReturn(null).thenReturn("RUNNING").thenReturn("DONE");
 
-        new KubernetesEngine(container, processRunner).findOrCreate("runName", configuration);
+        new KubernetesEngine(container, processRunner).findOrCreate("runName",
+                configuration,
+                JsonKey.of("id", "json"),
+                "bucket",
+                "service_account");
         verify(executedOperationsGet, times(3)).getStatus();
     }
 
@@ -122,7 +135,11 @@ public class KubernetesEngineTest {
         mocksForClusterExists();
         when(processRunner.execute(argThat(isListStartingWith("gcloud")))).thenReturn(false);
         try {
-            new KubernetesEngine(container, processRunner).findOrCreate("runName", configuration);
+            new KubernetesEngine(container, processRunner).findOrCreate("runName",
+                    configuration,
+                    JsonKey.of("id", "json"),
+                    "bucket",
+                    "service_account");
             fail("Expected an exception");
         } catch (RuntimeException e) {
             // OK
@@ -134,7 +151,11 @@ public class KubernetesEngineTest {
         mocksForClusterExists();
         when(processRunner.execute(anyList())).thenReturn(true).thenReturn(false);
         try {
-            new KubernetesEngine(container, processRunner).findOrCreate("runName", configuration);
+            new KubernetesEngine(container, processRunner).findOrCreate("runName",
+                    configuration,
+                    JsonKey.of("id", "json"),
+                    "bucket",
+                    "service_account");
             fail("Expected an exception");
         } catch (RuntimeException e) {
             // OK

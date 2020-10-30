@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 
 import com.google.common.collect.ImmutableMap;
 import com.hartwig.platinum.GcpConfiguration;
+import com.hartwig.platinum.config.PlatinumConfiguration;
 
 public class PipelineArguments {
 
@@ -18,20 +19,22 @@ public class PipelineArguments {
     private final String serviceAccountEmail;
     private final String runName;
     private final GcpConfiguration gcpConfiguration;
+    private final PlatinumConfiguration platinumConfiguration;
 
     public PipelineArguments(final Map<String, String> overrides, final String outputBucket, final String serviceAccountEmail,
-            final String runName, final GcpConfiguration gcpConfiguration) {
+            final String runName, final GcpConfiguration gcpConfiguration, final PlatinumConfiguration platinumConfiguration) {
         this.overrides = overrides;
         this.outputBucket = outputBucket;
         this.serviceAccountEmail = serviceAccountEmail;
         this.runName = runName;
         this.gcpConfiguration = gcpConfiguration;
+        this.platinumConfiguration = platinumConfiguration;
     }
 
     public List<String> asCommand(final SampleArgument sampleArgument, final String secretsPath, final String serviceAccountKeySecretName) {
         return of(Map.of("-profile", "public", "-output_cram", "false")).override(of(addDashesIfNeeded()))
                 .override(of(fixed(secretsPath, serviceAccountKeySecretName)))
-                .override(of(Map.of(sampleArgument.argument(), sampleArgument.value())))
+                .override(of(sampleArgument.arguments()))
                 .asCommand("/pipeline5.sh");
     }
 
@@ -52,6 +55,10 @@ public class PipelineArguments {
                 .put("-run_id", runName);
         if (!gcpConfiguration.networkTags().isEmpty()) {
             builder.put("-network_tags", String.join(",", gcpConfiguration.networkTags()));
+        }
+        if (platinumConfiguration.apiUrl().isPresent()){
+            builder.put("-sbp_api_url", platinumConfiguration.apiUrl().get());
+            builder.put("-profile", "production");
         }
         return builder.build();
     }

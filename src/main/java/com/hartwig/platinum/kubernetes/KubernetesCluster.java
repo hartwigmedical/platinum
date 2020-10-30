@@ -7,6 +7,7 @@ import com.hartwig.platinum.GcpConfiguration;
 import com.hartwig.platinum.config.PlatinumConfiguration;
 
 import io.fabric8.kubernetes.api.model.Volume;
+import io.fabric8.kubernetes.api.model.VolumeBuilder;
 import io.fabric8.kubernetes.client.KubernetesClient;
 
 public class KubernetesCluster {
@@ -33,22 +34,26 @@ public class KubernetesCluster {
     public void submit(final PlatinumConfiguration configuration) {
         Volume configMapVolume = new PipelineConfigMapVolume(configuration, kubernetesClient, "sample").asKubernetes();
         Volume secretVolume = this.secret.asKubernetes();
+        Volume jksVolume = new VolumeBuilder().withName("jks").editOrNewSecret().withSecretName("jks").endSecret().build();
         for (SampleArgument sample : samples(configuration)) {
             kubernetesClient.batch()
                     .jobs()
                     .createNew()
                     .withNewMetadata()
-                    .withName(sample.value())
+                    .withName(sample.id())
                     .withNamespace(NAMESPACE)
                     .endMetadata()
                     .withSpec(new PipelineJob(new PipelineContainer(sample,
                             runName,
                             new PipelineArguments(configuration.argumentOverrides(),
                                     outputBucketName,
-                                    serviceAccountEmail, runName,
-                                    gcpConfiguration),
+                                    serviceAccountEmail,
+                                    runName,
+                                    gcpConfiguration,
+                                    configuration),
+                            secretVolume.getName(),
                             configMapVolume.getName(),
-                            secretVolume.getName()).asKubernetes(), configMapVolume, secretVolume).asKubernetes())
+                            configuration.image()).asKubernetes(), configMapVolume, secretVolume, jksVolume).asKubernetes())
                     .done();
         }
     }

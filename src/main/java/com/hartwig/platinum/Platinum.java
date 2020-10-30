@@ -9,6 +9,7 @@ import com.hartwig.platinum.config.PlatinumConfiguration;
 import com.hartwig.platinum.iam.JsonKey;
 import com.hartwig.platinum.iam.PipelineIamPolicy;
 import com.hartwig.platinum.iam.PipelineServiceAccount;
+import com.hartwig.platinum.iam.TransientPipelineServiceAccount;
 import com.hartwig.platinum.iam.ServiceAccountPrivateKey;
 import com.hartwig.platinum.kubernetes.KubernetesEngine;
 import com.hartwig.platinum.storage.OutputBucket;
@@ -42,8 +43,9 @@ public class Platinum {
     public void run() {
         LOGGER.info("Starting platinum run with name {} and input {}", Console.bold(runName), Console.bold(input));
         PlatinumConfiguration configuration = PlatinumConfiguration.from(new File(input));
-        PipelineServiceAccount serviceAccount = new PipelineServiceAccount(iam, new PipelineIamPolicy(resourceManager));
-        String serviceAccountEmail = serviceAccount.findOrCreate(gcpConfiguration.project(), runName);
+        PipelineServiceAccount serviceAccount =
+                PipelineServiceAccount.from(iam, resourceManager, runName, gcpConfiguration.project(), configuration);
+        String serviceAccountEmail = serviceAccount.findOrCreate();
         ServiceAccountPrivateKey privateKey = new ServiceAccountPrivateKey(iam);
         JsonKey jsonKey = privateKey.create(gcpConfiguration.project(), serviceAccountEmail);
         kubernetesEngine.findOrCreate(runName,

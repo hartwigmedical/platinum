@@ -12,6 +12,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 
+import org.immutables.value.Value;
 import org.immutables.value.Value.Immutable;
 import org.immutables.value.Value.Style;
 
@@ -20,7 +21,16 @@ import org.immutables.value.Value.Style;
 @JsonDeserialize(as = ImmutablePlatinumConfiguration.class)
 public interface PlatinumConfiguration {
 
+    @Value.Default
+    default String image() {
+        return "eu.gcr.io/hmf-images/pipeline5:platinum";
+    }
+
     Optional<String> cmek();
+
+    Optional<String> serviceAccount();
+
+    Optional<String> apiUrl();
 
     Map<String, String> argumentOverrides();
 

@@ -1,21 +1,21 @@
 package com.hartwig.platinum.kubernetes;
 
+import java.util.Map;
+
 import org.immutables.value.Value;
 
 @Value.Immutable
 public interface SampleArgument {
 
-    String argument();
+    String id();
 
-    String value();
+    Map<String, String> arguments();
 
-    static SampleArgument sampleJson(final String sample){
-        //  .put("-sample_json", format("%s/%s", samplesPath, sample))
-        return null;
+    static SampleArgument sampleJson(final String sample) {
+        return ImmutableSampleArgument.builder().id(sample.toLowerCase()).putArguments("-sample_json", sample).putArguments("-set_id", sample).build();
     }
 
-    static SampleArgument biopsy(final String biopsy){
-        //  .put("-sample_json", format("%s/%s", samplesPath, sample))
-        return null;
+    static SampleArgument biopsy(final String biopsy) {
+        return ImmutableSampleArgument.builder().id(biopsy.toLowerCase()).putArguments("-biopsy", biopsy).build();
     }
 }
