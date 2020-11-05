@@ -2,6 +2,7 @@ package com.hartwig.platinum.config;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -21,33 +22,50 @@ import org.immutables.value.Value.Style;
 public interface PlatinumConfiguration {
 
     @Value.Default
+    default String image() {
+        return "eu.gcr.io/hmf-images/pipeline5:platinum";
+    }
+
+    @Value.Default
     default GcpConfiguration gcp() {
         return GcpConfiguration.builder().build();
     }
 
     Optional<String> cmek();
 
-    Map<String, String> argumentOverrides();
+    Optional<String> serviceAccount();
 
-    Map<String, JsonNode> samples();
+    Optional<String> apiUrl();
 
     default PlatinumConfiguration withGcp(final GcpConfiguration gcp) {
         return builder().from(this).gcp(gcp).build();
     }
 
+    Map<String, String> argumentOverrides();
+
+    Map<String, JsonNode> samples();
+
+    List<String> biopsies();
+
     static ImmutablePlatinumConfiguration.Builder builder() {
         return ImmutablePlatinumConfiguration.builder();
     }
 
-    static PlatinumConfiguration from(final String inputFile) {
+    static PlatinumConfiguration from(String inputFile) {
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.registerModule(new Jdk8Module());
         try {
-            return objectMapper.readValue(new File(inputFile), new TypeReference<>() {
+            PlatinumConfiguration platinumConfiguration = objectMapper.readValue(new File(inputFile), new TypeReference<>() {
             });
+            if (!platinumConfiguration.samples().isEmpty() && !platinumConfiguration.biopsies().isEmpty()) {
+                throw new IllegalArgumentException("Cannot specify both a list of sample jsons and a list of biopsies. "
+                        + "Split this configuration into two platinum runs.");
+            }
+            return platinumConfiguration;
         } catch (IOException ioe) {
             throw new RuntimeException("Could not parse input", ioe);
         }
+
     }
 }
 

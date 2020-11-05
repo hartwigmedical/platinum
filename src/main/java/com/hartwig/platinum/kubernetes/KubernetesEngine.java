@@ -19,6 +19,7 @@ import com.google.api.services.container.v1beta1.model.Operation;
 import com.google.api.services.container.v1beta1.model.PrivateClusterConfig;
 import com.hartwig.platinum.Console;
 import com.hartwig.platinum.config.GcpConfiguration;
+import com.hartwig.platinum.iam.JsonKey;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -109,7 +110,8 @@ public class KubernetesEngine {
         }
     }
 
-    public KubernetesCluster findOrCreate(final String runName, final GcpConfiguration gcpConfiguration) {
+    public KubernetesCluster findOrCreate(final String runName, final GcpConfiguration gcpConfiguration, final JsonKey jsonKey,
+            final String outputBucketName, final String serviceAccountEmail) {
         try {
             String clusterName = runName + "-cluster";
             String parent = String.format("projects/%s/locations/%s", gcpConfiguration.projectOrThrow(), gcpConfiguration.regionOrThrow());
@@ -131,7 +133,13 @@ public class KubernetesEngine {
                 throw new RuntimeException("Failed to run kubectl command against cluster");
             }
             LOGGER.info("Connection to cluster {} configured via gcloud and kubectl", Console.bold(clusterName));
-            return new KubernetesCluster(runName, new DefaultKubernetesClient());
+            DefaultKubernetesClient kubernetesClient = new DefaultKubernetesClient();
+            return new KubernetesCluster(runName,
+                    kubernetesClient,
+                    new PipelineServiceAccountSecretVolume(jsonKey, kubernetesClient, "service-account-key"),
+                    outputBucketName,
+                    gcpConfiguration,
+                    serviceAccountEmail);
         } catch (Exception e) {
             throw new RuntimeException("Failed to create cluster", e);
         }

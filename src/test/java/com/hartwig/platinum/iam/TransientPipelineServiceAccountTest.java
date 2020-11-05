@@ -18,14 +18,14 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 
-public class PipelineServiceAccountTest {
+public class TransientPipelineServiceAccountTest {
 
     private static final String SERVICE_ACCOUNT_NAME = "platinum-test";
     private static final String EMAIL = SERVICE_ACCOUNT_NAME + "@service-account.com";
     private static final String PROJECT = "hmf-test";
     private static final String PROJECT_RESOURCE_NAME = "projects/" + PROJECT;
     private static final String RUN_NAME = "test";
-    private PipelineServiceAccount victim;
+    private TransientPipelineServiceAccount victim;
     private ArgumentCaptor<String> projectArgumentCaptor;
     private ArgumentCaptor<CreateServiceAccountRequest> createServiceAccountRequestArgumentCaptor;
     private ListServiceAccountsResponse listServiceAccountsResponse;
@@ -55,13 +55,13 @@ public class PipelineServiceAccountTest {
         when(serviceAccount.getEmail()).thenReturn(EMAIL);
 
         iamPolicy = mock(PipelineIamPolicy.class);
-        victim = new PipelineServiceAccount(iam, iamPolicy);
+        victim = new TransientPipelineServiceAccount(iam, iamPolicy, RUN_NAME, PROJECT);
     }
 
     @Test
     public void createsServiceAccountIfNotExists() {
         when(listServiceAccountsResponse.getAccounts()).thenReturn(Collections.emptyList());
-        String serviceAccountEmail = victim.findOrCreate(PROJECT, RUN_NAME);
+        String serviceAccountEmail = victim.findOrCreate();
         assertThat(serviceAccountEmail).isEqualTo(EMAIL);
         assertThat(projectArgumentCaptor.getValue()).isEqualTo(PROJECT_RESOURCE_NAME);
         assertThat(createServiceAccountRequestArgumentCaptor.getValue().getAccountId()).isEqualTo(SERVICE_ACCOUNT_NAME);
@@ -70,7 +70,7 @@ public class PipelineServiceAccountTest {
     @Test
     public void skipsCreationWhenServiceAccountExists() throws Exception {
         when(listServiceAccountsResponse.getAccounts()).thenReturn(Collections.singletonList(new ServiceAccount().setEmail(EMAIL)));
-        String serviceAccountEmail = victim.findOrCreate(PROJECT, RUN_NAME);
+        String serviceAccountEmail = victim.findOrCreate();
         assertThat(serviceAccountEmail).isEqualTo(EMAIL);
         verify(serviceAccounts, never()).create(any(), any());
     }
@@ -78,13 +78,13 @@ public class PipelineServiceAccountTest {
     @Test
     public void handlesNullResponseFromServiceAccountList() {
         when(listServiceAccountsResponse.getAccounts()).thenReturn(null);
-        String serviceAccountEmail = victim.findOrCreate(PROJECT, RUN_NAME);
+        String serviceAccountEmail = victim.findOrCreate();
         assertThat(serviceAccountEmail).isEqualTo(EMAIL);
     }
 
     @Test
     public void appliesIamPolicy() {
-        victim.findOrCreate(PROJECT, RUN_NAME);
+        victim.findOrCreate();
         verify(iamPolicy).apply(serviceAccount);
     }
 
@@ -92,7 +92,7 @@ public class PipelineServiceAccountTest {
     public void deletesServiceAccount() throws Exception {
         ArgumentCaptor<String> accountNameArgumentCaptor = ArgumentCaptor.forClass(String.class);
         when(serviceAccounts.delete(accountNameArgumentCaptor.capture())).thenReturn(mock(Iam.Projects.ServiceAccounts.Delete.class));
-        victim.delete(PROJECT, EMAIL);
+        victim.delete(EMAIL);
         assertThat(accountNameArgumentCaptor.getValue()).isEqualTo(ServiceAccountId.from(PROJECT, EMAIL));
     }
 }

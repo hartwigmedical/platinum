@@ -10,16 +10,19 @@ import io.fabric8.kubernetes.api.model.Volume;
 import io.fabric8.kubernetes.api.model.VolumeBuilder;
 import io.fabric8.kubernetes.client.KubernetesClient;
 
-public class PipelineConfigMapVolume {
+public class PipelineConfigMapVolume implements KubernetesComponent<Volume> {
+
     private final PlatinumConfiguration configuration;
     private final KubernetesClient kubernetesClient;
+    private final String name;
 
-    public PipelineConfigMapVolume(PlatinumConfiguration configuration, KubernetesClient kubernetesClient) {
+    public PipelineConfigMapVolume(final PlatinumConfiguration configuration, final KubernetesClient kubernetesClient, final String name) {
         this.configuration = configuration;
         this.kubernetesClient = kubernetesClient;
+        this.name = name;
     }
 
-    public Volume create(final String name) {
+    public Volume asKubernetes() {
         kubernetesClient.configMaps()
                 .inNamespace(KubernetesCluster.NAMESPACE)
                 .withName(name)
@@ -30,10 +33,6 @@ public class PipelineConfigMapVolume {
                 .withNamespace(KubernetesCluster.NAMESPACE)
                 .endMetadata()
                 .done();
-        return new VolumeBuilder().withName(name)
-                .editOrNewConfigMap()
-                .withName(name)
-                .endConfigMap()
-                .build();
+        return new VolumeBuilder().withName(name).editOrNewConfigMap().withName(name).endConfigMap().build();
     }
 }

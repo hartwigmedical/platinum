@@ -10,29 +10,29 @@ import java.util.stream.Collectors;
 
 import com.google.common.collect.ImmutableMap;
 import com.hartwig.platinum.config.GcpConfiguration;
+import com.hartwig.platinum.config.PlatinumConfiguration;
 
 public class PipelineArguments {
 
     private final Map<String, String> overrides;
     private final String outputBucket;
     private final String serviceAccountEmail;
-    private final String sample;
     private final String runName;
-    private final GcpConfiguration gcpConfiguration;
+    private final PlatinumConfiguration platinumConfiguration;
 
     public PipelineArguments(final Map<String, String> overrides, final String outputBucket, final String serviceAccountEmail,
-            final String sample, final String runName, final GcpConfiguration gcpConfiguration) {
+            final String runName, final PlatinumConfiguration platinumConfiguration) {
         this.overrides = overrides;
         this.outputBucket = outputBucket;
         this.serviceAccountEmail = serviceAccountEmail;
-        this.sample = sample;
         this.runName = runName;
-        this.gcpConfiguration = gcpConfiguration;
+        this.platinumConfiguration = platinumConfiguration;
     }
 
-    public List<String> asCommand(final String samplesPath, final String secretsPath, final String serviceAccountKeySecretName) {
+    public List<String> asCommand(final SampleArgument sampleArgument, final String secretsPath, final String serviceAccountKeySecretName) {
         return of(Map.of("-profile", "public", "-output_cram", "false")).override(of(addDashesIfNeeded()))
-                .override(of(fixed(samplesPath, secretsPath, serviceAccountKeySecretName)))
+                .override(of(fixed(secretsPath, serviceAccountKeySecretName)))
+                .override(of(sampleArgument.arguments()))
                 .asCommand("/pipeline5.sh");
     }
 
@@ -42,10 +42,9 @@ public class PipelineArguments {
                 .collect(Collectors.toMap(e -> e.getKey().startsWith("-") ? e.getKey() : "-" + e.getKey(), Map.Entry::getValue));
     }
 
-    private Map<String, String> fixed(final String samplesPath, final String secretsPath, final String serviceAccountKeySecretName) {
-        ImmutableMap.Builder<String, String> builder = ImmutableMap.<String, String>builder().put("-set_id", sample)
-                .put("-sample_json", format("%s/%s", samplesPath, sample))
-                .put("-output_bucket", outputBucket)
+    private Map<String, String> fixed(final String secretsPath, final String serviceAccountKeySecretName) {
+        GcpConfiguration gcpConfiguration = platinumConfiguration.gcp();
+        ImmutableMap.Builder<String, String> builder = ImmutableMap.<String, String>builder().put("-output_bucket", outputBucket)
                 .put("-private_key_path", format("%s/%s", secretsPath, serviceAccountKeySecretName))
                 .put("-project", gcpConfiguration.projectOrThrow())
                 .put("-region", gcpConfiguration.regionOrThrow())
@@ -55,6 +54,11 @@ public class PipelineArguments {
                 .put("-run_id", runName);
         if (!gcpConfiguration.networkTags().isEmpty()) {
             builder.put("-network_tags", String.join(",", gcpConfiguration.networkTags()));
-        } return builder.build();
+        }
+        if (platinumConfiguration.apiUrl().isPresent()) {
+            builder.put("-sbp_api_url", platinumConfiguration.apiUrl().get());
+            builder.put("-profile", "production");
+        }
+        return builder.build();
     }
 }

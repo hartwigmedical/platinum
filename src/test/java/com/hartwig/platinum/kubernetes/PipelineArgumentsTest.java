@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.hartwig.platinum.config.GcpConfiguration;
+import com.hartwig.platinum.config.PlatinumConfiguration;
 
 import org.junit.Test;
 
@@ -36,15 +37,16 @@ public class PipelineArgumentsTest {
     }
 
     private List<String> asCommand(final PipelineArguments victim) {
-        return victim.asCommand("/samples", "/secrets", "key.json");
+        return victim.asCommand(SampleArgument.sampleJson("sample"), "/secrets", "key.json");
     }
 
     private PipelineArguments createVictimWithOverrides(final String s, final String value) {
         return new PipelineArguments(Map.of(s, value),
                 "output",
                 "email",
-                "sample",
                 "run",
-                GcpConfiguration.builder().region("region").project("project").privateCluster(false).build());
+                PlatinumConfiguration.builder()
+                        .gcp(GcpConfiguration.builder().region("region").project("project").privateCluster(false).build())
+                        .build());
     }
 }
