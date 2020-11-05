@@ -4,11 +4,7 @@ import static java.lang.String.format;
 
 import java.util.List;
 
-import org.immutables.value.internal.$guava$.collect.$ClassToInstanceMap;
-
 import io.fabric8.kubernetes.api.model.Container;
-import io.fabric8.kubernetes.api.model.EnvVar;
-import io.fabric8.kubernetes.api.model.EnvVarSource;
 import io.fabric8.kubernetes.api.model.VolumeMountBuilder;
 
 public class PipelineContainer implements KubernetesComponent<Container> {
@@ -35,16 +31,12 @@ public class PipelineContainer implements KubernetesComponent<Container> {
     public Container asKubernetes() {
         String containerName = format("%s-%s", runName, sample.id()).toLowerCase();
         Container container = new Container();
-        container.setEnv(List.of(new EnvVar("JAVA_OPTS",
-                "-Djavax.net.ssl.keyStore=/jks/api.jks -Djavax.net.ssl.keyStorePassword=sbp123",
-                null)));
         container.setImage(imageName);
         container.setName(containerName);
         List<String> command = arguments.asCommand(sample, SECRETS_PATH, serviceAccountKeySecretName);
         container.setCommand(command);
         container.setVolumeMounts(List.of(new VolumeMountBuilder().withMountPath(SAMPLES_PATH).withName(configMapName).build(),
-                new VolumeMountBuilder().withMountPath(SECRETS_PATH).withName(serviceAccountKeySecretName).build(),
-                new VolumeMountBuilder().withMountPath("/jks").withName("jks").build()));
+                new VolumeMountBuilder().withMountPath(SECRETS_PATH).withName(serviceAccountKeySecretName).build()));
         return container;
     }
 }
