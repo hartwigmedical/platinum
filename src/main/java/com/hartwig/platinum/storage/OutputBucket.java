@@ -1,7 +1,12 @@
 package com.hartwig.platinum.storage;
 
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
+
+import com.google.api.gax.paging.Page;
 import com.google.cloud.Identity;
 import com.google.cloud.Policy;
+import com.google.cloud.storage.Blob;
 import com.google.cloud.storage.Bucket;
 import com.google.cloud.storage.BucketInfo;
 import com.google.cloud.storage.Storage;
@@ -32,6 +37,10 @@ public class OutputBucket {
         Bucket outputBucket = storage.get(bucketName);
         if (outputBucket != null) {
             LOGGER.info("Deleting existing bucket {}", Console.bold(outputBucket.getName()));
+            Page<Blob> pages = outputBucket.list();
+            if (pages != null) {
+                StreamSupport.stream(pages.iterateAll().spliterator(), false).forEach(Blob::delete);
+            }
             storage.delete(bucketName);
         }
         outputBucket = storage.create(BucketInfo.newBuilder(bucketName)

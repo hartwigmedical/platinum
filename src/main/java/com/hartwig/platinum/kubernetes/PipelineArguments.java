@@ -9,7 +9,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import com.google.common.collect.ImmutableMap;
-import com.hartwig.platinum.GcpConfiguration;
+import com.hartwig.platinum.config.GcpConfiguration;
 import com.hartwig.platinum.config.PlatinumConfiguration;
 
 public class PipelineArguments {
@@ -18,16 +18,14 @@ public class PipelineArguments {
     private final String outputBucket;
     private final String serviceAccountEmail;
     private final String runName;
-    private final GcpConfiguration gcpConfiguration;
     private final PlatinumConfiguration platinumConfiguration;
 
     public PipelineArguments(final Map<String, String> overrides, final String outputBucket, final String serviceAccountEmail,
-            final String runName, final GcpConfiguration gcpConfiguration, final PlatinumConfiguration platinumConfiguration) {
+            final String runName, final PlatinumConfiguration platinumConfiguration) {
         this.overrides = overrides;
         this.outputBucket = outputBucket;
         this.serviceAccountEmail = serviceAccountEmail;
         this.runName = runName;
-        this.gcpConfiguration = gcpConfiguration;
         this.platinumConfiguration = platinumConfiguration;
     }
 
@@ -45,10 +43,11 @@ public class PipelineArguments {
     }
 
     private Map<String, String> fixed(final String secretsPath, final String serviceAccountKeySecretName) {
+        GcpConfiguration gcpConfiguration = platinumConfiguration.gcp();
         ImmutableMap.Builder<String, String> builder = ImmutableMap.<String, String>builder().put("-output_bucket", outputBucket)
                 .put("-private_key_path", format("%s/%s", secretsPath, serviceAccountKeySecretName))
-                .put("-project", gcpConfiguration.project())
-                .put("-region", gcpConfiguration.region())
+                .put("-project", gcpConfiguration.projectOrThrow())
+                .put("-region", gcpConfiguration.regionOrThrow())
                 .put("-network", gcpConfiguration.networkUrl())
                 .put("-subnet", gcpConfiguration.subnetUrl())
                 .put("-service_account_email", serviceAccountEmail)
@@ -56,7 +55,7 @@ public class PipelineArguments {
         if (!gcpConfiguration.networkTags().isEmpty()) {
             builder.put("-network_tags", String.join(",", gcpConfiguration.networkTags()));
         }
-        if (platinumConfiguration.apiUrl().isPresent()){
+        if (platinumConfiguration.apiUrl().isPresent()) {
             builder.put("-sbp_api_url", platinumConfiguration.apiUrl().get());
             builder.put("-profile", "production");
         }

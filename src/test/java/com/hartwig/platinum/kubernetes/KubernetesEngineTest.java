@@ -27,8 +27,7 @@ import com.google.api.services.container.v1beta1.Container.Projects.Locations.Cl
 import com.google.api.services.container.v1beta1.Container.Projects.Locations.Operations;
 import com.google.api.services.container.v1beta1.model.Cluster;
 import com.google.api.services.container.v1beta1.model.Operation;
-import com.hartwig.platinum.GcpConfiguration;
-import com.hartwig.platinum.ImmutableGcpConfiguration;
+import com.hartwig.platinum.config.GcpConfiguration;
 import com.hartwig.platinum.iam.JsonKey;
 
 import org.junit.Before;
@@ -42,7 +41,7 @@ public class KubernetesEngineTest {
     private ProcessRunner processRunner;
     private String project;
     private String region;
-    private ImmutableGcpConfiguration configuration;
+    private GcpConfiguration configuration;
 
     @Before
     public void setup() {

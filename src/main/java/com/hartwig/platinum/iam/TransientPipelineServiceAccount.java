@@ -66,7 +66,9 @@ public class TransientPipelineServiceAccount implements PipelineServiceAccount {
                     .setPageSize(100)
                     .setPageToken(response.getNextPageToken())
                     .execute();
-            accounts.addAll(response.getAccounts());
+            if (response.getAccounts() != null) {
+                accounts.addAll(response.getAccounts());
+            }
         }
         return accounts;
     }

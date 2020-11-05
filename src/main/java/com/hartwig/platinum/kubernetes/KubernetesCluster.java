@@ -3,7 +3,7 @@ package com.hartwig.platinum.kubernetes;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import com.hartwig.platinum.GcpConfiguration;
+import com.hartwig.platinum.config.GcpConfiguration;
 import com.hartwig.platinum.config.PlatinumConfiguration;
 
 import io.fabric8.kubernetes.api.model.Volume;
@@ -49,7 +49,6 @@ public class KubernetesCluster {
                                     outputBucketName,
                                     serviceAccountEmail,
                                     runName,
-                                    gcpConfiguration,
                                     configuration),
                             secretVolume.getName(),
                             configMapVolume.getName(),

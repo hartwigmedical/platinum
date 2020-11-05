@@ -1,23 +1,24 @@
 package com.hartwig.platinum.storage;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.List;
+
+import com.google.api.gax.paging.Page;
 import com.google.cloud.Policy;
-import com.google.cloud.storage.BlobInfo;
+import com.google.cloud.storage.Blob;
 import com.google.cloud.storage.Bucket;
 import com.google.cloud.storage.BucketInfo;
 import com.google.cloud.storage.Storage;
+import com.hartwig.platinum.config.GcpConfiguration;
 import com.hartwig.platinum.config.PlatinumConfiguration;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
-import org.mockito.Mockito;
 
 public class OutputBucketTest {
 
@@ -25,7 +26,8 @@ public class OutputBucketTest {
     private static final String BUCKET_NAME = "platinum-output-test";
     public static final String REGION = "europe-west4";
     private static final String SERVICE_ACCOUNT = "sa@sa.com";
-    private static final PlatinumConfiguration CONFIGURATION = PlatinumConfiguration.builder().build();
+    private static final PlatinumConfiguration CONFIGURATION =
+            PlatinumConfiguration.builder().gcp(GcpConfiguration.builder().build()).build();
     private static final String CMEK_KEY = "/location/of/key";
     private Storage storage;
     private Bucket bucket;
@@ -58,6 +60,23 @@ public class OutputBucketTest {
         when(storage.get(BUCKET_NAME)).thenReturn(bucket);
         String bucketName = victim.findOrCreate(RUN_NAME, REGION, SERVICE_ACCOUNT, CONFIGURATION);
         verify(storage).delete(BUCKET_NAME);
+        assertThat(bucketName).isEqualTo(BUCKET_NAME);
+        assertThat(bucketInfoArgumentCaptor.getValue().getName()).isEqualTo(BUCKET_NAME);
+    }
+
+    @Test
+    public void deletesBlobsAlreadyExistsAndCreatesNew() {
+        ArgumentCaptor<BucketInfo> bucketInfoArgumentCaptor = ArgumentCaptor.forClass(BucketInfo.class);
+        when(storage.create(bucketInfoArgumentCaptor.capture())).thenReturn(bucket);
+        when(storage.get(BUCKET_NAME)).thenReturn(bucket);
+        @SuppressWarnings("unchecked")
+        Page<Blob> page = mock(Page.class);
+        when(bucket.list()).thenReturn(page);
+        Blob blob = mock(Blob.class);
+        when(page.iterateAll()).thenReturn(List.of(blob));
+        String bucketName = victim.findOrCreate(RUN_NAME, REGION, SERVICE_ACCOUNT, CONFIGURATION);
+        verify(storage).delete(BUCKET_NAME);
+        verify(blob).delete();
         assertThat(bucketName).isEqualTo(BUCKET_NAME);
         assertThat(bucketInfoArgumentCaptor.getValue().getName()).isEqualTo(BUCKET_NAME);
     }

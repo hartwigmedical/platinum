@@ -31,10 +31,11 @@ In addition to the HMF algorithms, Platinum depends on a number of resources (da
 
 #### Disclaimer
 
- - Platinum aims to be based exclusively on open source code and databases that are free from any restrictions. However, the databases that are distributed as 
- part of Platinum are not owned by HMF and their licenses could change. Below table lists all institutions from which we distribute data along with a link to their disclaimer and/or about and/or publication. 
- - HMF is not responsible for the interpretation of the output of our pipeline. 
-
+ - Platinum aims to be based exclusively on open source code and databases that are free from any restrictions. However, the databases that are distributed as part of Platinum are not owned by HMF and their licenses could change. Below table lists all institutions from which we distribute data along with a link to their disclaimer and/or about and/or publication.
+ - HMF offers Platinum and the HMF cancer analysis pipeline on an ‘as-is’ basis.
+ - HMF assumes no liability whatsoever for general, special, incidental, consequential or any other type of damages arising out of the use or inability to use Platinum or a failure of Platinum to operate with any other programs. In as far as not yet sufficiently stipulated above, HMF expressly assumes no liability or responsibility whatsoever for the quality of the data that is being used in running Platinum or for the final configuration of the GCP project used by Platinum including anything related to security and encryption of data and any damages that may arise as a result thereof.
+ - HMF furthermore is not responsible for and assumes no liability whatsoever for damages resulting from the interpretation of the output of the HMF cancer analysis pipeline and the medical and/or scientific conclusions that are drawn on the basis of such interpretation.
+ 
 ### Resources used by Platinum
 Resource | Purpose | References
 :-:|---|:-:
@@ -178,6 +179,47 @@ Notes:
   }
 }
 ```
+
+### Additional GCP Configuration
+
+Platinum offers some additional configuration options to suit more complex GCP project setups. These extra settings are mainly geared for 
+setups requiring additional levels of security, in particular around the network.  These settings are configured in the JSON by adding a 
+sections `gcp`
+
+```json
+{
+  "gcp": {
+    "project": "hmf-crunch",
+    "region": "europe-west4",
+    "network": "kubernetes",
+    "subnet": "kubernetes",
+    "networkTags": [
+      "tag1"
+    ],
+    "zones": [
+      "europe-west4-a"
+    ],
+    "privateCluster": true,
+    "secondaryRangeNamePods": "pods",
+    "secondaryRangeNameServices": "services",
+    "masterIpv4CidrBlock" : "172.17.0.32/28"
+  }
+}
+```
+
+| Parameter | Description |
+| --- | --- |
+| project | Same as the `-p` CLI argument. If you specify it here you don't need to put on the command line |
+| region | Same as the `-r` CLI argument. If you specify it here you don't need to put on the command line |
+| network | A identifier to the VPC network to be used for all compute resources. If the network is in a different project from the run, you the "projects/network-project/global/networks/network-name" format |
+| subnet | A identifier to the VPC network to be used for all compute resources. If the network is in a different project or region from the run, you the "projects/subnet-project/regions/subnet-region/subnetworks/subnet-name" format |
+| networkTags | Network tags to apply to all compute resources |
+| zones | A list of zones to use for kubernetes nodes to avoid capacity issues. The pipeline may run outside these zones, but will automatically select a zone with capacity. |
+| privateCluster | Makes the kubernetes cluster private, ie no nodes or master have public IP. Note that if this option is used, you will not be able to run platinum from a computer outside the VPC. You should create a VM within the VPC to run platinum |
+| secondaryRangeNamePods | A secondary IP range for pods in the cluster. This setting is only required if you use a shared VPC network. |
+| secondaryRangeNamePods | A secondary IP range for services in the cluster. This setting is only required if you use a shared VPC network. |
+| masterIpv4CidrBlock | Passed to the master when private cluster is enabled. Will default to "172.16.0.32/28" so only required if you have multiple private clusters in the same VPC | 
+
 
 ### Running Pipelines
 

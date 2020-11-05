@@ -26,11 +26,20 @@ public interface PlatinumConfiguration {
         return "eu.gcr.io/hmf-images/pipeline5:platinum";
     }
 
+    @Value.Default
+    default GcpConfiguration gcp() {
+        return GcpConfiguration.builder().build();
+    }
+
     Optional<String> cmek();
 
     Optional<String> serviceAccount();
 
     Optional<String> apiUrl();
+
+    default PlatinumConfiguration withGcp(final GcpConfiguration gcp) {
+        return builder().from(this).gcp(gcp).build();
+    }
 
     Map<String, String> argumentOverrides();
 
@@ -42,11 +51,11 @@ public interface PlatinumConfiguration {
         return ImmutablePlatinumConfiguration.builder();
     }
 
-    static PlatinumConfiguration from(File inputFile) {
+    static PlatinumConfiguration from(String inputFile) {
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.registerModule(new Jdk8Module());
         try {
-            PlatinumConfiguration platinumConfiguration = objectMapper.readValue(inputFile, new TypeReference<>() {
+            PlatinumConfiguration platinumConfiguration = objectMapper.readValue(new File(inputFile), new TypeReference<>() {
             });
             if (!platinumConfiguration.samples().isEmpty() && !platinumConfiguration.biopsies().isEmpty()) {
                 throw new IllegalArgumentException("Cannot specify both a list of sample jsons and a list of biopsies. "

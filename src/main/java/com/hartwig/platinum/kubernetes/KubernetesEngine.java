@@ -18,7 +18,7 @@ import com.google.api.services.container.v1beta1.model.NodeConfig;
 import com.google.api.services.container.v1beta1.model.Operation;
 import com.google.api.services.container.v1beta1.model.PrivateClusterConfig;
 import com.hartwig.platinum.Console;
-import com.hartwig.platinum.GcpConfiguration;
+import com.hartwig.platinum.config.GcpConfiguration;
 import com.hartwig.platinum.iam.JsonKey;
 
 import org.slf4j.Logger;
@@ -60,20 +60,26 @@ public class KubernetesEngine {
             newCluster.setInitialNodeCount(1);
             newCluster.setNetwork(gcpConfiguration.networkUrl());
             newCluster.setSubnetwork(gcpConfiguration.subnetUrl());
+            newCluster.setLocations(gcpConfiguration.zones());
 
             if (!gcpConfiguration.networkTags().isEmpty()) {
                 newCluster.setNodeConfig(new NodeConfig().setTags(gcpConfiguration.networkTags()));
             }
-
+            IPAllocationPolicy ipAllocationPolicy = new IPAllocationPolicy();
             if (gcpConfiguration.privateCluster()) {
                 PrivateClusterConfig privateClusterConfig = new PrivateClusterConfig();
                 privateClusterConfig.setEnablePrivateEndpoint(true);
                 privateClusterConfig.setEnablePrivateNodes(true);
-                privateClusterConfig.setMasterIpv4CidrBlock("172.16.0.32/28");
+                privateClusterConfig.setMasterIpv4CidrBlock(gcpConfiguration.masterIpv4CidrBlock());
                 newCluster.setPrivateCluster(true);
                 newCluster.setPrivateClusterConfig(privateClusterConfig);
-                newCluster.setIpAllocationPolicy(new IPAllocationPolicy().setUseIpAliases(true));
+                ipAllocationPolicy.setUseIpAliases(true);
             }
+            if (gcpConfiguration.secondaryRangeNamePods().isPresent() && gcpConfiguration.secondaryRangeNameServices().isPresent()) {
+                ipAllocationPolicy.setClusterSecondaryRangeName(gcpConfiguration.secondaryRangeNamePods().get());
+                ipAllocationPolicy.setServicesSecondaryRangeName(gcpConfiguration.secondaryRangeNameServices().get());
+            }
+            newCluster.setIpAllocationPolicy(ipAllocationPolicy);
 
             CreateClusterRequest createRequest = new CreateClusterRequest();
             createRequest.setCluster(newCluster);
@@ -81,8 +87,8 @@ public class KubernetesEngine {
             Operation execute = created.execute();
             LOGGER.info("Creating new kubernetes cluster {} in project {} and region {}, this can take upwards of 5 minutes...",
                     Console.bold(newCluster.getName()),
-                    Console.bold(gcpConfiguration.project()),
-                    Console.bold(gcpConfiguration.region()));
+                    Console.bold(gcpConfiguration.projectOrThrow()),
+                    Console.bold(gcpConfiguration.regionOrThrow()));
             Failsafe.with(new RetryPolicy<>().withMaxDuration(ofMinutes(15))
                     .withDelay(ofSeconds(15))
                     .withMaxAttempts(-1)
@@ -94,8 +100,8 @@ public class KubernetesEngine {
                             .locations()
                             .operations()
                             .get(String.format("projects/%s/locations/%s/operations/%s",
-                                    gcpConfiguration.project(),
-                                    gcpConfiguration.region(),
+                                    gcpConfiguration.projectOrThrow(),
+                                    gcpConfiguration.regionOrThrow(),
                                     execute.getName()))
                             .execute()
                             .getStatus());
@@ -108,8 +114,8 @@ public class KubernetesEngine {
             final String outputBucketName, final String serviceAccountEmail) {
         try {
             String clusterName = runName + "-cluster";
-            String parent = String.format("projects/%s/locations/%s", gcpConfiguration.project(), gcpConfiguration.region());
-            if (find(fullPath(gcpConfiguration.project(), gcpConfiguration.region(), runName)).isEmpty()) {
+            String parent = String.format("projects/%s/locations/%s", gcpConfiguration.projectOrThrow(), gcpConfiguration.regionOrThrow());
+            if (find(fullPath(gcpConfiguration.projectOrThrow(), gcpConfiguration.regionOrThrow(), runName)).isEmpty()) {
                 create(containerApi, parent, gcpConfiguration, runName);
             }
             if (!processRunner.execute(of("gcloud",
@@ -118,9 +124,9 @@ public class KubernetesEngine {
                     "get-credentials",
                     clusterName,
                     "--region",
-                    gcpConfiguration.region(),
+                    gcpConfiguration.regionOrThrow(),
                     "--project",
-                    gcpConfiguration.project()))) {
+                    gcpConfiguration.projectOrThrow()))) {
                 throw new RuntimeException("Failed to get credentials for cluster");
             }
             if (!processRunner.execute(of("kubectl", "get", "pods"))) {

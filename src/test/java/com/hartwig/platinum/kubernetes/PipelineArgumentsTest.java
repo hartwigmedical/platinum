@@ -5,7 +5,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.util.List;
 import java.util.Map;
 
-import com.hartwig.platinum.GcpConfiguration;
+import com.hartwig.platinum.config.GcpConfiguration;
+import com.hartwig.platinum.config.PlatinumConfiguration;
 
 import org.junit.Test;
 
@@ -42,7 +43,10 @@ public class PipelineArgumentsTest {
     private PipelineArguments createVictimWithOverrides(final String s, final String value) {
         return new PipelineArguments(Map.of(s, value),
                 "output",
-                "email", "run",
-                GcpConfiguration.builder().region("region").project("project").privateCluster(false).build(), null);
+                "email",
+                "run",
+                PlatinumConfiguration.builder()
+                        .gcp(GcpConfiguration.builder().region("region").project("project").privateCluster(false).build())
+                        .build());
     }
 }
