@@ -19,6 +19,7 @@ import com.google.api.services.container.v1beta1.model.Operation;
 import com.google.api.services.container.v1beta1.model.PrivateClusterConfig;
 import com.hartwig.platinum.Console;
 import com.hartwig.platinum.config.GcpConfiguration;
+import com.hartwig.platinum.config.PlatinumConfiguration;
 import com.hartwig.platinum.iam.JsonKey;
 
 import org.slf4j.Logger;
@@ -51,12 +52,11 @@ public class KubernetesEngine {
         return String.format("projects/%s/locations/%s/clusters/%s-cluster", project, region, runName);
     }
 
-    private static void create(final Container containerApi, final String parent, final GcpConfiguration gcpConfiguration,
-            final String runName) {
+    private static void create(final Container containerApi, final String parent, final String cluster,
+            final GcpConfiguration gcpConfiguration) {
         try {
-            String clusterName = runName + "-cluster";
             Cluster newCluster = new Cluster();
-            newCluster.setName(clusterName);
+            newCluster.setName(cluster);
             newCluster.setInitialNodeCount(1);
             newCluster.setNetwork(gcpConfiguration.networkUrl());
             newCluster.setSubnetwork(gcpConfiguration.subnetUrl());
@@ -110,13 +110,14 @@ public class KubernetesEngine {
         }
     }
 
-    public KubernetesCluster findOrCreate(final String runName, final GcpConfiguration gcpConfiguration, final JsonKey jsonKey,
+    public KubernetesCluster findOrCreate(final String runName, final PlatinumConfiguration configuration, final JsonKey jsonKey,
             final String outputBucketName, final String serviceAccountEmail) {
         try {
-            String clusterName = runName + "-cluster";
+            String clusterName = configuration.cluster().orElse(runName);
+            GcpConfiguration gcpConfiguration = configuration.gcp();
             String parent = String.format("projects/%s/locations/%s", gcpConfiguration.projectOrThrow(), gcpConfiguration.regionOrThrow());
             if (find(fullPath(gcpConfiguration.projectOrThrow(), gcpConfiguration.regionOrThrow(), runName)).isEmpty()) {
-                create(containerApi, parent, gcpConfiguration, runName);
+                create(containerApi, parent, clusterName, gcpConfiguration);
             }
             if (!processRunner.execute(of("gcloud",
                     "container",
@@ -138,7 +139,6 @@ public class KubernetesEngine {
                     kubernetesClient,
                     new PipelineServiceAccountSecretVolume(jsonKey, kubernetesClient, "service-account-key"),
                     outputBucketName,
-                    gcpConfiguration,
                     serviceAccountEmail);
         } catch (Exception e) {
             throw new RuntimeException("Failed to create cluster", e);

@@ -3,7 +3,6 @@ package com.hartwig.platinum.kubernetes;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import com.hartwig.platinum.config.GcpConfiguration;
 import com.hartwig.platinum.config.PlatinumConfiguration;
 
 import io.fabric8.kubernetes.api.model.Volume;
@@ -18,16 +17,14 @@ public class KubernetesCluster {
     final static String NAMESPACE = "default";
     private final PipelineServiceAccountSecretVolume secret;
     private final String outputBucketName;
-    private final GcpConfiguration gcpConfiguration;
     private final String serviceAccountEmail;
 
     KubernetesCluster(final String runName, final KubernetesClient kubernetesClient, final PipelineServiceAccountSecretVolume secret,
-            final String outputBucketName, final GcpConfiguration gcpConfiguration, final String serviceAccountEmail) {
+            final String outputBucketName, final String serviceAccountEmail) {
         this.runName = runName.toLowerCase();
         this.kubernetesClient = kubernetesClient;
         this.secret = secret;
         this.outputBucketName = outputBucketName;
-        this.gcpConfiguration = gcpConfiguration;
         this.serviceAccountEmail = serviceAccountEmail;
     }
 

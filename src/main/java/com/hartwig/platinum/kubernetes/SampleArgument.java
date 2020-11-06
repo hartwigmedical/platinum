@@ -12,7 +12,11 @@ public interface SampleArgument {
     Map<String, String> arguments();
 
     static SampleArgument sampleJson(final String sample) {
-        return ImmutableSampleArgument.builder().id(sample.toLowerCase()).putArguments("-sample_json", sample).putArguments("-set_id", sample).build();
+        return ImmutableSampleArgument.builder()
+                .id(sample.toLowerCase())
+                .putArguments("-sample_json", sample)
+                .putArguments("-set_id", sample)
+                .build();
     }
 
     static SampleArgument biopsy(final String biopsy) {
