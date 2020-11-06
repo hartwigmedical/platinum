@@ -1,16 +1,12 @@
 package com.hartwig.platinum;
 
-import java.io.File;
-
 import com.google.api.services.cloudresourcemanager.CloudResourceManager;
 import com.google.api.services.iam.v1.Iam;
 import com.google.cloud.storage.Storage;
 import com.hartwig.platinum.config.GcpConfiguration;
 import com.hartwig.platinum.config.PlatinumConfiguration;
 import com.hartwig.platinum.iam.JsonKey;
-import com.hartwig.platinum.iam.PipelineIamPolicy;
 import com.hartwig.platinum.iam.PipelineServiceAccount;
-import com.hartwig.platinum.iam.TransientPipelineServiceAccount;
 import com.hartwig.platinum.iam.ServiceAccountPrivateKey;
 import com.hartwig.platinum.kubernetes.KubernetesEngine;
 import com.hartwig.platinum.storage.OutputBucket;
@@ -50,7 +46,7 @@ public class Platinum {
         ServiceAccountPrivateKey privateKey = new ServiceAccountPrivateKey(iam);
         JsonKey jsonKey = privateKey.create(gcpConfiguration.projectOrThrow(), serviceAccountEmail);
         kubernetesEngine.findOrCreate(runName,
-                gcpConfiguration,
+                configuration,
                 jsonKey,
                 OutputBucket.from(storage).findOrCreate(runName, gcpConfiguration.regionOrThrow(), serviceAccountEmail, configuration),
                 serviceAccountEmail).submit(configuration);
