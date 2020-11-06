@@ -9,14 +9,26 @@ import io.fabric8.kubernetes.api.model.batch.JobSpecBuilder;
 
 public class PipelineJob implements KubernetesComponent<JobSpec> {
 
-    private final Container container;
-    private final Volume config;
-    private final Volume secret;
+    public Container getContainer() {
+        return container;
+    }
 
-    public PipelineJob(final Container container, final Volume config, final Volume secret) {
+    private final Container container;
+    private final List<Volume> volumes;
+    private final String name;
+
+    public PipelineJob(final String name, final Container container, final List<Volume> volumes) {
         this.container = container;
-        this.config = config;
-        this.secret = secret;
+        this.volumes = volumes;
+        this.name = name;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public List<Volume> getVolumes() {
+        return volumes;
     }
 
     @Override
@@ -26,7 +38,7 @@ public class PipelineJob implements KubernetesComponent<JobSpec> {
                 .withNewSpec()
                 .withContainers(container)
                 .withRestartPolicy("Never")
-                .withVolumes(List.of(config, secret))
+                .withVolumes(volumes)
                 .endSpec()
                 .endTemplate()
                 .build();

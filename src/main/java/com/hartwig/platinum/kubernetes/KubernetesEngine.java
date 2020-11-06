@@ -19,6 +19,7 @@ import com.google.api.services.container.v1beta1.model.Operation;
 import com.google.api.services.container.v1beta1.model.PrivateClusterConfig;
 import com.hartwig.platinum.Console;
 import com.hartwig.platinum.config.GcpConfiguration;
+import com.hartwig.platinum.config.PlatinumConfiguration;
 import com.hartwig.platinum.iam.JsonKey;
 
 import org.slf4j.Logger;
@@ -110,9 +111,10 @@ public class KubernetesEngine {
         }
     }
 
-    public KubernetesCluster findOrCreate(final String runName, final GcpConfiguration gcpConfiguration, final JsonKey jsonKey,
+    public KubernetesCluster findOrCreate(final String runName, final PlatinumConfiguration configuration, final JsonKey jsonKey,
             final String outputBucketName, final String serviceAccountEmail) {
         try {
+            GcpConfiguration gcpConfiguration = configuration.gcp();
             String clusterName = runName + "-cluster";
             String parent = String.format("projects/%s/locations/%s", gcpConfiguration.projectOrThrow(), gcpConfiguration.regionOrThrow());
             if (find(fullPath(gcpConfiguration.projectOrThrow(), gcpConfiguration.regionOrThrow(), runName)).isEmpty()) {
@@ -136,9 +138,10 @@ public class KubernetesEngine {
             DefaultKubernetesClient kubernetesClient = new DefaultKubernetesClient();
             return new KubernetesCluster(runName,
                     kubernetesClient,
+                    new JobScheduler(kubernetesClient),
                     new PipelineServiceAccountSecretVolume(jsonKey, kubernetesClient, "service-account-key"),
+                    new PipelineConfigMapVolume(configuration, kubernetesClient),
                     outputBucketName,
-                    gcpConfiguration,
                     serviceAccountEmail);
         } catch (Exception e) {
             throw new RuntimeException("Failed to create cluster", e);

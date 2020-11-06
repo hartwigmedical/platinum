@@ -28,6 +28,7 @@ import com.google.api.services.container.v1beta1.Container.Projects.Locations.Op
 import com.google.api.services.container.v1beta1.model.Cluster;
 import com.google.api.services.container.v1beta1.model.Operation;
 import com.hartwig.platinum.config.GcpConfiguration;
+import com.hartwig.platinum.config.PlatinumConfiguration;
 import com.hartwig.platinum.iam.JsonKey;
 
 import org.junit.Before;
@@ -41,7 +42,7 @@ public class KubernetesEngineTest {
     private ProcessRunner processRunner;
     private String project;
     private String region;
-    private GcpConfiguration configuration;
+    private PlatinumConfiguration configuration;
 
     @Before
     public void setup() {
@@ -57,7 +58,7 @@ public class KubernetesEngineTest {
 
         project = "project";
         region = "region";
-        configuration = GcpConfiguration.builder().project(project).region(region).privateCluster(false).build();
+        configuration = PlatinumConfiguration.builder().gcp(GcpConfiguration.builder().project(project).region(region).privateCluster(false).build()).build();
     }
 
     @Test

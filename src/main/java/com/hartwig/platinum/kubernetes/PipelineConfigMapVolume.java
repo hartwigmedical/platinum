@@ -12,27 +12,26 @@ import io.fabric8.kubernetes.client.KubernetesClient;
 
 public class PipelineConfigMapVolume implements KubernetesComponent<Volume> {
 
+    private static final String SAMPLE = "sample";
     private final PlatinumConfiguration configuration;
     private final KubernetesClient kubernetesClient;
-    private final String name;
 
-    public PipelineConfigMapVolume(final PlatinumConfiguration configuration, final KubernetesClient kubernetesClient, final String name) {
+    public PipelineConfigMapVolume(final PlatinumConfiguration configuration, final KubernetesClient kubernetesClient) {
         this.configuration = configuration;
         this.kubernetesClient = kubernetesClient;
-        this.name = name;
     }
 
     public Volume asKubernetes() {
         kubernetesClient.configMaps()
                 .inNamespace(KubernetesCluster.NAMESPACE)
-                .withName(name)
+                .withName(SAMPLE)
                 .createOrReplaceWithNew()
                 .addToData(configuration.samples().entrySet().stream().collect(toMap(Entry::getKey, e -> e.getValue().toString())))
                 .withNewMetadata()
-                .withName(name)
+                .withName(SAMPLE)
                 .withNamespace(KubernetesCluster.NAMESPACE)
                 .endMetadata()
                 .done();
-        return new VolumeBuilder().withName(name).editOrNewConfigMap().withName(name).endConfigMap().build();
+        return new VolumeBuilder().withName(SAMPLE).editOrNewConfigMap().withName(SAMPLE).endConfigMap().build();
     }
 }
