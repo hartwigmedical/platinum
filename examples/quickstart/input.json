@@ -1,10 +1,4 @@
 {
-  "argumentOverrides": {
-    "run_germline_caller": false,
-    "ref_genome_version": "HG38",
-    "image_name": "hmf-ccia-pipeline-v1",
-    "local_ssds": false
-  },
   "samples": {
     "CPCT12345678": {
       "tumor": {
