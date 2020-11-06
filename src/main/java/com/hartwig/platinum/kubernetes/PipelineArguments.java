@@ -59,6 +59,9 @@ public class PipelineArguments {
             builder.put("-sbp_api_url", platinumConfiguration.apiUrl().get());
             builder.put("-profile", "production");
         }
+        if (platinumConfiguration.cmek().isPresent()) {
+            builder.put("-cmek", platinumConfiguration.cmek().get());
+        }
         return builder.build();
     }
 }

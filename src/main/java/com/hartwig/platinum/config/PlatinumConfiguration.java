@@ -39,6 +39,8 @@ public interface PlatinumConfiguration {
 
     Optional<String> apiUrl();
 
+    Optional<String> keystorePassword();
+
     default PlatinumConfiguration withGcp(final GcpConfiguration gcp) {
         return builder().from(this).gcp(gcp).build();
     }
