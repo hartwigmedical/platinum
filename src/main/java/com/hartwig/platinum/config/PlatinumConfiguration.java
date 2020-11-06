@@ -35,6 +35,8 @@ public interface PlatinumConfiguration {
 
     Optional<String> serviceAccount();
 
+    Optional<String> cluster();
+
     Optional<String> apiUrl();
 
     Optional<String> keystorePassword();

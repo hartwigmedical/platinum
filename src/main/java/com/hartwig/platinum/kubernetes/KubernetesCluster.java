@@ -4,17 +4,17 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.Stream.concat;
 import static java.util.stream.Stream.of;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.hartwig.platinum.config.PlatinumConfiguration;
 
 import io.fabric8.kubernetes.api.model.Volume;
-import io.fabric8.kubernetes.client.KubernetesClient;
+import io.fabric8.kubernetes.api.model.batch.Job;
 
 public class KubernetesCluster {
 
     private final String runName;
-    private final KubernetesClient kubernetesClient;
     private final JobScheduler scheduler;
 
     final static String NAMESPACE = "default";
@@ -23,11 +23,9 @@ public class KubernetesCluster {
     private final String outputBucketName;
     private final String serviceAccountEmail;
 
-    KubernetesCluster(final String runName, final KubernetesClient kubernetesClient, final JobScheduler scheduler,
-            final KubernetesComponent<Volume> serviceAccountSecret, final KubernetesComponent<Volume> configMap,
-            final String outputBucketName, final String serviceAccountEmail) {
+    KubernetesCluster(final String runName, final JobScheduler scheduler, final KubernetesComponent<Volume> serviceAccountSecret,
+            final KubernetesComponent<Volume> configMap, final String outputBucketName, final String serviceAccountEmail) {
         this.runName = runName.toLowerCase();
-        this.kubernetesClient = kubernetesClient;
         this.scheduler = scheduler;
         this.serviceAccountSecret = serviceAccountSecret;
         this.configMap = configMap;
@@ -35,10 +33,11 @@ public class KubernetesCluster {
         this.serviceAccountEmail = serviceAccountEmail;
     }
 
-    public void submit(final PlatinumConfiguration configuration) {
+    public List<Job> submit(final PlatinumConfiguration configuration) {
         Volume configMapVolume = configMap.asKubernetes();
         Volume secretVolume = serviceAccountSecret.asKubernetes();
         Volume maybeJksVolume = new JksSecret().asKubernetes();
+        List<Job> submitted = new ArrayList<>();
         for (SampleArgument sample : samples(configuration)) {
             PipelineContainer pipelineContainer = new PipelineContainer(sample,
                     runName,
@@ -46,13 +45,14 @@ public class KubernetesCluster {
                     secretVolume.getName(),
                     configMapVolume.getName(),
                     configuration.image());
-            scheduler.submit(new PipelineJob(sample.id(),
+            submitted.add(scheduler.submit(new PipelineJob(sample.id(),
                     configuration.keystorePassword()
                             .map(p -> new JksEnabledContainer(pipelineContainer.asKubernetes(), maybeJksVolume, p).asKubernetes())
                             .orElse(pipelineContainer.asKubernetes()),
                     concat(of(configMapVolume, secretVolume), configuration.keystorePassword().map(p -> maybeJksVolume).stream()).collect(
-                            toList())));
+                            toList()))));
         }
+        return submitted;
     }
 
     private List<SampleArgument> samples(final PlatinumConfiguration configuration) {

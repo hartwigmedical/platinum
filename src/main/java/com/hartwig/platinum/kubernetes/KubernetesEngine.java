@@ -48,16 +48,15 @@ public class KubernetesEngine {
         }
     }
 
-    private static String fullPath(final String project, final String region, final String runName) {
-        return String.format("projects/%s/locations/%s/clusters/%s-cluster", project, region, runName);
+    private static String fullPath(final String project, final String region, final String cluster) {
+        return String.format("projects/%s/locations/%s/clusters/%s", project, region, cluster);
     }
 
-    private static void create(final Container containerApi, final String parent, final GcpConfiguration gcpConfiguration,
-            final String runName) {
+    private static void create(final Container containerApi, final String parent, final String cluster,
+            final GcpConfiguration gcpConfiguration) {
         try {
-            String clusterName = runName + "-cluster";
             Cluster newCluster = new Cluster();
-            newCluster.setName(clusterName);
+            newCluster.setName(cluster);
             newCluster.setInitialNodeCount(1);
             newCluster.setNetwork(gcpConfiguration.networkUrl());
             newCluster.setSubnetwork(gcpConfiguration.subnetUrl());
@@ -114,11 +113,11 @@ public class KubernetesEngine {
     public KubernetesCluster findOrCreate(final String runName, final PlatinumConfiguration configuration, final JsonKey jsonKey,
             final String outputBucketName, final String serviceAccountEmail) {
         try {
+            String clusterName = configuration.cluster().orElse(runName);
             GcpConfiguration gcpConfiguration = configuration.gcp();
-            String clusterName = runName + "-cluster";
             String parent = String.format("projects/%s/locations/%s", gcpConfiguration.projectOrThrow(), gcpConfiguration.regionOrThrow());
-            if (find(fullPath(gcpConfiguration.projectOrThrow(), gcpConfiguration.regionOrThrow(), runName)).isEmpty()) {
-                create(containerApi, parent, gcpConfiguration, runName);
+            if (find(fullPath(gcpConfiguration.projectOrThrow(), gcpConfiguration.regionOrThrow(), clusterName)).isEmpty()) {
+                create(containerApi, parent, clusterName, gcpConfiguration);
             }
             if (!processRunner.execute(of("gcloud",
                     "container",
@@ -137,7 +136,6 @@ public class KubernetesEngine {
             LOGGER.info("Connection to cluster {} configured via gcloud and kubectl", Console.bold(clusterName));
             DefaultKubernetesClient kubernetesClient = new DefaultKubernetesClient();
             return new KubernetesCluster(runName,
-                    kubernetesClient,
                     new JobScheduler(kubernetesClient),
                     new PipelineServiceAccountSecretVolume(jsonKey, kubernetesClient, "service-account-key"),
                     new PipelineConfigMapVolume(configuration, kubernetesClient),

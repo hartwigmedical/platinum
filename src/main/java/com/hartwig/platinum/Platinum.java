@@ -1,5 +1,7 @@
 package com.hartwig.platinum;
 
+import java.util.List;
+
 import com.google.api.services.cloudresourcemanager.CloudResourceManager;
 import com.google.api.services.iam.v1.Iam;
 import com.google.cloud.storage.Storage;
@@ -13,6 +15,8 @@ import com.hartwig.platinum.storage.OutputBucket;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import io.fabric8.kubernetes.api.model.batch.Job;
 
 public class Platinum {
 
@@ -45,12 +49,12 @@ public class Platinum {
         String serviceAccountEmail = serviceAccount.findOrCreate();
         ServiceAccountPrivateKey privateKey = new ServiceAccountPrivateKey(iam);
         JsonKey jsonKey = privateKey.create(gcpConfiguration.projectOrThrow(), serviceAccountEmail);
-        kubernetesEngine.findOrCreate(runName,
+        List<Job> submitted = kubernetesEngine.findOrCreate(runName,
                 configuration,
                 jsonKey,
                 OutputBucket.from(storage).findOrCreate(runName, gcpConfiguration.regionOrThrow(), serviceAccountEmail, configuration),
                 serviceAccountEmail).submit(configuration);
-        LOGGER.info("Platinum started [{}] pipelines on GCP", configuration.samples().size());
+        LOGGER.info("Platinum started [{}] pipelines on GCP", submitted.size());
         LOGGER.info("You can monitor their progress with: {}", Console.bold("./platinum status"));
     }
 }

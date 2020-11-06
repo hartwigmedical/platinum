@@ -18,7 +18,6 @@ import org.mockito.ArgumentCaptor;
 import io.fabric8.kubernetes.api.model.EnvVar;
 import io.fabric8.kubernetes.api.model.Volume;
 import io.fabric8.kubernetes.api.model.VolumeBuilder;
-import io.fabric8.kubernetes.client.KubernetesClient;
 
 public class KubernetesClusterTest {
 
@@ -31,11 +30,10 @@ public class KubernetesClusterTest {
 
     @Before
     public void setUp() {
-        KubernetesClient kubernetesClient = mock(KubernetesClient.class);
         Volume secret = new VolumeBuilder().withName(SECRET).build();
         Volume configMap = new VolumeBuilder().withName(CONFIG).build();
         scheduler = mock(JobScheduler.class);
-        victim = new KubernetesCluster("test", kubernetesClient, scheduler, () -> secret, () -> configMap, "output", "sa@gcloud.com");
+        victim = new KubernetesCluster("test", scheduler, () -> secret, () -> configMap, "output", "sa@gcloud.com");
     }
 
     @Test
