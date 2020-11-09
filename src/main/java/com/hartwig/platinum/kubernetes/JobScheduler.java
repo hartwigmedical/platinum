@@ -2,6 +2,8 @@ package com.hartwig.platinum.kubernetes;
 
 import static com.hartwig.platinum.kubernetes.KubernetesCluster.NAMESPACE;
 
+import com.hartwig.platinum.Console;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,7 +24,7 @@ public class JobScheduler {
         JobSpec spec = job.asKubernetes();
         Boolean delete = kubernetesClient.batch().jobs().inNamespace(NAMESPACE).withName(job.getName()).delete();
         if (delete) {
-            LOGGER.info("Delete existing job [{}]", job.getName());
+            LOGGER.info("Delete existing job {}", Console.bold(job.getName()));
         }
         return kubernetesClient.batch()
                 .jobs()

@@ -8,14 +8,14 @@ import com.google.api.services.iam.v1.model.CreateServiceAccountRequest;
 import com.google.api.services.iam.v1.model.ListServiceAccountsResponse;
 import com.google.api.services.iam.v1.model.ServiceAccount;
 
-public class TransientPipelineServiceAccount implements PipelineServiceAccount {
+public class EphemeralPipelineServiceAccount implements PipelineServiceAccount {
 
     private final Iam iam;
     private final PipelineIamPolicy policy;
     private final String runName;
     private final String project;
 
-    public TransientPipelineServiceAccount(final Iam iam, final PipelineIamPolicy policy, final String runName, final String project) {
+    public EphemeralPipelineServiceAccount(final Iam iam, final PipelineIamPolicy policy, final String runName, final String project) {
         this.iam = iam;
         this.policy = policy;
         this.runName = runName;

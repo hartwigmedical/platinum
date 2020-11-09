@@ -18,16 +18,18 @@ public class PipelineServiceAccountSecretVolume implements KubernetesComponent<V
     }
 
     public Volume asKubernetes() {
-        kubernetesClient.secrets()
-                .inNamespace(KubernetesCluster.NAMESPACE)
-                .withName(name)
-                .createOrReplaceWithNew()
-                .addToData(name, jsonKey.jsonBase64())
-                .withNewMetadata()
-                .withName(name)
-                .withNamespace(KubernetesCluster.NAMESPACE)
-                .endMetadata()
-                .done();
+        if (!jsonKey.secretExists()) {
+            kubernetesClient.secrets()
+                    .inNamespace(KubernetesCluster.NAMESPACE)
+                    .withName(name)
+                    .createOrReplaceWithNew()
+                    .addToData(name, jsonKey.jsonBase64())
+                    .withNewMetadata()
+                    .withName(name)
+                    .withNamespace(KubernetesCluster.NAMESPACE)
+                    .endMetadata()
+                    .done();
+        }
         return new VolumeBuilder().withName(name).editOrNewSecret().withSecretName(name).endSecret().build();
     }
 }

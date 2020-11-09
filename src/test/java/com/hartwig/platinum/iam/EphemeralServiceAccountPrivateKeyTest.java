@@ -2,7 +2,6 @@ package com.hartwig.platinum.iam;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.google.api.services.iam.v1.Iam;
@@ -12,13 +11,13 @@ import com.google.api.services.iam.v1.model.ServiceAccountKey;
 import org.junit.Before;
 import org.junit.Test;
 
-public class ServiceAccountPrivateKeyTest {
+public class EphemeralServiceAccountPrivateKeyTest {
 
     public static final String PROJECT = "project";
     public static final String EMAIL = "service-account@service-account.com";
     public static final String DATA = "data";
     public static final String NAME = "name";
-    private ServiceAccountPrivateKey victim;
+    private EphemeralServiceAccountPrivateKey victim;
     private Iam.Projects.ServiceAccounts.Keys serviceAccountsKeys;
     private Iam.Projects.ServiceAccounts.Keys.Create serviceAccountKeyCreate;
 
@@ -32,7 +31,7 @@ public class ServiceAccountPrivateKeyTest {
         when(iam.projects()).thenReturn(projects);
         when(projects.serviceAccounts()).thenReturn(serviceAccounts);
         when(serviceAccounts.keys()).thenReturn(serviceAccountsKeys);
-        victim = new ServiceAccountPrivateKey(iam);
+        victim = new EphemeralServiceAccountPrivateKey(iam);
     }
 
     @Test
@@ -42,15 +41,6 @@ public class ServiceAccountPrivateKeyTest {
                 serviceAccountKeyCreate);
         when(serviceAccountKeyCreate.execute()).thenReturn(serviceAccountKey);
         JsonKey key = victim.create(PROJECT, EMAIL);
-        assertThat(key.id()).isEqualTo(NAME);
-        assertThat(key.jsonBase64()).isEqualTo(DATA);
-    }
-
-    @Test
-    public void deletesKeyWithName() throws Exception {
-        Iam.Projects.ServiceAccounts.Keys.Delete serviceAccountsKeysDelete = mock(Iam.Projects.ServiceAccounts.Keys.Delete.class);
-        when(serviceAccountsKeys.delete(NAME)).thenReturn(serviceAccountsKeysDelete);
-        victim.delete(JsonKey.of(NAME, DATA));
-        verify(serviceAccountsKeysDelete).execute();
+         assertThat(key.jsonBase64()).isEqualTo(DATA);
     }
 }

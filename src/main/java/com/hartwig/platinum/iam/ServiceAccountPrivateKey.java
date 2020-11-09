@@ -1,37 +1,24 @@
 package com.hartwig.platinum.iam;
 
-import java.io.IOException;
-
 import com.google.api.services.iam.v1.Iam;
-import com.google.api.services.iam.v1.model.CreateServiceAccountKeyRequest;
-import com.google.api.services.iam.v1.model.ServiceAccountKey;
+import com.hartwig.platinum.Console;
+import com.hartwig.platinum.config.PlatinumConfiguration;
+import com.hartwig.platinum.config.ServiceAccountConfiguration;
 
-public class ServiceAccountPrivateKey {
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-    private final Iam iam;
+public interface ServiceAccountPrivateKey {
 
-    public ServiceAccountPrivateKey(final Iam iam) {
-        this.iam = iam;
-    }
+    Logger LOGGER = LoggerFactory.getLogger(ServiceAccountPrivateKey.class);
 
-    public JsonKey create(final String project, final String email) {
-        try {
-            ServiceAccountKey key = iam.projects()
-                    .serviceAccounts()
-                    .keys()
-                    .create(ServiceAccountId.from(project, email), new CreateServiceAccountKeyRequest())
-                    .execute();
-            return JsonKey.of(key.getName(), key.getPrivateKeyData());
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
+    JsonKey create(final String project, final String email);
 
-    public void delete(final JsonKey key) {
-        try {
-            iam.projects().serviceAccounts().keys().delete(key.id()).execute();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+    static ServiceAccountPrivateKey from(final PlatinumConfiguration configuration, final Iam iam) {
+        return configuration.serviceAccount()
+                .flatMap(ServiceAccountConfiguration::existingSecret).<ServiceAccountPrivateKey>map(e -> (project, email) -> {
+                    LOGGER.info("Using existing private key for service account {}", Console.bold(email));
+                    return JsonKey.existing(e);
+                }).orElse(new EphemeralServiceAccountPrivateKey(iam));
     }
 }

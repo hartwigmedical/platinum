@@ -47,14 +47,14 @@ public class Platinum {
         PipelineServiceAccount serviceAccount =
                 PipelineServiceAccount.from(iam, resourceManager, runName, gcpConfiguration.projectOrThrow(), configuration);
         String serviceAccountEmail = serviceAccount.findOrCreate();
-        ServiceAccountPrivateKey privateKey = new ServiceAccountPrivateKey(iam);
+        ServiceAccountPrivateKey privateKey = ServiceAccountPrivateKey.from(configuration, iam);
         JsonKey jsonKey = privateKey.create(gcpConfiguration.projectOrThrow(), serviceAccountEmail);
         List<Job> submitted = kubernetesEngine.findOrCreate(runName,
                 configuration,
                 jsonKey,
                 OutputBucket.from(storage).findOrCreate(runName, gcpConfiguration.regionOrThrow(), serviceAccountEmail, configuration),
                 serviceAccountEmail).submit(configuration);
-        LOGGER.info("Platinum started [{}] pipelines on GCP", submitted.size());
+        LOGGER.info("Platinum started {} pipelines on GCP", Console.bold(String.valueOf(submitted.size())));
         LOGGER.info("You can monitor their progress with: {}", Console.bold("./platinum status"));
     }
 }
