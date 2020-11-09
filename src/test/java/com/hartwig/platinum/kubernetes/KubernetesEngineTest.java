@@ -46,7 +46,7 @@ public class KubernetesEngineTest {
     public static final String RUN_NAME = "runName";
     public static final String BUCKET = "bucket";
     public static final String SERVICE_ACCOUNT = "service_account";
-    public static final JsonKey JSON_KEY = JsonKey.of("id", "json");
+    public static final JsonKey JSON_KEY = JsonKey.of("json");
     private Locations locations;
     private Clusters clusters;
     private ProcessRunner processRunner;

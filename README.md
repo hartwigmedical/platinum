@@ -180,6 +180,23 @@ Notes:
 }
 ```
 
+### Running with an existing cluster
+
+Platinum uses ephemeral infrastructure to ease any maintenance burden, hide complexity and reduce resource contention. That said, you may 
+want to use existing shared infrastructure for your platinum runs.
+
+To set this up you can pass platinum an existing service account name, cluster name and secret within that cluster which contains the 
+private key for the service account like so:
+
+```json
+{
+"serviceAccount":{
+    "name": "you-sa@your-sa.iam.gserviceaccount.com",
+    "existingSecret": "secret"
+  "cluster": "your-cluster"
+}
+``` 
+
 ### Additional GCP Configuration
 
 Platinum offers some additional configuration options to suit more complex GCP project setups. These extra settings are mainly geared for 

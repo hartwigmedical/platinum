@@ -5,13 +5,23 @@ import org.immutables.value.Value;
 @Value.Immutable
 public interface JsonKey {
 
-    @Value.Parameter
-    String id();
+    @Value.Default
+    default boolean secretExists() {
+        return false;
+    }
 
-    @Value.Parameter
+    @Value.Default
+    default String secretName() {
+        return "service-account-key";
+    }
+
     String jsonBase64();
 
-    static JsonKey of(final String id, final String json) {
-        return ImmutableJsonKey.of(id, json);
+    static JsonKey existing(final String secret) {
+        return ImmutableJsonKey.builder().secretName(secret).secretExists(true).jsonBase64("").build();
+    }
+
+    static JsonKey of(final String json) {
+        return ImmutableJsonKey.builder().jsonBase64(json).build();
     }
 }

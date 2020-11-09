@@ -33,8 +33,8 @@ public interface PlatinumConfiguration {
 
     Optional<String> cmek();
 
-    Optional<String> serviceAccount();
-
+    Optional<ServiceAccountConfiguration> serviceAccount();
+    
     Optional<String> cluster();
 
     Optional<String> apiUrl();

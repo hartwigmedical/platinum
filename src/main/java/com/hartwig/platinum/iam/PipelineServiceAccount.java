@@ -15,13 +15,13 @@ public interface PipelineServiceAccount {
         return configuration.serviceAccount().<PipelineServiceAccount>map(s -> new PipelineServiceAccount() {
             @Override
             public String findOrCreate() {
-                return s;
+                return s.name();
             }
 
             @Override
             public void delete(final String email) {
                 // do nothing
             }
-        }).orElse(new TransientPipelineServiceAccount(iam, new PipelineIamPolicy(cloudResourceManager), runName, project));
+        }).orElse(new EphemeralPipelineServiceAccount(iam, new PipelineIamPolicy(cloudResourceManager), runName, project));
     }
 }

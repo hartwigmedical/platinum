@@ -18,14 +18,14 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 
-public class TransientPipelineServiceAccountTest {
+public class EphemeralPipelineServiceAccountTest {
 
     private static final String SERVICE_ACCOUNT_NAME = "platinum-test";
     private static final String EMAIL = SERVICE_ACCOUNT_NAME + "@service-account.com";
     private static final String PROJECT = "hmf-test";
     private static final String PROJECT_RESOURCE_NAME = "projects/" + PROJECT;
     private static final String RUN_NAME = "test";
-    private TransientPipelineServiceAccount victim;
+    private EphemeralPipelineServiceAccount victim;
     private ArgumentCaptor<String> projectArgumentCaptor;
     private ArgumentCaptor<CreateServiceAccountRequest> createServiceAccountRequestArgumentCaptor;
     private ListServiceAccountsResponse listServiceAccountsResponse;
@@ -55,7 +55,7 @@ public class TransientPipelineServiceAccountTest {
         when(serviceAccount.getEmail()).thenReturn(EMAIL);
 
         iamPolicy = mock(PipelineIamPolicy.class);
-        victim = new TransientPipelineServiceAccount(iam, iamPolicy, RUN_NAME, PROJECT);
+        victim = new EphemeralPipelineServiceAccount(iam, iamPolicy, RUN_NAME, PROJECT);
     }
 
     @Test

@@ -138,7 +138,7 @@ public class KubernetesEngine {
             return new KubernetesCluster(runName,
                     new JobScheduler(kubernetesClient),
                     new PipelineServiceAccountSecretVolume(jsonKey, kubernetesClient, "service-account-key"),
-                    new PipelineConfigMapVolume(configuration, kubernetesClient),
+                    new PipelineConfigMapVolume(configuration, kubernetesClient, runName),
                     outputBucketName,
                     serviceAccountEmail);
         } catch (Exception e) {
