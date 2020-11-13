@@ -4,14 +4,14 @@
     "existingSecret": "service-account-key"
   },
   "cluster": "rerun-cluster",
-  "image": "eu.gcr.io/hmf-images/pipeline5:5.?.?",
+  "image": "eu.gcr.io/hmf-build/pipeline5:cobalt-1.11",
   "cmek": "",
   "apiUrl": "https://api.hartwigmedicalfoundation.nl",
-  "keystorePassword": "",
+  "keystorePassword": "sbp123",
   "argumentOverrides": {
     "starting_point": ""
   },
-  "biopsies": [
-    ""
+  "sampleIds": [
+    "CPCT12345678T"
   ]
 }

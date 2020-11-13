@@ -28,7 +28,7 @@ public class Platinum {
     private final Iam iam;
     private final CloudResourceManager resourceManager;
     private final KubernetesEngine kubernetesEngine;
-    private PlatinumConfiguration configuration;
+    private final PlatinumConfiguration configuration;
 
     public Platinum(final String runName, final String input, final Storage storage, final Iam iam,
             final CloudResourceManager resourceManager, final KubernetesEngine clusterProvider, final PlatinumConfiguration configuration) {
