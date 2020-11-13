@@ -24,7 +24,7 @@ The HMF cancer analysis pipeline is a comprehensive pipeline specifically design
  - FASTQ is assumed to be available for the sample(s) and is the starting point for the pipeline. 
  - The pipeline assumes that the tumor DNA sample is analysed against a single reference DNA sample.
     - Do note that some individual algorithms support zero and/or multiple reference samples to allow "tumor-only" mode. These modes are not supported yet throughout the entire platinum process though.
- - Both HG19 and HG38 reference genomes are supported throughout the pipeline and lead to comparable analysis quality.  
+ - Both GRCh37 and GRCh38 reference genomes are supported throughout the pipeline and lead to comparable analysis quality.  
   
 The HMF pipeline primarily uses algorithms developed by HMF open-source and available via [hmftools](https://github.com/hartwigmedical/hmftools).
 In addition to the HMF algorithms, Platinum depends on a number of resources (databases) and some external tools and algorithms.
@@ -39,7 +39,7 @@ In addition to the HMF algorithms, Platinum depends on a number of resources (da
 ### Resources used by Platinum
 Resource | Purpose | References
 :-:|---|:-:
-[<img src="logos/grc.png" title="Genome Reference Consortium" height=100>](https://www.ncbi.nlm.nih.gov/grc)  | GRC makes available the human reference genome (HG19 or HG38) used in nearly every step of the pipeline. | N/A
+[<img src="logos/grc.png" title="Genome Reference Consortium" height=100>](https://www.ncbi.nlm.nih.gov/grc)  | GRC makes available the human reference genome (GRCh37 or GRCh38) used in nearly every step of the pipeline. | N/A
 [<img src="logos/ensembl.png" title="Ensembl">](http://www.ensembl.org)  | The ensembl database is used extensively throughout our algorithms as the source for all gene and transcript annotations. | [disclaimer](http://www.ensembl.org/info/about/legal/disclaimer.html)
 [<img src="logos/civic.png" title="Clinical Interpretations of Variants in Cancer">](https://civicdb.org)  | CIViC is a knowledgebase containing (pathogenic) mutations and linking them to treatments. In terms of the pipeline, CIViC's list of pathogenic variants contribute to the hotspot list used as our most sensitive calling tier and used for downstream interpretation of drivers. | - [about](https://civic.readthedocs.io/en/latest/about.html) <br /> - [reference](https://www.nature.com/articles/ng.3774)
 [<img src="logos/docm.png" title="Database of Curated Mutations">](http://www.docm.info)  | DoCM is a knowledgebase containing (pathogenic) mutations. In terms of the pipeline, DoCM's list of pathogenic variants contribute to the hotspot list used as our most sensitive calling tier and used for downstream interpretation of drivers. | - [about](http://www.docm.info/about) <br /> - [reference](http://www.nature.com/nmeth/journal/v13/n10/full/nmeth.4000.html)
