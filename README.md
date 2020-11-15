@@ -254,7 +254,7 @@ for your run.
 Platinum is asynchronous, you can keep eye on the progress use the following command:
 
 ```shell script
-Pauls-MacBook-Pro:platinum pwolfe$ ./platinum status
+./platinum status
 NAME                                READY   STATUS    RESTARTS   AGE
 cpct12345678-5qb2s   1/1     Running   0          172m
 ```
@@ -311,7 +311,6 @@ To configure this add the following to your JSON and be sure to use the same pro
     "starting_point": "calling_complete"
   },
   "samples": {
-...
   }
 }
 ```
