@@ -33,6 +33,7 @@ public class PipelineContainer implements KubernetesComponent<Container> {
         Container container = new Container();
         container.setImage(imageName);
         container.setName(containerName);
+        container.setImagePullPolicy("Always");
         List<String> command = arguments.asCommand(sample, SECRETS_PATH, serviceAccountKeySecretName);
         container.setCommand(command);
         container.setVolumeMounts(List.of(new VolumeMountBuilder().withMountPath(SAMPLES_PATH).withName(configMapName).build(),

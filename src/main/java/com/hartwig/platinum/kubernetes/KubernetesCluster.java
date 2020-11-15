@@ -57,10 +57,10 @@ public class KubernetesCluster {
     }
 
     private List<SampleArgument> samples(final PlatinumConfiguration configuration) {
-        return configuration.biopsies().isEmpty() ? configuration.samples()
+        return configuration.sampleIds().isEmpty() ? configuration.samples()
                 .keySet()
                 .stream()
                 .map(SampleArgument::sampleJson)
-                .collect(toList()) : configuration.biopsies().stream().map(SampleArgument::biopsy).collect(toList());
+                .collect(toList()) : configuration.sampleIds().stream().map(SampleArgument::biopsy).collect(toList());
     }
 }

@@ -49,7 +49,7 @@ public interface PlatinumConfiguration {
 
     Map<String, JsonNode> samples();
 
-    List<String> biopsies();
+    List<String> sampleIds();
 
     static ImmutablePlatinumConfiguration.Builder builder() {
         return ImmutablePlatinumConfiguration.builder();
@@ -61,7 +61,7 @@ public interface PlatinumConfiguration {
         try {
             PlatinumConfiguration platinumConfiguration = objectMapper.readValue(new File(inputFile), new TypeReference<>() {
             });
-            if (!platinumConfiguration.samples().isEmpty() && !platinumConfiguration.biopsies().isEmpty()) {
+            if (!platinumConfiguration.samples().isEmpty() && !platinumConfiguration.sampleIds().isEmpty()) {
                 throw new IllegalArgumentException("Cannot specify both a list of sample jsons and a list of biopsies. "
                         + "Split this configuration into two platinum runs.");
             }
