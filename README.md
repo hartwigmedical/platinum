@@ -190,10 +190,11 @@ private key for the service account like so:
 
 ```json
 {
-"serviceAccount":{
-    "name": "you-sa@your-sa.iam.gserviceaccount.com",
-    "existingSecret": "secret"
-  "cluster": "your-cluster"
+  "serviceAccount":{
+      "name": "your-service-account@your-service-account.iam.gserviceaccount.com",
+      "existingSecret": "your-secret",
+      "cluster": "your-cluster"
+  }
 }
 ``` 
 
