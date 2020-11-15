@@ -17,10 +17,10 @@ public class PipelineJob implements KubernetesComponent<JobSpec> {
     private final List<Volume> volumes;
     private final String name;
 
-    public PipelineJob(final String name, final Container container, final List<Volume> volumes) {
+    public PipelineJob(final String run, final String sample, final Container container, final List<Volume> volumes) {
         this.container = container;
         this.volumes = volumes;
-        this.name = name;
+        this.name = sample + "-" + run;
     }
 
     public String getName() {
