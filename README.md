@@ -180,6 +180,19 @@ Notes:
 }
 ```
 
+### Running with HG38 Reference Genome
+
+Platinum defaults to using the HG19 reference genome. To use HG38 instead, include these lines at the top of your input file, above the samples object:
+
+```json
+{
+  "argumentOverrides": {
+    "ref_genome_version": "HG38"
+  },
+  "samples": {
+...
+```
+
 ### Running with an existing cluster
 
 Platinum uses ephemeral infrastructure to ease any maintenance burden, hide complexity and reduce resource contention. That said, you may 
