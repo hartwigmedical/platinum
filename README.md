@@ -89,7 +89,7 @@ You'll also need a machine to checkout this repo and run Platinum with
 these installed:
 * [Java 11](https://www.oracle.com/java/technologies/javase-jdk11-downloads.html).
 * [gcloud SDK](https://cloud.google.com/sdk/docs/downloads-interactive)
-  (configured to access your new project)
+  (configured to access your new project) and the connector module which you can install with `gcloud components install kubectl`.
 * [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/)
 
 ### Quickstart
