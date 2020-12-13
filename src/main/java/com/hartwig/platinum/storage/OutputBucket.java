@@ -1,12 +1,7 @@
 package com.hartwig.platinum.storage;
 
-import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
-
-import com.google.api.gax.paging.Page;
 import com.google.cloud.Identity;
 import com.google.cloud.Policy;
-import com.google.cloud.storage.Blob;
 import com.google.cloud.storage.Bucket;
 import com.google.cloud.storage.BucketInfo;
 import com.google.cloud.storage.Storage;
@@ -36,21 +31,18 @@ public class OutputBucket {
         String bucketName = BucketName.from(runName);
         Bucket outputBucket = storage.get(bucketName);
         if (outputBucket != null) {
-            LOGGER.info("Deleting existing bucket {}", Console.bold(outputBucket.getName()));
-            Page<Blob> pages = outputBucket.list();
-            if (pages != null) {
-                StreamSupport.stream(pages.iterateAll().spliterator(), false).forEach(Blob::delete);
-            }
-            storage.delete(bucketName);
+            LOGGER.info("Bucket {} already existed, re-using it, if this is not a re-run of an existing experiment platinm will not have "
+                    + "permission to write", Console.bold(outputBucket.getName()));
+        } else {
+            outputBucket = storage.create(BucketInfo.newBuilder(bucketName)
+                    .setIamConfiguration(BucketInfo.IamConfiguration.newBuilder().setIsUniformBucketLevelAccessEnabled(true).build())
+                    .setLocation(region)
+                    .setDefaultKmsKeyName(configuration.cmek().orElse(null))
+                    .build());
+            Policy bucketPolicy = storage.getIamPolicy(bucketName);
+            storage.setIamPolicy(bucketName,
+                    bucketPolicy.toBuilder().addIdentity(StorageRoles.admin(), Identity.serviceAccount(serviceAccount)).build());
         }
-        outputBucket = storage.create(BucketInfo.newBuilder(bucketName)
-                .setIamConfiguration(BucketInfo.IamConfiguration.newBuilder().setIsUniformBucketLevelAccessEnabled(true).build())
-                .setLocation(region)
-                .setDefaultKmsKeyName(configuration.cmek().orElse(null))
-                .build());
-        Policy bucketPolicy = storage.getIamPolicy(bucketName);
-        storage.setIamPolicy(bucketName,
-                bucketPolicy.toBuilder().addIdentity(StorageRoles.admin(), Identity.serviceAccount(serviceAccount)).build());
         return outputBucket.getName();
     }
 }
