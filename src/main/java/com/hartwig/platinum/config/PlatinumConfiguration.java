@@ -31,6 +31,8 @@ public interface PlatinumConfiguration {
         return GcpConfiguration.builder().build();
     }
 
+    Optional<String> outputBucket();
+
     Optional<String> cmek();
 
     Optional<ServiceAccountConfiguration> serviceAccount();

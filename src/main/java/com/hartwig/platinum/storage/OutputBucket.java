@@ -28,10 +28,10 @@ public class OutputBucket {
 
     public String findOrCreate(final String runName, final String region, final String serviceAccount,
             final PlatinumConfiguration configuration) {
-        String bucketName = BucketName.from(runName);
+        String bucketName = configuration.outputBucket().orElse(BucketName.from(runName));
         Bucket outputBucket = storage.get(bucketName);
         if (outputBucket != null) {
-            LOGGER.info("Bucket {} already existed, re-using it, if this is not a re-run of an existing experiment platinm will not have "
+            LOGGER.info("Bucket {} already existed, re-using it, if this is not a re-run of an existing experiment platinum will not have "
                     + "permission to write", Console.bold(outputBucket.getName()));
         } else {
             outputBucket = storage.create(BucketInfo.newBuilder(bucketName)
