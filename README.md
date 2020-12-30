@@ -180,18 +180,21 @@ Notes:
 }
 ```
 
-### Running with HG38 Reference Genome
+### Reference Genomes
 
-Platinum defaults to using the HG19 reference genome. To use HG38 instead, include these lines at the top of your input file, above the samples object:
-
+Platinum can be run with either a 37 or 38 reference genome release. The default is 38, but to use 37 instead, include these lines at the top of your input file, above the samples object:
 ```json
 {
   "argumentOverrides": {
-    "ref_genome_version": "HG38"
+    "ref_genome_version": "37"
   },
   "samples": {
 ...
 ```
+
+Internally Platinum uses the GRCh37 assembly `Homo_sapiens.GRCh37.GATK.illumina.fasta`, and the GRCh38 no-alt assembly `GCA_000001405.15_GRCh38_no_alt_analysis_set.fna`.
+
+There is no support for use of other assemblies or versions.   
 
 ### Running with an existing cluster
 
@@ -242,6 +245,7 @@ sections `gcp`
 | --- | --- |
 | project | Same as the `-p` CLI argument. If you specify it here you don't need to put on the command line |
 | region | Same as the `-r` CLI argument. If you specify it here you don't need to put on the command line |
+| outputBucket / Override the output bucket location with an existing bucket |
 | network | A identifier to the VPC network to be used for all compute resources. If the network is in a different project from the run, you the "projects/network-project/global/networks/network-name" format |
 | subnet | A identifier to the VPC network to be used for all compute resources. If the network is in a different project or region from the run, you the "projects/subnet-project/regions/subnet-region/subnetworks/subnet-name" format |
 | networkTags | Network tags to apply to all compute resources |
