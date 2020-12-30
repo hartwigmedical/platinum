@@ -62,6 +62,21 @@ public class OutputBucketTest {
     }
 
     @Test
+    public void usesBucketFromConfigurationIfPresent() {
+        ArgumentCaptor<BucketInfo> bucketInfoArgumentCaptor = ArgumentCaptor.forClass(BucketInfo.class);
+        when(storage.create(bucketInfoArgumentCaptor.capture())).thenReturn(bucket);
+        String configuredBucket = "configuredBucket";
+        when(storage.getIamPolicy(configuredBucket)).thenReturn(Policy.newBuilder().build());
+        String bucketName = victim.findOrCreate(RUN_NAME,
+                REGION,
+                SERVICE_ACCOUNT,
+                PlatinumConfiguration.builder().from(CONFIGURATION).outputBucket(configuredBucket).build());
+        assertThat(bucketName).isEqualTo(BUCKET_NAME);
+        BucketInfo bucketInfo = bucketInfoArgumentCaptor.getValue();
+        assertThat(bucketInfo.getName()).isEqualTo(configuredBucket);
+    }
+
+    @Test
     public void appliesCmekIfSpecifiedInConfig() {
         ArgumentCaptor<BucketInfo> bucketInfoArgumentCaptor = ArgumentCaptor.forClass(BucketInfo.class);
         when(storage.create(bucketInfoArgumentCaptor.capture())).thenReturn(bucket);
