@@ -42,6 +42,11 @@ public interface GcpConfiguration {
         return false;
     }
 
+    @Value.Default
+    default int maxNodes() {
+        return 10;
+    }
+
     List<String> zones();
 
     Optional<String> secondaryRangeNamePods();
@@ -86,4 +91,5 @@ public interface GcpConfiguration {
                 field,
                 field));
     }
+
 }
