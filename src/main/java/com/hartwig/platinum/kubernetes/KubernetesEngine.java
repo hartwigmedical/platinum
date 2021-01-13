@@ -5,6 +5,7 @@ import static java.time.Duration.ofSeconds;
 import static java.util.List.of;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Optional;
 
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
@@ -15,6 +16,8 @@ import com.google.api.services.container.v1beta1.model.Cluster;
 import com.google.api.services.container.v1beta1.model.CreateClusterRequest;
 import com.google.api.services.container.v1beta1.model.IPAllocationPolicy;
 import com.google.api.services.container.v1beta1.model.NodeConfig;
+import com.google.api.services.container.v1beta1.model.NodePool;
+import com.google.api.services.container.v1beta1.model.NodePoolAutoscaling;
 import com.google.api.services.container.v1beta1.model.Operation;
 import com.google.api.services.container.v1beta1.model.PrivateClusterConfig;
 import com.hartwig.platinum.Console;
@@ -57,10 +60,15 @@ public class KubernetesEngine {
         try {
             Cluster newCluster = new Cluster();
             newCluster.setName(cluster);
-            newCluster.setInitialNodeCount(1);
             newCluster.setNetwork(gcpConfiguration.networkUrl());
             newCluster.setSubnetwork(gcpConfiguration.subnetUrl());
             newCluster.setLocations(gcpConfiguration.zones());
+            NodePool defaultNodePool = new NodePool().setName("default")
+                    .setInitialNodeCount(1)
+                    .setAutoscaling(new NodePoolAutoscaling().setEnabled(true)
+                            .setMinNodeCount(1)
+                            .setMaxNodeCount(gcpConfiguration.maxNodes()));
+            newCluster.setNodePools(List.of(defaultNodePool));
 
             if (!gcpConfiguration.networkTags().isEmpty()) {
                 newCluster.setNodeConfig(new NodeConfig().setTags(gcpConfiguration.networkTags()));
