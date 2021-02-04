@@ -68,11 +68,11 @@ public class KubernetesEngine {
                     .setAutoscaling(new NodePoolAutoscaling().setEnabled(true)
                             .setMinNodeCount(1)
                             .setMaxNodeCount(gcpConfiguration.maxNodes()));
+            if (!gcpConfiguration.networkTags().isEmpty()) {
+                defaultNodePool.setConfig(new NodeConfig().setTags(gcpConfiguration.networkTags()));
+            }
             newCluster.setNodePools(List.of(defaultNodePool));
 
-            if (!gcpConfiguration.networkTags().isEmpty()) {
-                newCluster.setNodeConfig(new NodeConfig().setTags(gcpConfiguration.networkTags()));
-            }
             IPAllocationPolicy ipAllocationPolicy = new IPAllocationPolicy();
             if (gcpConfiguration.privateCluster()) {
                 PrivateClusterConfig privateClusterConfig = new PrivateClusterConfig();
