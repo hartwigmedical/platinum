@@ -1,5 +1,7 @@
 package com.hartwig.platinum;
 
+import static java.util.stream.Collectors.toList;
+
 import java.util.List;
 
 import com.google.api.services.cloudresourcemanager.CloudResourceManager;
@@ -11,6 +13,9 @@ import com.hartwig.platinum.iam.JsonKey;
 import com.hartwig.platinum.iam.PipelineServiceAccount;
 import com.hartwig.platinum.iam.ServiceAccountPrivateKey;
 import com.hartwig.platinum.kubernetes.KubernetesEngine;
+import com.hartwig.platinum.kubernetes.SampleArgument;
+import com.hartwig.platinum.p5sample.DecomposeSamples;
+import com.hartwig.platinum.p5sample.TumorNormalPair;
 import com.hartwig.platinum.storage.OutputBucket;
 
 import org.slf4j.Logger;
@@ -28,7 +33,7 @@ public class Platinum {
     private final Iam iam;
     private final CloudResourceManager resourceManager;
     private final KubernetesEngine kubernetesEngine;
-    private PlatinumConfiguration configuration;
+    private final PlatinumConfiguration configuration;
 
     public Platinum(final String runName, final String input, final Storage storage, final Iam iam,
             final CloudResourceManager resourceManager, final KubernetesEngine clusterProvider, final PlatinumConfiguration configuration) {
@@ -49,12 +54,20 @@ public class Platinum {
         String serviceAccountEmail = serviceAccount.findOrCreate();
         ServiceAccountPrivateKey privateKey = ServiceAccountPrivateKey.from(configuration, iam);
         JsonKey jsonKey = privateKey.create(gcpConfiguration.projectOrThrow(), serviceAccountEmail);
+        List<TumorNormalPair> pairs = DecomposeSamples.apply(configuration.samples());
         List<Job> submitted = kubernetesEngine.findOrCreate(runName,
-                configuration,
+                pairs,
                 jsonKey,
                 OutputBucket.from(storage).findOrCreate(runName, gcpConfiguration.regionOrThrow(), serviceAccountEmail, configuration),
-                serviceAccountEmail).submit(configuration);
+                serviceAccountEmail).submit(samples(configuration, pairs, runName));
         LOGGER.info("Platinum started {} pipelines on GCP", Console.bold(String.valueOf(submitted.size())));
         LOGGER.info("You can monitor their progress with: {}", Console.bold("./platinum status"));
+    }
+
+    private List<SampleArgument> samples(final PlatinumConfiguration configuration, final List<TumorNormalPair> pairs,
+            final String runName) {
+        return configuration.sampleIds().isEmpty()
+                ? pairs.stream().map(p -> SampleArgument.sampleJson(p, runName)).collect(toList())
+                : configuration.sampleIds().stream().map(SampleArgument::biopsy).collect(toList());
     }
 }

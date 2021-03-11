@@ -4,6 +4,8 @@ import static java.lang.String.format;
 
 import java.util.Map;
 
+import com.hartwig.platinum.p5sample.TumorNormalPair;
+
 import org.immutables.value.Value;
 
 @Value.Immutable
@@ -13,11 +15,12 @@ public interface SampleArgument {
 
     Map<String, String> arguments();
 
-    static SampleArgument sampleJson(final String sample) {
+    static SampleArgument sampleJson(final TumorNormalPair pair, final String runName) {
         return ImmutableSampleArgument.builder()
-                .id(sample.toLowerCase())
-                .putArguments("-sample_json", format("samples/%s", sample))
-                .putArguments("-set_id", sample)
+                .id(pair.name().toLowerCase())
+                .putArguments("-sample_json", format("samples/%s-%s", pair.name().toLowerCase(), runName))
+                .putArguments("-set_id", pair.name() + "-set")
+                .putArguments("-run_id", runName + pair.tumorIndex().map(ti -> "-" + ti).orElse(""))
                 .build();
     }
 

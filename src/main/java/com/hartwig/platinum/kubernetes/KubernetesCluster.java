@@ -22,23 +22,26 @@ public class KubernetesCluster {
     private final KubernetesComponent<Volume> configMap;
     private final String outputBucketName;
     private final String serviceAccountEmail;
+    private final PlatinumConfiguration configuration;
 
     KubernetesCluster(final String runName, final JobScheduler scheduler, final KubernetesComponent<Volume> serviceAccountSecret,
-            final KubernetesComponent<Volume> configMap, final String outputBucketName, final String serviceAccountEmail) {
+            final KubernetesComponent<Volume> configMap, final String outputBucketName, final String serviceAccountEmail,
+            final PlatinumConfiguration configuration) {
         this.runName = runName.toLowerCase();
         this.scheduler = scheduler;
         this.serviceAccountSecret = serviceAccountSecret;
         this.configMap = configMap;
         this.outputBucketName = outputBucketName;
         this.serviceAccountEmail = serviceAccountEmail;
+        this.configuration = configuration;
     }
 
-    public List<Job> submit(final PlatinumConfiguration configuration) {
+    public List<Job> submit(final List<SampleArgument> samples) {
         Volume configMapVolume = configMap.asKubernetes();
         Volume secretVolume = serviceAccountSecret.asKubernetes();
         Volume maybeJksVolume = new JksSecret().asKubernetes();
         List<Job> submitted = new ArrayList<>();
-        for (SampleArgument sample : samples(configuration)) {
+        for (SampleArgument sample : samples) {
             PipelineContainer pipelineContainer = new PipelineContainer(sample,
                     runName,
                     new PipelineArguments(configuration.argumentOverrides(), outputBucketName, serviceAccountEmail, runName, configuration),
@@ -54,13 +57,5 @@ public class KubernetesCluster {
                             toList()))));
         }
         return submitted;
-    }
-
-    private List<SampleArgument> samples(final PlatinumConfiguration configuration) {
-        return configuration.sampleIds().isEmpty() ? configuration.samples()
-                .keySet()
-                .stream()
-                .map(SampleArgument::sampleJson)
-                .collect(toList()) : configuration.sampleIds().stream().map(SampleArgument::biopsy).collect(toList());
     }
 }

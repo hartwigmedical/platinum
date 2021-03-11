@@ -46,7 +46,7 @@ public class PlatinumMain implements Callable<Integer> {
                     StorageOptions.newBuilder().setProjectId(configuration.gcp().projectOrThrow()).build().getService(),
                     IamProvider.get(),
                     ResourceManagerProvider.get(),
-                    new KubernetesEngine(ContainerProvider.get(), new ProcessRunner()),
+                    new KubernetesEngine(ContainerProvider.get(), new ProcessRunner(), configuration),
                     configuration).run();
             return 0;
         } catch (Exception e) {
