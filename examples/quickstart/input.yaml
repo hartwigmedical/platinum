@@ -1,4 +1,3 @@
-image: "eu.gcr.io/hmf-images/pipeline5:ccia-set-test"
 samples:
   - name: CPCT12345678T
     tumors:

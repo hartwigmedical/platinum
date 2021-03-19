@@ -42,9 +42,9 @@ public class PipelineConfigMapVolume implements KubernetesComponent<Volume> {
         return new VolumeBuilder().withName(name).editOrNewConfigMap().withName(name).endConfigMap().build();
     }
 
-    private String toJson(final ObjectMapper objectMapper, final TumorNormalPair p) {
+    private String toJson(final ObjectMapper objectMapper, final TumorNormalPair tumorNormalPair) {
         try {
-            return objectMapper.writeValueAsString(p);
+            return objectMapper.writeValueAsString(tumorNormalPair);
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }

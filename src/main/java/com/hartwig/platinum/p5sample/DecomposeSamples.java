@@ -13,12 +13,15 @@ import com.hartwig.platinum.config.SampleConfiguration;
 
 public class DecomposeSamples {
 
+    public static final int GCP_VM_LIMIT = 55;
+
     public static List<TumorNormalPair> apply(final List<SampleConfiguration> configurations) {
         List<TumorNormalPair> pairs = new ArrayList<>();
         for (SampleConfiguration sample : configurations) {
-            if (sample.name().length() >= 55) {
-                throw new IllegalArgumentException("Platinum can only support sample names up to 55 characters. Please shorten the sample "
-                        + "name (this name will not be used for file naming or in any headers)");
+            if (sample.name().length() >= GCP_VM_LIMIT) {
+                throw new IllegalArgumentException(
+                        "Platinum can only support sample names up to " + GCP_VM_LIMIT + " characters. Please shorten the sample "
+                                + "name (this name will not be used for file naming or in any headers)");
             }
             boolean indexTumors = sample.tumors().size() > 1;
             int tumorIndex = 1;
@@ -35,7 +38,7 @@ public class DecomposeSamples {
         return pairs;
     }
 
-    public static String tumorIndexString(final int tumorIndex) {
+    private static String tumorIndexString(final int tumorIndex) {
         return "t" + tumorIndex;
     }
 
