@@ -7,9 +7,9 @@ import java.util.Map;
 import java.util.Optional;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 
 import org.immutables.value.Value;
@@ -31,12 +31,17 @@ public interface PlatinumConfiguration {
         return GcpConfiguration.builder().build();
     }
 
+    @Value.Default
+    default boolean namespaced() {
+        return false;
+    }
+
     Optional<String> outputBucket();
 
     Optional<String> cmek();
 
     Optional<ServiceAccountConfiguration> serviceAccount();
-    
+
     Optional<String> cluster();
 
     Optional<String> apiUrl();
@@ -49,7 +54,7 @@ public interface PlatinumConfiguration {
 
     Map<String, String> argumentOverrides();
 
-    Map<String, JsonNode> samples();
+    List<SampleConfiguration> samples();
 
     List<String> sampleIds();
 
@@ -58,7 +63,7 @@ public interface PlatinumConfiguration {
     }
 
     static PlatinumConfiguration from(String inputFile) {
-        ObjectMapper objectMapper = new ObjectMapper();
+        ObjectMapper objectMapper = inputFile.endsWith("yaml") ? new ObjectMapper(new YAMLFactory()) : new ObjectMapper();
         objectMapper.registerModule(new Jdk8Module());
         try {
             PlatinumConfiguration platinumConfiguration = objectMapper.readValue(new File(inputFile), new TypeReference<>() {
@@ -71,7 +76,6 @@ public interface PlatinumConfiguration {
         } catch (IOException ioe) {
             throw new RuntimeException("Could not parse input", ioe);
         }
-
     }
 }
 

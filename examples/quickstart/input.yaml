@@ -1,0 +1,35 @@
+samples:
+  - name: CPCT12345678T
+    tumors:
+      - name: CPCT12345678T
+        fastq:
+          - read1: "gs://hmf-public/cancerPanel/CPCT12345678T_AHHKYHDSXX_S12_L001_R1_001.fastq.gz"
+            read2: "gs://hmf-public/cancerPanel/CPCT12345678T_AHHKYHDSXX_S12_L001_R2_001.fastq.gz"
+          - read1: "gs://hmf-public/cancerPanel/CPCT12345678T_AHHKYHDSXX_S12_L002_R1_001.fastq.gz"
+            read2: "gs://hmf-public/cancerPanel/CPCT12345678T_AHHKYHDSXX_S12_L002_R2_001.fastq.gz"
+          - read1: "gs://hmf-public/cancerPanel/CPCT12345678T_AHHKYHDSXX_S12_L003_R1_001.fastq.gz"
+            read2: "gs://hmf-public/cancerPanel/CPCT12345678T_AHHKYHDSXX_S12_L003_R2_001.fastq.gz"
+          - read1: "gs://hmf-public/cancerPanel/CPCT12345678T_AHHKYHDSXX_S12_L004_R1_001.fastq.gz"
+            read2: "gs://hmf-public/cancerPanel/CPCT12345678T_AHHKYHDSXX_S12_L004_R2_001.fastq.gz"
+      - name: CPCT12345678TII
+        fastq:
+          - read1: "gs://hmf-public/cancerPanel/CPCT12345678T_AHHKYHDSXX_S12_L001_R1_001.fastq.gz"
+            read2: "gs://hmf-public/cancerPanel/CPCT12345678T_AHHKYHDSXX_S12_L001_R2_001.fastq.gz"
+          - read1: "gs://hmf-public/cancerPanel/CPCT12345678T_AHHKYHDSXX_S12_L002_R1_001.fastq.gz"
+            read2: "gs://hmf-public/cancerPanel/CPCT12345678T_AHHKYHDSXX_S12_L002_R2_001.fastq.gz"
+          - read1: "gs://hmf-public/cancerPanel/CPCT12345678T_AHHKYHDSXX_S12_L003_R1_001.fastq.gz"
+            read2: "gs://hmf-public/cancerPanel/CPCT12345678T_AHHKYHDSXX_S12_L003_R2_001.fastq.gz"
+          - read1: "gs://hmf-public/cancerPanel/CPCT12345678T_AHHKYHDSXX_S12_L004_R1_001.fastq.gz"
+            read2: "gs://hmf-public/cancerPanel/CPCT12345678T_AHHKYHDSXX_S12_L004_R2_001.fastq.gz"
+    normal:
+      name: CPCT12345678R
+      fastq:
+        - read1: "gs://hmf-public/cancerPanel/CPCT12345678R_AHHKYHDSXX_S13_L001_R1_001.fastq.gz"
+          read2: "gs://hmf-public/cancerPanel/CPCT12345678R_AHHKYHDSXX_S13_L001_R2_001.fastq.gz"
+        - read1: "gs://hmf-public/cancerPanel/CPCT12345678R_AHHKYHDSXX_S13_L002_R1_001.fastq.gz"
+          read2: "gs://hmf-public/cancerPanel/CPCT12345678R_AHHKYHDSXX_S13_L002_R1_001.fastq.gz"
+        - read1: "gs://hmf-public/cancerPanel/CPCT12345678R_AHHKYHDSXX_S13_L001_R1_001.fastq.gz"
+          read2: "gs://hmf-public/cancerPanel/CPCT12345678R_AHHKYHDSXX_S13_L001_R1_001.fastq.gz"
+        - read1: "gs://hmf-public/cancerPanel/CPCT12345678R_AHHKYHDSXX_S13_L001_R1_001.fastq.gz"
+          read2: "gs://hmf-public/cancerPanel/CPCT12345678R_AHHKYHDSXX_S13_L001_R1_001.fastq.gz"
+

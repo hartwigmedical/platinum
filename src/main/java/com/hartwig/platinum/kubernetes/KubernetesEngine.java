@@ -24,6 +24,7 @@ import com.hartwig.platinum.Console;
 import com.hartwig.platinum.config.GcpConfiguration;
 import com.hartwig.platinum.config.PlatinumConfiguration;
 import com.hartwig.platinum.iam.JsonKey;
+import com.hartwig.platinum.p5sample.TumorNormalPair;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,10 +37,12 @@ public class KubernetesEngine {
     private static final Logger LOGGER = LoggerFactory.getLogger(KubernetesEngine.class);
     private final Container containerApi;
     private final ProcessRunner processRunner;
+    private final PlatinumConfiguration configuration;
 
-    public KubernetesEngine(final Container containerApi, final ProcessRunner processRunner) {
+    public KubernetesEngine(final Container containerApi, final ProcessRunner processRunner, final PlatinumConfiguration configuration) {
         this.containerApi = containerApi;
         this.processRunner = processRunner;
+        this.configuration = configuration;
     }
 
     private Optional<Cluster> find(final String path) throws IOException {
@@ -118,7 +121,7 @@ public class KubernetesEngine {
         }
     }
 
-    public KubernetesCluster findOrCreate(final String runName, final PlatinumConfiguration configuration, final JsonKey jsonKey,
+    public KubernetesCluster findOrCreate(final String runName, final List<TumorNormalPair> pairs, final JsonKey jsonKey,
             final String outputBucketName, final String serviceAccountEmail) {
         try {
             String clusterName = configuration.cluster().orElse(runName);
@@ -146,9 +149,10 @@ public class KubernetesEngine {
             return new KubernetesCluster(runName,
                     new JobScheduler(kubernetesClient),
                     new PipelineServiceAccountSecretVolume(jsonKey, kubernetesClient, "service-account-key"),
-                    new PipelineConfigMapVolume(configuration, kubernetesClient, runName),
+                    new PipelineConfigMapVolume(pairs, kubernetesClient, runName),
                     outputBucketName,
-                    serviceAccountEmail);
+                    serviceAccountEmail,
+                    configuration);
         } catch (Exception e) {
             throw new RuntimeException("Failed to create cluster", e);
         }

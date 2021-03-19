@@ -15,6 +15,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
@@ -63,13 +64,13 @@ public class KubernetesEngineTest {
         when(projects.locations()).thenReturn(locations);
         when(locations.clusters()).thenReturn(clusters);
         when(processRunner.execute(anyList())).thenReturn(true);
-        victim = new KubernetesEngine(container, processRunner);
+        victim = new KubernetesEngine(container, processRunner, CONFIGURATION);
     }
 
     @Test
     public void shouldReturnExistingInstanceIfFound() throws IOException {
         mocksForClusterExists();
-        victim.findOrCreate(RUN_NAME, CONFIGURATION, JSON_KEY, BUCKET, SERVICE_ACCOUNT);
+        victim.findOrCreate(RUN_NAME, Collections.emptyList(), JSON_KEY, BUCKET, SERVICE_ACCOUNT);
         verify(clusters).get(anyString());
         verify(clusters, never()).create(any(), any());
     }
@@ -88,7 +89,7 @@ public class KubernetesEngineTest {
 
         mockForClusterCreation();
 
-        victim.findOrCreate(RUN_NAME, CONFIGURATION, JSON_KEY, BUCKET, SERVICE_ACCOUNT);
+        victim.findOrCreate(RUN_NAME, Collections.emptyList(), JSON_KEY, BUCKET, SERVICE_ACCOUNT);
         verify(created).execute();
     }
 
@@ -112,7 +113,7 @@ public class KubernetesEngineTest {
         when(operationsGet.execute()).thenReturn(executedOperationsGet);
         when(executedOperationsGet.getStatus()).thenReturn(null).thenReturn("RUNNING").thenReturn("DONE");
 
-        victim.findOrCreate(RUN_NAME, CONFIGURATION, JSON_KEY, BUCKET, SERVICE_ACCOUNT);
+        victim.findOrCreate(RUN_NAME, Collections.emptyList(), JSON_KEY, BUCKET, SERVICE_ACCOUNT);
         //noinspection ResultOfMethodCallIgnored
         verify(executedOperationsGet, times(3)).getStatus();
     }
@@ -121,14 +122,14 @@ public class KubernetesEngineTest {
     public void shouldThrowIfGcloudCredentialFetchFails() {
         mocksForClusterExists();
         when(processRunner.execute(argThat(startsWithGcloud()))).thenReturn(false);
-        victim.findOrCreate(RUN_NAME, CONFIGURATION, JSON_KEY, BUCKET, SERVICE_ACCOUNT);
+        victim.findOrCreate(RUN_NAME, Collections.emptyList(), JSON_KEY, BUCKET, SERVICE_ACCOUNT);
     }
 
     @Test(expected = RuntimeException.class)
     public void shouldThrowIfKubectlCommandFails() {
         mocksForClusterExists();
         when(processRunner.execute(anyList())).thenReturn(true).thenReturn(false);
-        victim.findOrCreate(RUN_NAME, CONFIGURATION, JSON_KEY, BUCKET, SERVICE_ACCOUNT);
+        victim.findOrCreate(RUN_NAME, Collections.emptyList(), JSON_KEY, BUCKET, SERVICE_ACCOUNT);
     }
 
     @Test
@@ -152,12 +153,12 @@ public class KubernetesEngineTest {
         when(executedCreate.getName()).thenReturn("created");
         mockForClusterCreation();
         victim.findOrCreate(RUN_NAME,
-                PlatinumConfiguration.builder().from(CONFIGURATION).cluster("cluster").build(),
+                Collections.emptyList(),
                 JSON_KEY,
                 BUCKET,
                 SERVICE_ACCOUNT);
 
-        assertThat(createRequest.getValue().getCluster().getName()).isEqualTo("cluster");
+        assertThat(createRequest.getValue().getCluster().getName()).isEqualTo("runName");
     }
 
     public void mockForClusterCreation() throws IOException {
