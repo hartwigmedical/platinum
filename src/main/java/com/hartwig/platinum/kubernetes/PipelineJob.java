@@ -34,7 +34,7 @@ public class PipelineJob implements KubernetesComponent<JobSpec> {
     @Override
     public JobSpec asKubernetes() {
         JobSpecBuilder jobSpecBuilder = new JobSpecBuilder();
-        return jobSpecBuilder.withNewTemplate()
+        JobSpec spec = jobSpecBuilder.withNewTemplate()
                 .withNewSpec()
                 .withContainers(container)
                 .withRestartPolicy("Never")
@@ -42,5 +42,7 @@ public class PipelineJob implements KubernetesComponent<JobSpec> {
                 .endSpec()
                 .endTemplate()
                 .build();
+        spec.setAdditionalProperty("backoffLimit", 1);
+        return spec;
     }
 }

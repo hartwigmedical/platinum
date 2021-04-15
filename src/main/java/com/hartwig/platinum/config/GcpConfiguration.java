@@ -43,6 +43,11 @@ public interface GcpConfiguration {
     }
 
     @Value.Default
+    default boolean preemptibleCluster() {
+        return true;
+    }
+
+    @Value.Default
     default int maxNodes() {
         return 10;
     }

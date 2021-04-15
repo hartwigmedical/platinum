@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.hartwig.platinum.p5sample.TumorNormalPair;
 
+import io.fabric8.kubernetes.api.model.ConfigMapBuilder;
 import io.fabric8.kubernetes.api.model.Volume;
 import io.fabric8.kubernetes.api.model.VolumeBuilder;
 import io.fabric8.kubernetes.client.KubernetesClient;
@@ -32,13 +33,13 @@ public class PipelineConfigMapVolume implements KubernetesComponent<Volume> {
         kubernetesClient.configMaps()
                 .inNamespace(KubernetesCluster.NAMESPACE)
                 .withName(name)
-                .createOrReplaceWithNew()
-                .addToData(pairs.stream().collect(Collectors.toMap(p -> p.name().toLowerCase() + "-" + runName, p -> toJson(objectMapper, p))))
-                .withNewMetadata()
-                .withName(name)
-                .withNamespace(KubernetesCluster.NAMESPACE)
-                .endMetadata()
-                .done();
+                .createOrReplace(new ConfigMapBuilder().addToData(pairs.stream()
+                        .collect(Collectors.toMap(p -> p.name().toLowerCase() + "-" + runName, p -> toJson(objectMapper, p))))
+                        .withNewMetadata()
+                        .withName(name)
+                        .withNamespace(KubernetesCluster.NAMESPACE)
+                        .endMetadata()
+                        .build());
         return new VolumeBuilder().withName(name).editOrNewConfigMap().withName(name).endConfigMap().build();
     }
 
