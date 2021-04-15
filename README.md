@@ -148,7 +148,7 @@ In the example below we have one sample. A sample in this context is close to sy
 
 Each sample can have multiple tumors to a single normal. Note: when platinum runs it will actually run a pipeline for each pair. So in this example, 2 pipeline will run.
 
-Each fastq should be a two paths, one to each end of the pair. 
+Each FASTQ should be a two paths, one to each end of the pair. 
 
 ```yaml
 samples:

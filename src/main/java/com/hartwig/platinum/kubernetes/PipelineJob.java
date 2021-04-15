@@ -44,6 +44,5 @@ public class PipelineJob implements KubernetesComponent<JobSpec> {
                 .build();
         spec.setAdditionalProperty("backoffLimit", 1);
         return spec;
-
     }
 }

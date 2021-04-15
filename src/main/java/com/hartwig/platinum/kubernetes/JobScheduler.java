@@ -25,10 +25,10 @@ public class JobScheduler {
         if (existing == null) {
             return submit(job, spec);
         } else if (existing.getStatus().getFailed() == null || existing.getStatus().getFailed() == 0) {
-            LOGGER.info("Job [{}] alread existed, skipping", job.getName());
+            LOGGER.info("Job [{}] existed and completed successfully, skipping", job.getName());
             return false;
         } else {
-            LOGGER.info("Job [{}] existed but failed. Restarting", job.getName());
+            LOGGER.info("Job [{}] existed but failed, restarting", job.getName());
             kubernetesClient.batch().jobs().delete(existing);
             return submit(job, spec);
         }
