@@ -19,7 +19,7 @@ public interface SampleArgument {
         return ImmutableSampleArgument.builder()
                 .id(pair.name().toLowerCase())
                 .putArguments("-sample_json", format("samples/%s-%s", pair.name().toLowerCase(), runName))
-                .putArguments("-set_id", pair.name() + "-set")
+                .putArguments("-set_id", pair.name())
                 .putArguments("-run_id", runName + pair.tumorIndex().map(ti -> "-" + ti).orElse(""))
                 .build();
     }

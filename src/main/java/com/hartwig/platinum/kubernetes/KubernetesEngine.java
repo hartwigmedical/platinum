@@ -17,7 +17,6 @@ import com.google.api.services.container.v1beta1.model.CreateClusterRequest;
 import com.google.api.services.container.v1beta1.model.IPAllocationPolicy;
 import com.google.api.services.container.v1beta1.model.NodeConfig;
 import com.google.api.services.container.v1beta1.model.NodePool;
-import com.google.api.services.container.v1beta1.model.NodePoolAutoscaling;
 import com.google.api.services.container.v1beta1.model.Operation;
 import com.google.api.services.container.v1beta1.model.PrivateClusterConfig;
 import com.hartwig.platinum.Console;
@@ -66,13 +65,11 @@ public class KubernetesEngine {
             newCluster.setNetwork(gcpConfiguration.networkUrl());
             newCluster.setSubnetwork(gcpConfiguration.subnetUrl());
             newCluster.setLocations(gcpConfiguration.zones());
-            NodePool defaultNodePool = new NodePool().setName("default")
-                    .setInitialNodeCount(1)
-                    .setAutoscaling(new NodePoolAutoscaling().setEnabled(true)
-                            .setMinNodeCount(1)
-                            .setMaxNodeCount(gcpConfiguration.maxNodes()));
+            NodePool defaultNodePool = new NodePool().setName("default").setInitialNodeCount(2);
             if (!gcpConfiguration.networkTags().isEmpty()) {
-                defaultNodePool.setConfig(new NodeConfig().setTags(gcpConfiguration.networkTags()));
+                defaultNodePool.setConfig(new NodeConfig().setTags(gcpConfiguration.networkTags())
+                        .setPreemptible(gcpConfiguration.preemptibleCluster())
+                        .setDiskSizeGb(500));
             }
             newCluster.setNodePools(List.of(defaultNodePool));
 
@@ -141,7 +138,7 @@ public class KubernetesEngine {
                     gcpConfiguration.projectOrThrow()))) {
                 throw new RuntimeException("Failed to get credentials for cluster");
             }
-            if (!processRunner.execute(of("kubectl", "get", "pods"))) {
+            if (!processRunner.execute(of("kubectl", "get", "configmaps"))) {
                 throw new RuntimeException("Failed to run kubectl command against cluster");
             }
             LOGGER.info("Connection to cluster {} configured via gcloud and kubectl", Console.bold(clusterName));
@@ -152,7 +149,8 @@ public class KubernetesEngine {
                     new PipelineConfigMapVolume(pairs, kubernetesClient, runName),
                     outputBucketName,
                     serviceAccountEmail,
-                    configuration);
+                    configuration,
+                    Delay.threadSleep());
         } catch (Exception e) {
             throw new RuntimeException("Failed to create cluster", e);
         }

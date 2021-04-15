@@ -21,8 +21,6 @@ import com.hartwig.platinum.storage.OutputBucket;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.fabric8.kubernetes.api.model.batch.Job;
-
 public class Platinum {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Platinum.class);
@@ -55,12 +53,12 @@ public class Platinum {
         ServiceAccountPrivateKey privateKey = ServiceAccountPrivateKey.from(configuration, iam);
         JsonKey jsonKey = privateKey.create(gcpConfiguration.projectOrThrow(), serviceAccountEmail);
         List<TumorNormalPair> pairs = DecomposeSamples.apply(configuration.samples());
-        List<Job> submitted = kubernetesEngine.findOrCreate(runName,
+        int submitted = kubernetesEngine.findOrCreate(runName,
                 pairs,
                 jsonKey,
                 OutputBucket.from(storage).findOrCreate(runName, gcpConfiguration.regionOrThrow(), serviceAccountEmail, configuration),
                 serviceAccountEmail).submit(samples(configuration, pairs, runName));
-        LOGGER.info("Platinum started {} pipelines on GCP", Console.bold(String.valueOf(submitted.size())));
+        LOGGER.info("Platinum started {} pipelines on GCP", Console.bold(String.valueOf(submitted)));
         LOGGER.info("You can monitor their progress with: {}", Console.bold("./platinum status"));
     }
 

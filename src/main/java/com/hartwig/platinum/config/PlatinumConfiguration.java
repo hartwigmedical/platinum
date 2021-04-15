@@ -36,6 +36,8 @@ public interface PlatinumConfiguration {
         return false;
     }
 
+    Optional<BatchConfiguration> batch();
+
     Optional<String> outputBucket();
 
     Optional<String> cmek();

@@ -104,7 +104,7 @@ export REGION='your region'
 export EXPERIMENT_NAME='experiment_name'
 ./platinum configure -p $PROJECT -r $REGION
 ./platinum login
-./platinum run -n $EXPERIMENT_NAME -p $PROJECT -r $REGION -i examples/quickstart/input.json
+./platinum run -n $EXPERIMENT_NAME -p $PROJECT -r $REGION -i examples/quickstart/input.yaml
 ./platinum status
 # Keep checking this until you see the pod is complete. Then cleanup
 ./platinum cleanup -n $EXPERIMENT_NAME -p $PROJECT -r $REGION
@@ -142,54 +142,57 @@ You should run this command at least once, and whenever you use different creden
 ### Configuring Input
 
 The HMF pipeline takes paired-end FASTQ as input. This input should be uploaded to a bucket in [Google Cloud Storage](https://cloud.google.com/storage) (GCS) before running platinum. 
-Once the input FASTQ is in GCS you define a JSON configuration in the following format.
+Once the input FASTQ is in GCS you define a YAML or JSON configuration in the following format.
 
-Notes:
-- Reference in this context is our internal terminology for the "normal" sample (which acts as "non-tumor reference" to the tumor sample).
-- The first part of the path is the bucket, WITH NO `gs://` PREFIX!
+In the example below we have one sample. A sample in this context is close to synonymous with a patient or donor, and is a grouping of tumor sequencing data with blood/normal sequencing data.
 
+Each sample can have multiple tumors to a single normal. Note: when platinum runs it will actually run a pipeline for each pair. So in this example, 2 pipeline will run.
 
-```json
-{
-  "samples": {
-    "SAMPLE_1": {
-      "tumor": {
-        "type": "TUMOR",
-        "name": "SAMPLE_1_TUMOR",
-        "lanes": [
-          {
-            "laneNumber": "1",
-            "firstOfPairPath": "path/to/your/tumor_r1.fastq.gz",
-            "secondOfPairPath":  "path/to/your/tumor_r2.fastq.gz"
-          }
-        ]
-      },
-      "reference": {
-        "type": "REFERENCE",
-        "name": "SAMPLE_1_REFERENCE",
-        "lanes": [
-          {
-            "laneNumber": "1",
-            "firstOfPairPath": "path/to/your/reference_r1.fastq.gz",
-            "secondOfPairPath": "path/to/your/reference_r2.fastq.gz"
-          }
-        ]
-      }
-    }
-  }
-}
+Each fastq should be a two paths, one to each end of the pair. 
+
+```yaml
+samples:
+  - name: SAMPLE_NAME
+    tumors:
+      - name: TUMOR1
+        fastq:
+          - read1: "gs://hmf-public/cancerPanel/CPCT12345678T_AHHKYHDSXX_S12_L001_R1_001.fastq.gz"
+            read2: "gs://hmf-public/cancerPanel/CPCT12345678T_AHHKYHDSXX_S12_L001_R2_001.fastq.gz"
+          - read1: "gs://hmf-public/cancerPanel/CPCT12345678T_AHHKYHDSXX_S12_L002_R1_001.fastq.gz"
+            read2: "gs://hmf-public/cancerPanel/CPCT12345678T_AHHKYHDSXX_S12_L002_R2_001.fastq.gz"
+          - read1: "gs://hmf-public/cancerPanel/CPCT12345678T_AHHKYHDSXX_S12_L003_R1_001.fastq.gz"
+            read2: "gs://hmf-public/cancerPanel/CPCT12345678T_AHHKYHDSXX_S12_L003_R2_001.fastq.gz"
+          - read1: "gs://hmf-public/cancerPanel/CPCT12345678T_AHHKYHDSXX_S12_L004_R1_001.fastq.gz"
+            read2: "gs://hmf-public/cancerPanel/CPCT12345678T_AHHKYHDSXX_S12_L004_R2_001.fastq.gz"
+      - name: TUMOR2 #Optional
+        fastq:
+          - read1: "gs://hmf-public/cancerPanel/CPCT12345678T_AHHKYHDSXX_S12_L001_R1_001.fastq.gz"
+            read2: "gs://hmf-public/cancerPanel/CPCT12345678T_AHHKYHDSXX_S12_L001_R2_001.fastq.gz"
+          - read1: "gs://hmf-public/cancerPanel/CPCT12345678T_AHHKYHDSXX_S12_L002_R1_001.fastq.gz"
+            read2: "gs://hmf-public/cancerPanel/CPCT12345678T_AHHKYHDSXX_S12_L002_R2_001.fastq.gz"
+          - read1: "gs://hmf-public/cancerPanel/CPCT12345678T_AHHKYHDSXX_S12_L003_R1_001.fastq.gz"
+            read2: "gs://hmf-public/cancerPanel/CPCT12345678T_AHHKYHDSXX_S12_L003_R2_001.fastq.gz"
+          - read1: "gs://hmf-public/cancerPanel/CPCT12345678T_AHHKYHDSXX_S12_L004_R1_001.fastq.gz"
+            read2: "gs://hmf-public/cancerPanel/CPCT12345678T_AHHKYHDSXX_S12_L004_R2_001.fastq.gz"
+    normal:
+      name: NORMAL
+      fastq:
+        - read1: "gs://hmf-public/cancerPanel/CPCT12345678R_AHHKYHDSXX_S13_L001_R1_001.fastq.gz"
+          read2: "gs://hmf-public/cancerPanel/CPCT12345678R_AHHKYHDSXX_S13_L001_R2_001.fastq.gz"
+        - read1: "gs://hmf-public/cancerPanel/CPCT12345678R_AHHKYHDSXX_S13_L002_R1_001.fastq.gz"
+          read2: "gs://hmf-public/cancerPanel/CPCT12345678R_AHHKYHDSXX_S13_L002_R1_001.fastq.gz"
+        - read1: "gs://hmf-public/cancerPanel/CPCT12345678R_AHHKYHDSXX_S13_L001_R1_001.fastq.gz"
+          read2: "gs://hmf-public/cancerPanel/CPCT12345678R_AHHKYHDSXX_S13_L001_R1_001.fastq.gz"
+        - read1: "gs://hmf-public/cancerPanel/CPCT12345678R_AHHKYHDSXX_S13_L001_R1_001.fastq.gz"
+          read2: "gs://hmf-public/cancerPanel/CPCT12345678R_AHHKYHDSXX_S13_L001_R1_001.fastq.gz"
 ```
 
 ### Reference Genomes
 
 Platinum can be run with either a 37 or 38 reference genome release. The default is 38, but to use 37 instead, include these lines at the top of your input file, above the samples object:
-```json
-{
-  "argumentOverrides": {
-    "ref_genome_version": "37"
-  },
-  "samples": {
-...
+```yaml
+argumentOverrides: 
+    ref_genome_version: "37"
 ```
 
 Internally Platinum uses the GRCh37 assembly `Homo_sapiens.GRCh37.GATK.illumina.fasta`, and the GRCh38 no-alt assembly `GCA_000001405.15_GRCh38_no_alt_analysis_set.fna`.
@@ -204,14 +207,11 @@ want to use existing shared infrastructure for your platinum runs.
 To set this up you can pass platinum an existing service account name, cluster name and secret within that cluster which contains the 
 private key for the service account like so:
 
-```json
-{
-  "serviceAccount":{
-      "name": "your-service-account@your-service-account.iam.gserviceaccount.com",
-      "existingSecret": "your-secret",
-      "cluster": "your-cluster"
-  }
-}
+```yaml
+serviceAccount:
+  name: "your-service-account@your-service-account.iam.gserviceaccount.com",
+  existingSecret: "your-secret",
+  cluster: "your-cluster"
 ``` 
 
 ### Additional GCP Configuration
@@ -220,25 +220,20 @@ Platinum offers some additional configuration options to suit more complex GCP p
 setups requiring additional levels of security, in particular around the network.  These settings are configured in the JSON by adding a 
 sections `gcp`
 
-```json
-{
-  "gcp": {
-    "project": "hmf-crunch",
-    "region": "europe-west4",
-    "network": "kubernetes",
-    "subnet": "kubernetes",
-    "networkTags": [
-      "tag1"
-    ],
-    "zones": [
-      "europe-west4-a"
-    ],
-    "privateCluster": true,
-    "secondaryRangeNamePods": "pods",
-    "secondaryRangeNameServices": "services",
-    "masterIpv4CidrBlock" : "172.17.0.32/28"
-  }
-}
+```yaml
+gcp: 
+  project: "hmf-crunch",
+  region: "europe-west4",
+  network: "kubernetes",
+  subnet: "kubernetes",
+  networkTags: 
+    - "tag1"
+  zones:
+    - "europe-west4-a"
+  privateCluster: true,
+  secondaryRangeNamePods: "pods",
+  secondaryRangeNameServices: "services",
+  masterIpv4CidrBlock : "172.17.0.32/28"
 ```
 
 | Parameter | Description |
@@ -253,8 +248,8 @@ sections `gcp`
 | privateCluster | Makes the kubernetes cluster private, ie no nodes or master have public IP. Note that if this option is used, you will not be able to run platinum from a computer outside the VPC. You should create a VM within the VPC to run platinum |
 | secondaryRangeNamePods | A secondary IP range for pods in the cluster. This setting is only required if you use a shared VPC network. |
 | secondaryRangeNamePods | A secondary IP range for services in the cluster. This setting is only required if you use a shared VPC network. |
-| masterIpv4CidrBlock | Passed to the master when private cluster is enabled. Will default to "172.16.0.32/28" so only required if you have multiple private clusters in the same VPC | 
-
+| masterIpv4CidrBlock | Passed to the master when private cluster is enabled. Will default to "172.16.0.32/28" so only required if you have multiple private clusters in the same VPC |
+| preemptibleCluster | Use pre-emptible nodes in the cluster to save cost. Default is true |
 
 ### Running Pipelines
 
@@ -314,6 +309,21 @@ Getting large quota increases can be difficult if you have a new GCP account wit
 and not the bursty requirements of running a large pipeline. You may need to contact Google in order to explain your requirements. If you are having trouble getting
 the quotas you need for a large experiment, please reach out to us and we can help put you in touch with the right people. 
 
+### Batching
+
+When running large workloads you may find that Kubernetes cluster has a hard time keeping up, and you end up overwhelming it at startup. This would manifest itself in 
+many "Pending" or "Evicted" jobs.
+
+In these circumstances you can set up a batch configuration to more slowly submit the pipelines with the following configuration:
+
+```yaml
+batch:
+    size: 50
+    delay: 10
+```
+
+The delay is in minutes.
+
 ### Re-running Platinum
 
 Platinum can also re-use the output of a complete run to facilitate running new version on old data. When re-run platinum will leave input
@@ -322,14 +332,9 @@ again.
 
 To configure this add the following to your JSON and be sure to use the same project and experiment name when running platinum.
 
-```json
-{
-  "argumentOverrides": {
-    "starting_point": "calling_complete"
-  },
-  "samples": {
-  }
-}
+```yaml
+argumentOverrides:
+  starting_point: "calling_complete"
 ```
 
 The following starting points are supported, in order, as each starting point logically proceeds the others. See the [HMF cancer analysis pipeline](https://github.com/hartwigmedical/pipeline5)

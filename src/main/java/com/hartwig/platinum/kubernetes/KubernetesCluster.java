@@ -4,15 +4,19 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.Stream.concat;
 import static java.util.stream.Stream.of;
 
-import java.util.ArrayList;
 import java.util.List;
 
+import com.hartwig.platinum.config.BatchConfiguration;
 import com.hartwig.platinum.config.PlatinumConfiguration;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import io.fabric8.kubernetes.api.model.Volume;
-import io.fabric8.kubernetes.api.model.batch.Job;
 
 public class KubernetesCluster {
+
+    private final static Logger LOGGER = LoggerFactory.getLogger(KubernetesCluster.class);
 
     private final String runName;
     private final JobScheduler scheduler;
@@ -23,10 +27,11 @@ public class KubernetesCluster {
     private final String outputBucketName;
     private final String serviceAccountEmail;
     private final PlatinumConfiguration configuration;
+    private final Delay delay;
 
     KubernetesCluster(final String runName, final JobScheduler scheduler, final KubernetesComponent<Volume> serviceAccountSecret,
             final KubernetesComponent<Volume> configMap, final String outputBucketName, final String serviceAccountEmail,
-            final PlatinumConfiguration configuration) {
+            final PlatinumConfiguration configuration, final Delay delay) {
         this.runName = runName.toLowerCase();
         this.scheduler = scheduler;
         this.serviceAccountSecret = serviceAccountSecret;
@@ -34,13 +39,14 @@ public class KubernetesCluster {
         this.outputBucketName = outputBucketName;
         this.serviceAccountEmail = serviceAccountEmail;
         this.configuration = configuration;
+        this.delay = delay;
     }
 
-    public List<Job> submit(final List<SampleArgument> samples) {
+    public int submit(final List<SampleArgument> samples) {
         Volume configMapVolume = configMap.asKubernetes();
         Volume secretVolume = serviceAccountSecret.asKubernetes();
         Volume maybeJksVolume = new JksSecret().asKubernetes();
-        List<Job> submitted = new ArrayList<>();
+        int numSubmitted = 0;
         for (SampleArgument sample : samples) {
             PipelineContainer pipelineContainer = new PipelineContainer(sample,
                     runName,
@@ -48,14 +54,26 @@ public class KubernetesCluster {
                     secretVolume.getName(),
                     configMapVolume.getName(),
                     configuration.image());
-            submitted.add(scheduler.submit(new PipelineJob(runName,
+            if (scheduler.submit(new PipelineJob(runName,
                     sample.id(),
                     configuration.keystorePassword()
                             .map(p -> new JksEnabledContainer(pipelineContainer.asKubernetes(), maybeJksVolume, p).asKubernetes())
                             .orElse(pipelineContainer.asKubernetes()),
                     concat(of(configMapVolume, secretVolume), configuration.keystorePassword().map(p -> maybeJksVolume).stream()).collect(
-                            toList()))));
+                            toList())))) {
+                numSubmitted++;
+                if (configuration.batch().isPresent()) {
+                    BatchConfiguration batchConfiguration = configuration.batch().get();
+                    if (numSubmitted % batchConfiguration.size() == 0) {
+                        LOGGER.info("Batch of [{}] of [{}] scheduled, waiting [{}] minutes",
+                                (numSubmitted / batchConfiguration.size()),
+                                (samples.size() / batchConfiguration.size()),
+                                batchConfiguration.delay());
+                        delay.forMinutes(batchConfiguration.delay());
+                    }
+                }
+            }
         }
-        return submitted;
+        return numSubmitted;
     }
 }

@@ -2,6 +2,7 @@ package com.hartwig.platinum.kubernetes;
 
 import com.hartwig.platinum.iam.JsonKey;
 
+import io.fabric8.kubernetes.api.model.SecretBuilder;
 import io.fabric8.kubernetes.api.model.Volume;
 import io.fabric8.kubernetes.api.model.VolumeBuilder;
 import io.fabric8.kubernetes.client.KubernetesClient;
@@ -22,13 +23,12 @@ public class PipelineServiceAccountSecretVolume implements KubernetesComponent<V
             kubernetesClient.secrets()
                     .inNamespace(KubernetesCluster.NAMESPACE)
                     .withName(name)
-                    .createOrReplaceWithNew()
-                    .addToData(name, jsonKey.jsonBase64())
-                    .withNewMetadata()
-                    .withName(name)
-                    .withNamespace(KubernetesCluster.NAMESPACE)
-                    .endMetadata()
-                    .done();
+                    .createOrReplace(new SecretBuilder().addToData(name, jsonKey.jsonBase64())
+                            .withNewMetadata()
+                            .withName(name)
+                            .withNamespace(KubernetesCluster.NAMESPACE)
+                            .endMetadata()
+                            .build());
         }
         return new VolumeBuilder().withName(name).editOrNewSecret().withSecretName(name).endSecret().build();
     }
