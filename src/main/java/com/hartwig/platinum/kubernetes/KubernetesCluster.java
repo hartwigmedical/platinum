@@ -13,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.fabric8.kubernetes.api.model.Volume;
+import io.fabric8.kubernetes.client.KubernetesClientException;
 
 public class KubernetesCluster {
 
@@ -48,30 +49,39 @@ public class KubernetesCluster {
         Volume maybeJksVolume = new JksSecret().asKubernetes();
         int numSubmitted = 0;
         for (SampleArgument sample : samples) {
-            PipelineContainer pipelineContainer = new PipelineContainer(sample,
-                    runName,
-                    new PipelineArguments(configuration.argumentOverrides(), outputBucketName, serviceAccountEmail, runName, configuration),
-                    secretVolume.getName(),
-                    configMapVolume.getName(),
-                    configuration.image());
-            if (scheduler.submit(new PipelineJob(runName,
-                    sample.id(),
-                    configuration.keystorePassword()
-                            .map(p -> new JksEnabledContainer(pipelineContainer.asKubernetes(), maybeJksVolume, p).asKubernetes())
-                            .orElse(pipelineContainer.asKubernetes()),
-                    concat(of(configMapVolume, secretVolume), configuration.keystorePassword().map(p -> maybeJksVolume).stream()).collect(
-                            toList())))) {
-                numSubmitted++;
-                if (configuration.batch().isPresent()) {
-                    BatchConfiguration batchConfiguration = configuration.batch().get();
-                    if (numSubmitted % batchConfiguration.size() == 0) {
-                        LOGGER.info("Batch of [{}] of [{}] scheduled, waiting [{}] minutes",
-                                (numSubmitted / batchConfiguration.size()),
-                                (samples.size() / batchConfiguration.size()),
-                                batchConfiguration.delay());
-                        delay.forMinutes(batchConfiguration.delay());
+            try {
+                PipelineContainer pipelineContainer = new PipelineContainer(sample,
+                        runName,
+                        new PipelineArguments(configuration.argumentOverrides(),
+                                outputBucketName,
+                                serviceAccountEmail,
+                                runName,
+                                configuration),
+                        secretVolume.getName(),
+                        configMapVolume.getName(),
+                        configuration.image());
+                if (scheduler.submit(new PipelineJob(runName,
+                        sample.id(),
+                        configuration.keystorePassword()
+                                .map(p -> new JksEnabledContainer(pipelineContainer.asKubernetes(), maybeJksVolume, p).asKubernetes())
+                                .orElse(pipelineContainer.asKubernetes()),
+                        concat(of(configMapVolume, secretVolume),
+                                configuration.keystorePassword().map(p -> maybeJksVolume).stream()).collect(toList())))) {
+                    numSubmitted++;
+                    if (configuration.batch().isPresent()) {
+                        BatchConfiguration batchConfiguration = configuration.batch().get();
+                        if (numSubmitted % batchConfiguration.size() == 0) {
+                            LOGGER.info("Batch of [{}] of [{}] scheduled, waiting [{}] minutes",
+                                    (numSubmitted / batchConfiguration.size()),
+                                    (samples.size() / batchConfiguration.size()),
+                                    batchConfiguration.delay());
+                            delay.forMinutes(batchConfiguration.delay());
+                        }
                     }
                 }
+            } catch (KubernetesClientException e) {
+                LOGGER.info("Refreshing K8 client");
+                scheduler.refresh(configuration.cluster().orElse(runName), configuration.gcp());
             }
         }
         return numSubmitted;
