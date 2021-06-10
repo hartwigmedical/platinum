@@ -80,7 +80,7 @@ public class KubernetesCluster {
                     }
                 }
             } catch (KubernetesClientException e) {
-                LOGGER.info("Refreshing K8 client");
+                LOGGER.warn("Refreshing K8 client as an error was encountered. ", e);
                 scheduler.refresh(configuration.cluster().orElse(runName), configuration.gcp());
             }
         }
