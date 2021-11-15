@@ -26,12 +26,24 @@ public class DecomposeSamples {
             boolean indexTumors = sample.tumors().size() > 1;
             int tumorIndex = 1;
             for (RawDataConfiguration tumor : sample.tumors()) {
-                pairs.add(ImmutableTumorNormalPair.builder()
-                        .reference(ImmutableSample.builder().name(sample.normal().name()).lanes(toLanes(sample.normal().fastq())).build())
-                        .tumor(ImmutableSample.builder().name(tumor.name()).lanes(toLanes(tumor.fastq())).build())
-                        .tumorIndex(indexTumors ? Optional.of(tumorIndexString(tumorIndex)) : Optional.empty())
-                        .name(indexTumors ? sample.name() + "-" + tumorIndexString(tumorIndex) : sample.name())
-                        .build());
+                if (tumor.bam().isPresent()) {
+                    pairs.add(ImmutableTumorNormalPair.builder()
+                            .reference(ImmutableSample.builder().name(sample.normal().name()).bam(sample.normal().bam()).build())
+                            .tumor(ImmutableSample.builder().name(tumor.name()).bam(tumor.bam()).build())
+                            .tumorIndex(indexTumors ? Optional.of(tumorIndexString(tumorIndex)) : Optional.empty())
+                            .name(indexTumors ? sample.name() + "-" + tumorIndexString(tumorIndex) : sample.name())
+                            .build());
+                } else {
+                    pairs.add(ImmutableTumorNormalPair.builder()
+                            .reference(ImmutableSample.builder()
+                                    .name(sample.normal().name())
+                                    .lanes(toLanes(sample.normal().fastq()))
+                                    .build())
+                            .tumor(ImmutableSample.builder().name(tumor.name()).lanes(toLanes(tumor.fastq())).build())
+                            .tumorIndex(indexTumors ? Optional.of(tumorIndexString(tumorIndex)) : Optional.empty())
+                            .name(indexTumors ? sample.name() + "-" + tumorIndexString(tumorIndex) : sample.name())
+                            .build());
+                }
                 tumorIndex++;
             }
         }

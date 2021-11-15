@@ -1,6 +1,7 @@
 package com.hartwig.platinum.p5sample;
 
 import java.util.List;
+import java.util.Optional;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
@@ -12,6 +13,8 @@ import org.immutables.value.Value;
 public interface Sample {
 
     String name();
+
+    Optional<String> bam();
 
     List<Lane> lanes();
 

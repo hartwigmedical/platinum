@@ -1,6 +1,7 @@
 package com.hartwig.platinum.config;
 
 import java.util.List;
+import java.util.Optional;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
@@ -12,6 +13,8 @@ import org.immutables.value.Value;
 public interface RawDataConfiguration {
 
     String name();
+
+    Optional<String> bam();
 
     List<FastqConfiguration> fastq();
 }
