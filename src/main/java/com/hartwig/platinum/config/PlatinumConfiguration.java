@@ -60,6 +60,11 @@ public interface PlatinumConfiguration {
 
     List<String> sampleIds();
 
+    @Value.Default
+    default boolean createRun() {
+        return false;
+    }
+
     static ImmutablePlatinumConfiguration.Builder builder() {
         return ImmutablePlatinumConfiguration.builder();
     }

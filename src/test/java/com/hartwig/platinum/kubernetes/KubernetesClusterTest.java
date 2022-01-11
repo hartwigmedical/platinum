@@ -54,7 +54,8 @@ public class KubernetesClusterTest {
                 "output",
                 "sa@gcloud.com",
                 PlatinumConfiguration.builder().keystorePassword("changeit").gcp(GCP).build(),
-                delay);
+                delay,
+                TargetNodePool.defaultPool());
         victim.submit(List.of(sample("sample")));
         verify(scheduler).submit(job.capture());
         PipelineJob result = job.getValue();
@@ -75,7 +76,8 @@ public class KubernetesClusterTest {
                 "output",
                 "sa@gcloud.com",
                 PlatinumConfiguration.builder().gcp(GCP).build(),
-                delay);
+                delay,
+                TargetNodePool.defaultPool());
         victim.submit(SAMPLES);
         verify(scheduler).submit(job.capture());
         PipelineJob result = job.getValue();
@@ -91,7 +93,8 @@ public class KubernetesClusterTest {
                 "output",
                 "sa@gcloud.com",
                 PlatinumConfiguration.builder().gcp(GCP).batch(ImmutableBatchConfiguration.builder().size(2).delay(1).build()).build(),
-                delay);
+                delay,
+                TargetNodePool.defaultPool());
         victim.submit(List.of(sample("1"), sample("2"), sample("3"), sample("4"), sample("5")));
 
         ArgumentCaptor<Integer> delayCaptor = ArgumentCaptor.forClass(Integer.class);

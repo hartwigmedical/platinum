@@ -15,6 +15,8 @@ public interface SampleConfiguration {
 
     String name();
 
+    List<String> primaryTumorDoids();
+
     List<RawDataConfiguration> tumors();
 
     RawDataConfiguration normal();

@@ -29,10 +29,11 @@ public class KubernetesCluster {
     private final String serviceAccountEmail;
     private final PlatinumConfiguration configuration;
     private final Delay delay;
+    private final TargetNodePool targetNodePool;
 
     KubernetesCluster(final String runName, final JobScheduler scheduler, final KubernetesComponent<Volume> serviceAccountSecret,
             final KubernetesComponent<Volume> configMap, final String outputBucketName, final String serviceAccountEmail,
-            final PlatinumConfiguration configuration, final Delay delay) {
+            final PlatinumConfiguration configuration, final Delay delay, final TargetNodePool targetNodePool) {
         this.runName = runName.toLowerCase();
         this.scheduler = scheduler;
         this.serviceAccountSecret = serviceAccountSecret;
@@ -41,6 +42,7 @@ public class KubernetesCluster {
         this.serviceAccountEmail = serviceAccountEmail;
         this.configuration = configuration;
         this.delay = delay;
+        this.targetNodePool = targetNodePool;
     }
 
     public int submit(final List<SampleArgument> samples) {
@@ -66,7 +68,8 @@ public class KubernetesCluster {
                                 .map(p -> new JksEnabledContainer(pipelineContainer.asKubernetes(), maybeJksVolume, p).asKubernetes())
                                 .orElse(pipelineContainer.asKubernetes()),
                         concat(of(configMapVolume, secretVolume),
-                                configuration.keystorePassword().map(p -> maybeJksVolume).stream()).collect(toList())))) {
+                                configuration.keystorePassword().map(p -> maybeJksVolume).stream()).collect(toList()),
+                        targetNodePool))) {
                     numSubmitted++;
                     if (configuration.batch().isPresent()) {
                         BatchConfiguration batchConfiguration = configuration.batch().get();
@@ -79,7 +82,7 @@ public class KubernetesCluster {
                         }
                     }
                 }
-            }catch (KubernetesClientException e) {
+            } catch (KubernetesClientException e) {
                 LOGGER.warn("Refreshing K8 client as an error was encountered. ", e);
                 scheduler.refresh(configuration.cluster().orElse(runName), configuration.gcp());
             }
