@@ -21,6 +21,8 @@ public interface GcpConfiguration {
 
     Optional<String> region();
 
+    Optional<NodePoolConfiguration> nodePoolConfiguration();
+
     default String projectOrThrow() {
         return project().orElseThrow(missing("project"));
     }

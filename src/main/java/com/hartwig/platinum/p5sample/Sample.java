@@ -18,6 +18,8 @@ public interface Sample {
 
     List<Lane> lanes();
 
+    List<String> primaryTumorDoids();
+
     static ImmutableSample.Builder builder(final String name) {
         return ImmutableSample.builder().name(name);
     }

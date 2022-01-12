@@ -29,7 +29,11 @@ public class DecomposeSamples {
                 if (tumor.bam().isPresent()) {
                     pairs.add(ImmutableTumorNormalPair.builder()
                             .reference(ImmutableSample.builder().name(sample.normal().name()).bam(sample.normal().bam()).build())
-                            .tumor(ImmutableSample.builder().name(tumor.name()).bam(tumor.bam()).build())
+                            .tumor(ImmutableSample.builder()
+                                    .name(tumor.name())
+                                    .bam(tumor.bam())
+                                    .primaryTumorDoids(sample.primaryTumorDoids())
+                                    .build())
                             .tumorIndex(indexTumors ? Optional.of(tumorIndexString(tumorIndex)) : Optional.empty())
                             .name(indexTumors ? sample.name() + "-" + tumorIndexString(tumorIndex) : sample.name())
                             .build());
@@ -39,7 +43,11 @@ public class DecomposeSamples {
                                     .name(sample.normal().name())
                                     .lanes(toLanes(sample.normal().fastq()))
                                     .build())
-                            .tumor(ImmutableSample.builder().name(tumor.name()).lanes(toLanes(tumor.fastq())).build())
+                            .tumor(ImmutableSample.builder()
+                                    .name(tumor.name())
+                                    .lanes(toLanes(tumor.fastq()))
+                                    .primaryTumorDoids(sample.primaryTumorDoids())
+                                    .build())
                             .tumorIndex(indexTumors ? Optional.of(tumorIndexString(tumorIndex)) : Optional.empty())
                             .name(indexTumors ? sample.name() + "-" + tumorIndexString(tumorIndex) : sample.name())
                             .build());

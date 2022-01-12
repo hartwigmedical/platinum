@@ -98,10 +98,10 @@ public class KubernetesEngine {
                     Console.bold(gcpConfiguration.projectOrThrow()),
                     Console.bold(gcpConfiguration.regionOrThrow()));
             Failsafe.with(new RetryPolicy<>().withMaxDuration(ofMinutes(15))
-                    .withDelay(ofSeconds(15))
-                    .withMaxAttempts(-1)
-                    .handleResult(null)
-                    .handleResult("RUNNING"))
+                            .withDelay(ofSeconds(15))
+                            .withMaxAttempts(-1)
+                            .handleResult(null)
+                            .handleResult("RUNNING"))
                     .onFailure(objectExecutionCompletedEvent -> LOGGER.info("Waiting on operation, status is [{}]",
                             objectExecutionCompletedEvent.getResult()))
                     .get(() -> containerApi.projects()
@@ -143,6 +143,18 @@ public class KubernetesEngine {
             }
             LOGGER.info("Connection to cluster {} configured via gcloud and kubectl", Console.bold(clusterName));
             DefaultKubernetesClient kubernetesClient = new DefaultKubernetesClient();
+
+            TargetNodePool targetNodePool = configuration.gcp()
+                    .nodePoolConfiguration()
+                    .map(c -> TargetNodePool.fromConfig(c,
+                            configuration.samples().isEmpty() ? configuration.sampleIds().size() : configuration.samples().size()))
+                    .orElse(TargetNodePool.defaultPool());
+            if (!targetNodePool.isDefault()) {
+                new GcloudNodePool(processRunner).create(targetNodePool,
+                        serviceAccountEmail,
+                        clusterName,
+                        gcpConfiguration.projectOrThrow());
+            }
             return new KubernetesCluster(runName,
                     new JobScheduler(kubernetesClient),
                     new PipelineServiceAccountSecretVolume(jsonKey, kubernetesClient, "service-account-key"),
@@ -150,7 +162,8 @@ public class KubernetesEngine {
                     outputBucketName,
                     serviceAccountEmail,
                     configuration,
-                    Delay.threadSleep());
+                    Delay.threadSleep(),
+                    targetNodePool);
         } catch (Exception e) {
             throw new RuntimeException("Failed to create cluster", e);
         }
