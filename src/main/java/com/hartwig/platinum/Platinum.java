@@ -9,6 +9,7 @@ import com.google.api.services.iam.v1.Iam;
 import com.google.cloud.storage.Storage;
 import com.hartwig.platinum.config.GcpConfiguration;
 import com.hartwig.platinum.config.PlatinumConfiguration;
+import com.hartwig.platinum.config.Validation;
 import com.hartwig.platinum.iam.JsonKey;
 import com.hartwig.platinum.iam.PipelineServiceAccount;
 import com.hartwig.platinum.iam.ServiceAccountPrivateKey;

@@ -4,6 +4,7 @@ import java.util.concurrent.Callable;
 
 import com.google.cloud.storage.StorageOptions;
 import com.hartwig.platinum.config.PlatinumConfiguration;
+import com.hartwig.platinum.config.Validation;
 import com.hartwig.platinum.iam.IamProvider;
 import com.hartwig.platinum.iam.ResourceManagerProvider;
 import com.hartwig.platinum.kubernetes.ContainerProvider;
@@ -41,6 +42,7 @@ public class PlatinumMain implements Callable<Integer> {
     public Integer call() {
         try {
             PlatinumConfiguration configuration = addRegionAndProject(PlatinumConfiguration.from(inputJson));
+            Validation.apply(runName, configuration);
             new Platinum(runName,
                     inputJson,
                     StorageOptions.newBuilder().setProjectId(configuration.gcp().projectOrThrow()).build().getService(),

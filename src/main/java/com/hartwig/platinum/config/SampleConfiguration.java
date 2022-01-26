@@ -21,11 +21,7 @@ public interface SampleConfiguration {
 
     RawDataConfiguration normal();
 
-    default String asJsonString(final ObjectMapper objectMapper) {
-        try {
-            return objectMapper.writeValueAsString(this);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
+    static ImmutableSampleConfiguration.Builder builder() {
+        return ImmutableSampleConfiguration.builder();
     }
 }

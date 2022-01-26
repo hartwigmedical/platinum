@@ -17,4 +17,8 @@ public interface RawDataConfiguration {
     Optional<String> bam();
 
     List<FastqConfiguration> fastq();
+
+    static ImmutableRawDataConfiguration.Builder builder() {
+        return ImmutableRawDataConfiguration.builder();
+    }
 }
