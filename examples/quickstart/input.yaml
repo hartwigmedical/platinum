@@ -1,5 +1,5 @@
 samples:
-  - name: CPCT12345678T
+  - name: CPCT12345678
     tumors:
       - name: CPCT12345678T
         fastq:
