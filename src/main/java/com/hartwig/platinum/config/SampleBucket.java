@@ -13,8 +13,8 @@ public class SampleBucket {
 
     private static final String TUMOR_PATH = "TUMOR";
     private static final String NORMAL_PATH = "NORMAL";
-    public static final String R1 = "R1";
-    public static final String R2 = "R2";
+    public static final String R1 = "_R1";
+    public static final String R2 = "_R2";
     private final Bucket bucket;
 
     public SampleBucket(final Bucket bucket) {

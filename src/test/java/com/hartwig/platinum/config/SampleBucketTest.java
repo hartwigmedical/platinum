@@ -30,6 +30,7 @@ public class SampleBucketTest {
     @Test
     public void createsSampleConfigurationFromBucketPath() {
         Bucket bucket = mock(Bucket.class);
+        when(bucket.getName()).thenReturn("bucket");
         Page<Blob> samplePage = mock(Page.class);
         Blob setDirectory = blob("COLO829/");
         when(samplePage.iterateAll()).thenReturn(List.of(setDirectory));
@@ -67,10 +68,14 @@ public class SampleBucketTest {
         assertThat(sampleConfiguration.normal().name()).isEqualTo("COLO829R");
         assertThat(sampleConfiguration.tumors().get(0).name()).isEqualTo("COLO829T");
 
-        assertThat(sampleConfiguration.normal().fastq().get(0).read1()).isEqualTo("COLO829/NORMAL/COLO829R/COLO829R_R1_001.fastq.gz");
-        assertThat(sampleConfiguration.normal().fastq().get(0).read2()).isEqualTo("COLO829/NORMAL/COLO829R/COLO829R_R2_001.fastq.gz");
-        assertThat(sampleConfiguration.tumors().get(0).fastq().get(0).read1()).isEqualTo("COLO829/TUMOR/COLO829T/COLO829T_R1_001.fastq.gz");
-        assertThat(sampleConfiguration.tumors().get(0).fastq().get(0).read2()).isEqualTo("COLO829/TUMOR/COLO829T/COLO829T_R2_001.fastq.gz");
+        assertThat(sampleConfiguration.normal().fastq().get(0).read1()).isEqualTo("bucket/COLO829/NORMAL/COLO829R/COLO829R_R1_001.fastq"
+                + ".gz");
+        assertThat(sampleConfiguration.normal().fastq().get(0).read2()).isEqualTo("bucket/COLO829/NORMAL/COLO829R/COLO829R_R2_001.fastq"
+                + ".gz");
+        assertThat(sampleConfiguration.tumors().get(0).fastq().get(0).read1()).isEqualTo("bucket/COLO829/TUMOR/COLO829T/COLO829T_R1_001"
+                + ".fastq.gz");
+        assertThat(sampleConfiguration.tumors().get(0).fastq().get(0).read2()).isEqualTo("bucket/COLO829/TUMOR/COLO829T/COLO829T_R2_001"
+                + ".fastq.gz");
     }
 
     private Blob blob(final String name) {
