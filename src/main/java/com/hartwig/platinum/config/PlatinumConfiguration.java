@@ -60,6 +60,8 @@ public interface PlatinumConfiguration {
 
     List<String> sampleIds();
 
+    Optional<String> sampleBucket();
+
     @Value.Default
     default boolean createRun() {
         return false;
@@ -69,7 +71,7 @@ public interface PlatinumConfiguration {
         return ImmutablePlatinumConfiguration.builder();
     }
 
-    static PlatinumConfiguration from(String inputFile) {
+    static PlatinumConfiguration from(final String inputFile) {
         ObjectMapper objectMapper = inputFile.endsWith("yaml") ? new ObjectMapper(new YAMLFactory()) : new ObjectMapper();
         objectMapper.registerModule(new Jdk8Module());
         try {

@@ -9,6 +9,7 @@ import com.google.api.services.iam.v1.Iam;
 import com.google.cloud.storage.Storage;
 import com.hartwig.platinum.config.GcpConfiguration;
 import com.hartwig.platinum.config.PlatinumConfiguration;
+import com.hartwig.platinum.config.SampleBucket;
 import com.hartwig.platinum.config.Validation;
 import com.hartwig.platinum.iam.JsonKey;
 import com.hartwig.platinum.iam.PipelineServiceAccount;
@@ -53,7 +54,9 @@ public class Platinum {
         String serviceAccountEmail = serviceAccount.findOrCreate();
         ServiceAccountPrivateKey privateKey = ServiceAccountPrivateKey.from(configuration, iam);
         JsonKey jsonKey = privateKey.create(gcpConfiguration.projectOrThrow(), serviceAccountEmail);
-        List<TumorNormalPair> pairs = DecomposeSamples.apply(configuration.samples());
+        List<TumorNormalPair> pairs = DecomposeSamples.apply(configuration.sampleBucket()
+                .map(b -> new SampleBucket(storage.get(b)).apply())
+                .orElseGet(configuration::samples));
         int submitted = kubernetesEngine.findOrCreate(runName,
                 pairs,
                 jsonKey,
