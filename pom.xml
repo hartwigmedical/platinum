@@ -23,7 +23,7 @@
         <jackson.version>2.10.0</jackson.version>
         <failsafe.version>2.0.1</failsafe.version>
         <junit.version>4.13.1</junit.version>
-        <mockito.version>2.23.4</mockito.version>
+        <mockito.version>4.3.1</mockito.version>
         <assertj-core.version>3.8.0</assertj-core.version>
         <google-api-services-iam.version>v1-rev20200709-1.30.10</google-api-services-iam.version>
         <google-api-services-cloudresourcemanager.version>v1-rev20200720-1.30.10</google-api-services-cloudresourcemanager.version>
