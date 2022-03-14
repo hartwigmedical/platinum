@@ -20,6 +20,7 @@ import com.google.api.services.container.v1beta1.model.NodePool;
 import com.google.api.services.container.v1beta1.model.Operation;
 import com.google.api.services.container.v1beta1.model.PrivateClusterConfig;
 import com.hartwig.platinum.Console;
+import com.hartwig.platinum.config.BatchConfiguration;
 import com.hartwig.platinum.config.GcpConfiguration;
 import com.hartwig.platinum.config.PlatinumConfiguration;
 import com.hartwig.platinum.iam.JsonKey;
@@ -147,7 +148,11 @@ public class KubernetesEngine {
             TargetNodePool targetNodePool = configuration.gcp()
                     .nodePoolConfiguration()
                     .map(c -> TargetNodePool.fromConfig(c,
-                            configuration.samples().isEmpty() ? configuration.sampleIds().size() : configuration.samples().size()))
+                            configuration.batch()
+                                    .map(BatchConfiguration::size)
+                                    .orElse(configuration.samples().isEmpty()
+                                            ? configuration.sampleIds().size()
+                                            : configuration.samples().size())))
                     .orElse(TargetNodePool.defaultPool());
             if (!targetNodePool.isDefault()) {
                 new GcloudNodePool(processRunner).create(targetNodePool,

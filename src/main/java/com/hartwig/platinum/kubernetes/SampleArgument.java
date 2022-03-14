@@ -27,4 +27,12 @@ public interface SampleArgument {
     static SampleArgument biopsy(final String biopsy) {
         return ImmutableSampleArgument.builder().id(biopsy.toLowerCase()).putArguments("-biopsy", biopsy).build();
     }
+
+    static SampleArgument runId(final String biopsy, final Long runId) {
+        return ImmutableSampleArgument.builder()
+                .id(biopsy.toLowerCase())
+                .putArguments("-sbp_run_id", String.valueOf(runId))
+                .putArguments("-biopsy", biopsy)
+                .build();
+    }
 }

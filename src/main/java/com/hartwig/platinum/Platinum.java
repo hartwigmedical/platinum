@@ -3,6 +3,7 @@ package com.hartwig.platinum;
 import static java.util.stream.Collectors.toList;
 
 import java.util.List;
+import java.util.Objects;
 
 import com.google.api.services.cloudresourcemanager.CloudResourceManager;
 import com.google.api.services.iam.v1.Iam;
@@ -10,7 +11,6 @@ import com.google.cloud.storage.Storage;
 import com.hartwig.platinum.config.GcpConfiguration;
 import com.hartwig.platinum.config.PlatinumConfiguration;
 import com.hartwig.platinum.config.SampleBucket;
-import com.hartwig.platinum.config.Validation;
 import com.hartwig.platinum.iam.JsonKey;
 import com.hartwig.platinum.iam.PipelineServiceAccount;
 import com.hartwig.platinum.iam.ServiceAccountPrivateKey;
@@ -34,9 +34,11 @@ public class Platinum {
     private final CloudResourceManager resourceManager;
     private final KubernetesEngine kubernetesEngine;
     private final PlatinumConfiguration configuration;
+    private final ApiRerun apiRerun;
 
     public Platinum(final String runName, final String input, final Storage storage, final Iam iam,
-            final CloudResourceManager resourceManager, final KubernetesEngine clusterProvider, final PlatinumConfiguration configuration) {
+            final CloudResourceManager resourceManager, final KubernetesEngine clusterProvider, final PlatinumConfiguration configuration,
+            final ApiRerun apiRerun) {
         this.runName = runName;
         this.input = input;
         this.storage = storage;
@@ -44,6 +46,7 @@ public class Platinum {
         this.resourceManager = resourceManager;
         this.kubernetesEngine = clusterProvider;
         this.configuration = configuration;
+        this.apiRerun = apiRerun;
     }
 
     public void run() {
@@ -68,8 +71,20 @@ public class Platinum {
 
     private List<SampleArgument> samples(final PlatinumConfiguration configuration, final List<TumorNormalPair> pairs,
             final String runName) {
-        return configuration.sampleIds().isEmpty()
-                ? pairs.stream().map(p -> SampleArgument.sampleJson(p, runName)).collect(toList())
-                : configuration.sampleIds().stream().map(SampleArgument::biopsy).collect(toList());
+        if (configuration.sampleIds().isEmpty()) {
+            return pairs.stream().map(p -> SampleArgument.sampleJson(p, runName)).collect(toList());
+        } else {
+            if (configuration.apiUrl().isPresent()) {
+                return configuration.sampleIds().parallelStream().map(s -> {
+                    final Long runId = apiRerun.create(s);
+                    if (runId != null) {
+                        return SampleArgument.runId(s, runId);
+                    }
+                    return null;
+                }).filter(Objects::nonNull).collect(toList());
+            } else {
+                return configuration.sampleIds().stream().map(SampleArgument::biopsy).collect(toList());
+            }
+        }
     }
 }

@@ -3,6 +3,7 @@ package com.hartwig.platinum;
 import java.util.concurrent.Callable;
 
 import com.google.cloud.storage.StorageOptions;
+import com.hartwig.api.HmfApi;
 import com.hartwig.platinum.config.PlatinumConfiguration;
 import com.hartwig.platinum.config.Validation;
 import com.hartwig.platinum.iam.IamProvider;
@@ -43,13 +44,16 @@ public class PlatinumMain implements Callable<Integer> {
         try {
             PlatinumConfiguration configuration = addRegionAndProject(PlatinumConfiguration.from(inputJson));
             Validation.apply(runName, configuration);
+
+            final HmfApi api = HmfApi.create(HmfApi.PRODUCTION);
             new Platinum(runName,
                     inputJson,
                     StorageOptions.newBuilder().setProjectId(configuration.gcp().projectOrThrow()).build().getService(),
                     IamProvider.get(),
                     ResourceManagerProvider.get(),
                     new KubernetesEngine(ContainerProvider.get(), new ProcessRunner(), configuration),
-                    configuration).run();
+                    configuration,
+                    new ApiRerun(api.runs(), api.sets(), api.samples(), configuration.outputBucket().get(), "5.27.1")).run();
             return 0;
         } catch (Exception e) {
             LOGGER.error("Unexpected exception", e);

@@ -55,8 +55,8 @@ public class PipelineArguments {
             builder.put("-network_tags", String.join(",", gcpConfiguration.networkTags()));
         }
         if (platinumConfiguration.apiUrl().isPresent()) {
-            builder.put("-sbp_api_url", platinumConfiguration.apiUrl().get());
             builder.put("-profile", "production");
+            builder.put("-context", "RESEARCH");
         }
         if (platinumConfiguration.cmek().isPresent()) {
             builder.put("-cmek", platinumConfiguration.cmek().get());

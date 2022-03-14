@@ -28,13 +28,8 @@
         <google-api-services-iam.version>v1-rev20200709-1.30.10</google-api-services-iam.version>
         <google-api-services-cloudresourcemanager.version>v1-rev20200720-1.30.10</google-api-services-cloudresourcemanager.version>
         <google-api-services-container.version>v1beta1-rev20200724-1.30.10</google-api-services-container.version>
+        <java-client.version>1.14.1</java-client.version>
     </properties>
-
-    <scm>
-        <url>https://github.com/hartwigmedical/bamcomp</url>
-        <connection>scm:git:https://github.com/hartwigmedical/bamcomp.git</connection>
-        <developerConnection>scm:git:git@github.com:hartwigmedicalfoundation/bamcomp.git</developerConnection>
-    </scm>
 
     <dependencyManagement>
         <dependencies>
@@ -49,6 +44,13 @@
     </dependencyManagement>
 
     <dependencies>
+
+        <dependency>
+            <groupId>com.hartwig.api</groupId>
+            <artifactId>java-client</artifactId>
+            <version>${java-client.version}</version>
+        </dependency>
+
         <dependency>
             <groupId>com.google.cloud</groupId>
             <artifactId>google-cloud-container</artifactId>
@@ -139,6 +141,13 @@
     </dependencies>
 
     <build>
+        <extensions>
+            <extension>
+                <groupId>com.gkatzioura.maven.cloud</groupId>
+                <artifactId>google-storage-wagon</artifactId>
+                <version>1.0</version>
+            </extension>
+        </extensions>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -185,4 +194,19 @@
             </plugin>
         </plugins>
     </build>
+
+    <repositories>
+        <repository>
+            <id>oss-sonatype</id>
+            <name>oss-sonatype</name>
+            <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+        <repository>
+            <id>hmf-maven-repository-release</id>
+            <url>gs://hmf-maven-repository/release</url>
+        </repository>
+    </repositories>
 </project>
