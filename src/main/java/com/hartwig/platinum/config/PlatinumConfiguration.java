@@ -73,7 +73,7 @@ public interface PlatinumConfiguration {
 
     static PlatinumConfiguration from(final String inputFile) {
         ObjectMapper objectMapper = inputFile.endsWith("yaml") ? new ObjectMapper(new YAMLFactory()) : new ObjectMapper();
-        objectMapper.registerModule(new Jdk8Module());
+        objectMapper.findAndRegisterModules();
         try {
             PlatinumConfiguration platinumConfiguration = objectMapper.readValue(new File(inputFile), new TypeReference<>() {
             });

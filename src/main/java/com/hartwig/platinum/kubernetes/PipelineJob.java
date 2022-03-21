@@ -1,5 +1,7 @@
 package com.hartwig.platinum.kubernetes;
 
+import java.time.Duration;
+import java.time.Period;
 import java.util.List;
 import java.util.Map;
 
@@ -21,12 +23,14 @@ public class PipelineJob implements KubernetesComponent<JobSpec> {
     private final List<Volume> volumes;
     private final String name;
     private final TargetNodePool nodePool;
+    private final Duration ttl;
 
     public PipelineJob(final String run, final String sample, final Container container, final List<Volume> volumes,
-            final TargetNodePool nodePool) {
+            final TargetNodePool nodePool, final Duration ttl) {
         this.container = container;
         this.volumes = volumes;
         this.nodePool = nodePool;
+        this.ttl = ttl;
         this.name = sample + "-" + run;
     }
 
@@ -49,6 +53,9 @@ public class PipelineJob implements KubernetesComponent<JobSpec> {
         }
         JobSpec spec = dsl.endSpec().endTemplate().build();
         spec.setAdditionalProperty("backoffLimit", 1);
+        if (!ttl.equals(Duration.ZERO)) {
+            spec.setTtlSecondsAfterFinished(Math.toIntExact(ttl.getSeconds()));
+        }
         return spec;
     }
 }
