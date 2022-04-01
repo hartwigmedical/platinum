@@ -20,6 +20,15 @@ steps:
     env:
       - MAVEN_OPTS=-Dmaven.repo.local=/cache/.m2
 
+  - name: 'gcr.io/cloud-builders/docker'
+    id: Building Platinum image
+    args: [ 'build', '-t', 'eu.gcr.io/$PROJECT_ID/platinum:${SHORT_SHA}', '.', '--build-arg', 'VERSION=${SHORT_SHA}' ]
+
+  - name: 'gcr.io/cloud-builders/docker'
+    id: Push Platinum image
+    entrypoint: '/bin/bash'
+    args: [ '-c', "docker", "push", "eu.gcr.io/$PROJECT_ID/platinum:${SHORT_SHA}" ]
+
   - name: 'gcr.io/cloud-builders/gsutil'
     args:
       - '-m'
@@ -32,3 +41,5 @@ steps:
         name: 'm2_cache'
 options:
   machineType: 'N1_HIGHCPU_32'
+images:
+  - eu.gcr.io/$PROJECT_ID/platinum
