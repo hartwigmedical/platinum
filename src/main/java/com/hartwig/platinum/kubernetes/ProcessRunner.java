@@ -12,7 +12,7 @@ public class ProcessRunner {
         ProcessBuilder processBuilder = new ProcessBuilder(arguments);
         try {
             LOGGER.debug("Starting [{}]", arguments);
-            Process process = processBuilder.start();
+            Process process = processBuilder.inheritIO().start();
             process.waitFor();
             LOGGER.debug("Process [{}] complete with exit code {}", arguments, process.exitValue());
             return process.exitValue() == 0;
