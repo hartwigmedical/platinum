@@ -15,6 +15,8 @@ echo "Getting clusters:"
 gcloud container clusters get-credentials patient-cluster-verification-1 --region europe-west4 --project hmf-crunch
 echo "Containers:"
 gcloud container clusters list
+echo "Kubectl config:"
+kubectl config view
 echo "Alright running Platinum"
 export GOOGLE_APPLICATION_CREDENTIALS=$GOOGLE_APPLICATION_CREDENTIALS
 /usr/bin/java ${JAVA_OPTS} -jar /usr/share/platinum/bootstrap.jar "$@"
