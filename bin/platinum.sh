@@ -1,6 +1,9 @@
 #!/bin/bash
 
 echo "Running as: $(whoami)"
+echo "Environment:"
+env
+echo "Specifically ADC: $GOOGLE_APPLICATION_CREDENTIALS"
 echo "Gcloud config:"
 gcloud config list
 echo "Config directory:"
