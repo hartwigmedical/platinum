@@ -4,7 +4,8 @@ echo "Running as: $(whoami)"
 echo "Environment:"
 env
 echo "Specifically ADC: $GOOGLE_APPLICATION_CREDENTIALS"
-gcloud auth application-default print-access-token
+echo "Access token: $(gcloud auth application-default print-access-token)"
+echo "Key contents: $(cat $GOOGLE_APPLICATION_CREDENTIALS)"
 echo "Gcloud config:"
 gcloud config list
 echo "Config directory:"
