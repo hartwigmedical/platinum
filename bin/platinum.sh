@@ -16,6 +16,7 @@ gcloud container clusters get-credentials patient-cluster-verification-1 --regio
 echo "Containers:"
 gcloud container clusters list
 echo "Alright running Platinum"
+export GOOGLE_APPLICATION_CREDENTIALS=$GOOGLE_APPLICATION_CREDENTIALS
 /usr/bin/java ${JAVA_OPTS} -jar /usr/share/platinum/bootstrap.jar "$@"
 status=$?
 if [ ${status} -ne 0 ]; then
