@@ -18,6 +18,9 @@ gcloud container clusters list
 echo "Kubectl config:"
 kubectl config view
 echo "Control server:"
+echo "Ping:"
+ping -c1 192.168.23.50
+echo "Curl to https:"
 curl https://192.168.23.50
 echo "Alright running Platinum"
 export GOOGLE_APPLICATION_CREDENTIALS=$GOOGLE_APPLICATION_CREDENTIALS
