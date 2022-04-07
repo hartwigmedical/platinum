@@ -17,6 +17,8 @@ echo "Containers:"
 gcloud container clusters list
 echo "Kubectl config:"
 kubectl config view
+echo "Control server:"
+curl https://192.168.23.50
 echo "Alright running Platinum"
 export GOOGLE_APPLICATION_CREDENTIALS=$GOOGLE_APPLICATION_CREDENTIALS
 /usr/bin/java ${JAVA_OPTS} -jar /usr/share/platinum/bootstrap.jar "$@"
