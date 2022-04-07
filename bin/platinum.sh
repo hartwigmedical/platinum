@@ -5,6 +5,8 @@ echo "Gcloud config:"
 gcloud config list
 echo "Config directory:"
 ls -l /root/.config/gcloud
+echo "Getting clusters:"
+gcloud container clusters get-credentials patient-cluster-verification-1 --region europe-west4 --project hmf-crunch
 echo "Containers:"
 gcloud container clusters list
 echo "Alright running Platinum"
