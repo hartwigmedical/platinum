@@ -6,6 +6,7 @@ env
 echo "Specifically ADC: $GOOGLE_APPLICATION_CREDENTIALS"
 echo "Access token: $(gcloud auth application-default print-access-token)"
 echo "Key contents: $(cat $GOOGLE_APPLICATION_CREDENTIALS)"
+gcloud auth activate-service-account --key-file=/google-key.json
 echo "Gcloud config:"
 gcloud config list
 echo "Config directory:"
