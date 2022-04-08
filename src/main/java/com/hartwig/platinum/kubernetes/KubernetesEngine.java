@@ -142,9 +142,9 @@ public class KubernetesEngine {
             if (!processRunner.execute(of("gcloud", "container", "clusters", "list"))) {
                 throw new RuntimeException("Failed to list clusters");
             }
-            if (!processRunner.execute(of("kubectl", "get", "configmaps"))) {
-                throw new RuntimeException("Failed to run kubectl command against cluster");
-            }
+//            if (!processRunner.execute(of("kubectl", "get", "configmaps"))) {
+//                throw new RuntimeException("Failed to run kubectl command against cluster");
+//            }
             LOGGER.info("Connection to cluster {} configured via gcloud and kubectl", Console.bold(clusterName));
             DefaultKubernetesClient kubernetesClient = new DefaultKubernetesClient();
 
