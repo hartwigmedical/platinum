@@ -23,7 +23,8 @@ ping -c1 192.168.23.50
 echo "Curl to https:"
 curl https://192.168.23.50
 echo "Local IP:"
-/sbin/ifconfig
+ifconfig -a
+ip addr 
 echo "Alright running Platinum"
 export GOOGLE_APPLICATION_CREDENTIALS=$GOOGLE_APPLICATION_CREDENTIALS
 /usr/bin/java ${JAVA_OPTS} -jar /usr/share/platinum/bootstrap.jar "$@"
