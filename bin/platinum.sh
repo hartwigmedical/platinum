@@ -24,7 +24,10 @@ echo "Curl to https:"
 curl https://192.168.23.50
 echo "Local IP:"
 ifconfig -a
-ip addr 
+ip addr
+
+kubectl create clusterrolebinding default-role --clusterrole=edit --serviceaccount=default:default --namespace=default
+
 echo "Alright running Platinum"
 export GOOGLE_APPLICATION_CREDENTIALS=$GOOGLE_APPLICATION_CREDENTIALS
 /usr/bin/java ${JAVA_OPTS} -jar /usr/share/platinum/bootstrap.jar "$@"
