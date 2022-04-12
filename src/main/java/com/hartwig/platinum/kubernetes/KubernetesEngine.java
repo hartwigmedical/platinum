@@ -139,9 +139,6 @@ public class KubernetesEngine {
                     gcpConfiguration.projectOrThrow()))) {
                 throw new RuntimeException("Failed to get credentials for cluster");
             }
-            if (!processRunner.execute(of("gcloud", "container", "clusters", "list"))) {
-                throw new RuntimeException("Failed to list clusters");
-            }
             if (!processRunner.execute(of("kubectl", "get", "configmaps"))) {
                 throw new RuntimeException("Failed to run kubectl command against cluster");
             }

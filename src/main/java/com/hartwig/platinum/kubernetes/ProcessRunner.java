@@ -18,7 +18,7 @@ public class ProcessRunner {
             Process process = processBuilder.inheritIO().start();
             BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
             process.waitFor();
-            LOGGER.info(reader.lines().collect(Collectors.joining("\n")));
+            LOGGER.debug(reader.lines().collect(Collectors.joining("\n")));
             LOGGER.debug("Process [{}] complete with exit code {}", arguments, process.exitValue());
             return process.exitValue() == 0;
         } catch (Exception e) {
