@@ -4,6 +4,7 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.Stream.concat;
 import static java.util.stream.Stream.of;
 
+import java.time.Duration;
 import java.util.List;
 
 import com.hartwig.platinum.config.BatchConfiguration;
@@ -69,7 +70,8 @@ public class KubernetesCluster {
                                 .orElse(pipelineContainer.asKubernetes()),
                         concat(of(configMapVolume, secretVolume),
                                 configuration.keystorePassword().map(p -> maybeJksVolume).stream()).collect(toList()),
-                        targetNodePool))) {
+                        targetNodePool,
+                        configuration.gcp().jobTtl().orElse(Duration.ZERO)))) {
                     numSubmitted++;
                     if (configuration.batch().isPresent()) {
                         BatchConfiguration batchConfiguration = configuration.batch().get();

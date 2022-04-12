@@ -2,6 +2,7 @@ package com.hartwig.platinum.config;
 
 import static java.lang.String.format;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
@@ -59,6 +60,8 @@ public interface GcpConfiguration {
     Optional<String> secondaryRangeNamePods();
 
     Optional<String> secondaryRangeNameServices();
+
+    Optional<Duration> jobTtl();
 
     @Value.Default
     default String masterIpv4CidrBlock() {
