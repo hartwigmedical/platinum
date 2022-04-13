@@ -50,7 +50,8 @@ public class PipelineArguments {
                 .put("-region", gcpConfiguration.regionOrThrow())
                 .put("-network", gcpConfiguration.networkUrl())
                 .put("-subnet", gcpConfiguration.subnetUrl())
-                .put("-service_account_email", serviceAccountEmail);
+                .put("-service_account_email", serviceAccountEmail)
+                .put("-context", "PLATINUM");
         if (!gcpConfiguration.networkTags().isEmpty()) {
             builder.put("-network_tags", String.join(",", gcpConfiguration.networkTags()));
         }
