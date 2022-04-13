@@ -4,7 +4,7 @@ RUN apt update
 RUN apt --yes install openjdk-11-jre kubectl google-cloud-sdk 
 
 ADD platinum platinum
-ADD target/lib /usr/share/platinum/lib
-ADD target/platinum-local-SNAPSHOT.jar /usr/share/platinum/bootstrap.jar
+ADD target/platinum-local-SNAPSHOT.jar /target/platinum-local-SNAPSHOT.jar
+ADD target/lib /target/lib
 
 ENTRYPOINT ["./platinum"]
