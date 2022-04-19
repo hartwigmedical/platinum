@@ -1,14 +1,11 @@
 package com.hartwig.platinum.config;
 
-import com.google.common.collect.ImmutableList;
-
 public class Validation {
 
     private static final int MAX_LENGTH = 49;
 
     public static void apply(final String runName, final PlatinumConfiguration configuration) {
         checkSamplePlusRunNameIsNotTooLong(runName, configuration);
-        checkSampleNamesAreDifferentThanRawDataNames(configuration);
     }
 
     private static void checkSamplePlusRunNameIsNotTooLong(final String runName, final PlatinumConfiguration configuration) {
@@ -19,21 +16,6 @@ public class Validation {
                         runName,
                         sample.name(),
                         MAX_LENGTH));
-            }
-        }
-    }
-
-    private static void checkSampleNamesAreDifferentThanRawDataNames(final PlatinumConfiguration configuration) {
-        for (SampleConfiguration sample : configuration.samples()) {
-            for (RawDataConfiguration rawData : ImmutableList.<RawDataConfiguration>builder()
-                    .addAll(sample.tumors())
-                    .add(sample.normal())
-                    .build()) {
-                if (rawData.name().equals(sample.name())) {
-                    throw new IllegalArgumentException(String.format(
-                            "Invalid input: Tumor and normal names cannot be the same as the sample containing them [%s]",
-                            rawData.name()));
-                }
             }
         }
     }
