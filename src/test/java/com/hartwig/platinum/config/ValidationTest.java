@@ -5,30 +5,6 @@ import org.junit.Test;
 public class ValidationTest {
 
     @Test(expected = IllegalArgumentException.class)
-    public void failsValidationWhenSampleNameAndTumorNameEqual() {
-        Validation.apply("tumor",
-                PlatinumConfiguration.builder()
-                        .addSamples(SampleConfiguration.builder()
-                                .name("tumor")
-                                .addTumors(RawDataConfiguration.builder().name("tumor").build())
-                                .normal(RawDataConfiguration.builder().name("normal").build())
-                                .build())
-                        .build());
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void failsValidationWhenSampleNameAndNormalNameEqual() {
-        Validation.apply("tumor",
-                PlatinumConfiguration.builder()
-                        .addSamples(SampleConfiguration.builder()
-                                .name("normal")
-                                .addTumors(RawDataConfiguration.builder().name("tumor").build())
-                                .normal(RawDataConfiguration.builder().name("normal").build())
-                                .build())
-                        .build());
-    }
-
-    @Test(expected = IllegalArgumentException.class)
     public void failsValidationWhenSampleNamePlusRunNameExceeds49() {
         Validation.apply("this-is-a-long-run-name",
                 PlatinumConfiguration.builder()
