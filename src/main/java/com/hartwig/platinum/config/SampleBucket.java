@@ -35,7 +35,7 @@ public class SampleBucket {
     private Optional<RawDataConfiguration> extractFastq(final Blob blob, final String typePrefix) {
         final Optional<String> maybeSampleName =
                 StreamSupport.stream(bucket.list(Storage.BlobListOption.prefix(blob.getName() + typePrefix)).iterateAll().spliterator(),
-                        false).findFirst().map(BlobInfo::getName).map(s -> s.split("/")).map(s -> s[0]);
+                        false).findFirst().map(BlobInfo::getName).map(s -> s.split("/")).map(s -> s[2]);
         ImmutableRawDataConfiguration.Builder rawDataConfigurationBuilder = ImmutableRawDataConfiguration.builder();
         if (maybeSampleName.isPresent()) {
             String sampleName = maybeSampleName.get();
