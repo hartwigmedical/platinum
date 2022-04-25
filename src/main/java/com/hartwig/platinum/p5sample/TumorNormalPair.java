@@ -17,7 +17,7 @@ public interface TumorNormalPair {
     @JsonIgnore
     Optional<String> tumorIndex();
 
-    Sample reference();
+    Optional<Sample> reference();
 
-    Sample tumor();
+    Optional<Sample> tumor();
 }

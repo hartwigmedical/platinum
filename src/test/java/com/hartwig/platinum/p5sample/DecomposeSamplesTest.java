@@ -30,13 +30,13 @@ public class DecomposeSamplesTest {
         assertThat(pairs).hasSize(2);
         TumorNormalPair firstPair = pairs.get(0);
         assertThat(firstPair.name()).isEqualTo("sample-t1");
-        assertThat(firstPair.tumor().name()).isEqualTo("first_tumor");
-        assertThat(firstPair.reference().name()).isEqualTo("normal");
+        assertThat(firstPair.tumor().orElseThrow().name()).isEqualTo("first_tumor");
+        assertThat(firstPair.reference().orElseThrow().name()).isEqualTo("normal");
         assertThat(firstPair.tumorIndex()).hasValue("t1");
         TumorNormalPair secondPair = pairs.get(1);
         assertThat(secondPair.name()).isEqualTo("sample-t2");
-        assertThat(secondPair.tumor().name()).isEqualTo("second_tumor");
-        assertThat(secondPair.reference().name()).isEqualTo("normal");
+        assertThat(secondPair.tumor().orElseThrow().name()).isEqualTo("second_tumor");
+        assertThat(secondPair.reference().orElseThrow().name()).isEqualTo("normal");
         assertThat(secondPair.tumorIndex()).hasValue("t2");
     }
 
@@ -50,12 +50,12 @@ public class DecomposeSamplesTest {
                         ImmutableFastqConfiguration.builder().read1("normal_read1.fastq").read2("normal_read2.fastq").build()))
                 .build()));
         TumorNormalPair pair = pairs.get(0);
-        assertThat(pair.tumor().lanes()).containsOnly(ImmutableLane.builder()
+        assertThat(pair.tumor().orElseThrow().lanes()).containsOnly(ImmutableLane.builder()
                 .laneNumber("1")
                 .firstOfPairPath("first_tumor_read1.fastq")
                 .secondOfPairPath("first_tumor_read2.fastq")
                 .build());
-        assertThat(pair.reference().lanes()).containsOnly(ImmutableLane.builder()
+        assertThat(pair.reference().orElseThrow().lanes()).containsOnly(ImmutableLane.builder()
                 .laneNumber("1")
                 .firstOfPairPath("normal_read1.fastq")
                 .secondOfPairPath("normal_read2.fastq")

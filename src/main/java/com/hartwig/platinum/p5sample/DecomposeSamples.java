@@ -28,7 +28,7 @@ public class DecomposeSamples {
             for (RawDataConfiguration tumor : sample.tumors()) {
                 if (tumor.bam().isPresent()) {
                     pairs.add(ImmutableTumorNormalPair.builder()
-                            .reference(ImmutableSample.builder().name(sample.normal().name()).bam(sample.normal().bam()).build())
+                            .reference(sample.normal().map(n -> ImmutableSample.builder().name(n.name()).bam(n.bam()).build()))
                             .tumor(ImmutableSample.builder()
                                     .name(tumor.name())
                                     .bam(tumor.bam())
@@ -39,10 +39,7 @@ public class DecomposeSamples {
                             .build());
                 } else {
                     pairs.add(ImmutableTumorNormalPair.builder()
-                            .reference(ImmutableSample.builder()
-                                    .name(sample.normal().name())
-                                    .lanes(toLanes(sample.normal().fastq()))
-                                    .build())
+                            .reference(sample.normal().map(n -> ImmutableSample.builder().name(n.name()).lanes(toLanes(n.fastq())).build()))
                             .tumor(ImmutableSample.builder()
                                     .name(tumor.name())
                                     .lanes(toLanes(tumor.fastq()))

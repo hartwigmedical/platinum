@@ -65,12 +65,14 @@ public class SampleBucketTest {
         assertThat(result).hasSize(1);
         SampleConfiguration sampleConfiguration = result.get(0);
         assertThat(sampleConfiguration.name()).isEqualTo("COLO829");
-        assertThat(sampleConfiguration.normal().name()).isEqualTo("COLO829R");
+        assertThat(sampleConfiguration.normal().orElseThrow().name()).isEqualTo("COLO829R");
         assertThat(sampleConfiguration.tumors().get(0).name()).isEqualTo("COLO829T");
 
-        assertThat(sampleConfiguration.normal().fastq().get(0).read1()).isEqualTo("bucket/COLO829/NORMAL/COLO829R/COLO829R_R1_001.fastq"
+        assertThat(sampleConfiguration.normal().orElseThrow().fastq().get(0).read1()).isEqualTo("bucket/COLO829/NORMAL/COLO829R"
+                + "/COLO829R_R1_001.fastq"
                 + ".gz");
-        assertThat(sampleConfiguration.normal().fastq().get(0).read2()).isEqualTo("bucket/COLO829/NORMAL/COLO829R/COLO829R_R2_001.fastq"
+        assertThat(sampleConfiguration.normal().orElseThrow().fastq().get(0).read2()).isEqualTo("bucket/COLO829/NORMAL/COLO829R"
+                + "/COLO829R_R2_001.fastq"
                 + ".gz");
         assertThat(sampleConfiguration.tumors().get(0).fastq().get(0).read1()).isEqualTo("bucket/COLO829/TUMOR/COLO829T/COLO829T_R1_001"
                 + ".fastq.gz");
