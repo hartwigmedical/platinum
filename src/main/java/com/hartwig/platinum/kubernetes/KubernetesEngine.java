@@ -67,11 +67,13 @@ public class KubernetesEngine {
             newCluster.setSubnetwork(gcpConfiguration.subnetUrl());
             newCluster.setLocations(gcpConfiguration.zones());
             NodePool defaultNodePool = new NodePool().setName("default").setInitialNodeCount(2);
+            final NodeConfig nodeConfig = new NodeConfig().setPreemptible(gcpConfiguration.preemptibleCluster())
+                    .setOauthScopes(List.of("https://www.googleapis.com/auth/cloud-platform"))
+                    .setDiskSizeGb(500);
             if (!gcpConfiguration.networkTags().isEmpty()) {
-                defaultNodePool.setConfig(new NodeConfig().setTags(gcpConfiguration.networkTags())
-                        .setPreemptible(gcpConfiguration.preemptibleCluster())
-                        .setDiskSizeGb(500));
+                nodeConfig.setTags(gcpConfiguration.networkTags());
             }
+            defaultNodePool.setConfig(nodeConfig);
             newCluster.setNodePools(List.of(defaultNodePool));
 
             IPAllocationPolicy ipAllocationPolicy = new IPAllocationPolicy();

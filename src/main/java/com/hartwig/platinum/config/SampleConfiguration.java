@@ -1,6 +1,7 @@
 package com.hartwig.platinum.config;
 
 import java.util.List;
+import java.util.Optional;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -19,7 +20,7 @@ public interface SampleConfiguration {
 
     List<RawDataConfiguration> tumors();
 
-    RawDataConfiguration normal();
+    Optional<RawDataConfiguration> normal();
 
     static ImmutableSampleConfiguration.Builder builder() {
         return ImmutableSampleConfiguration.builder();
