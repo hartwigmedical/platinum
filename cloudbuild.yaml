@@ -1,5 +1,6 @@
 steps:
   - name: 'gcr.io/cloud-builders/gsutil'
+    id: 'Prime Maven cache'
     args:
       - '-m'
       - 'rsync'
@@ -10,9 +11,15 @@ steps:
       - path: '/cache/.m2'
         name: 'm2_cache'
 
+  - name: 'maven:3-jdk-11'
+    id: 'Set version for Maven'
+    entrypoint: mvn
+    args: [ 'versions:set', '-DnewVersion=${SHORT_SHA}' ]
+
   - name: 'gcr.io/cloud-builders/mvn'
     args:
-      - 'install'
+      - 'deploy'
+      - '-Drelease'
       - '--batch-mode'
     volumes:
       - path: '/cache/.m2'
