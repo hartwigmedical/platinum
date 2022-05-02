@@ -8,13 +8,18 @@ import java.util.Objects;
 import com.google.api.services.cloudresourcemanager.CloudResourceManager;
 import com.google.api.services.iam.v1.Iam;
 import com.google.cloud.storage.Storage;
+import com.hartwig.api.HmfApi;
 import com.hartwig.platinum.config.GcpConfiguration;
 import com.hartwig.platinum.config.PlatinumConfiguration;
 import com.hartwig.platinum.config.SampleBucket;
+import com.hartwig.platinum.iam.IamProvider;
 import com.hartwig.platinum.iam.JsonKey;
 import com.hartwig.platinum.iam.PipelineServiceAccount;
+import com.hartwig.platinum.iam.ResourceManagerProvider;
 import com.hartwig.platinum.iam.ServiceAccountPrivateKey;
+import com.hartwig.platinum.kubernetes.ContainerProvider;
 import com.hartwig.platinum.kubernetes.KubernetesEngine;
+import com.hartwig.platinum.kubernetes.ProcessRunner;
 import com.hartwig.platinum.kubernetes.SampleArgument;
 import com.hartwig.platinum.p5sample.DecomposeSamples;
 import com.hartwig.platinum.p5sample.TumorNormalPair;
@@ -47,6 +52,19 @@ public class Platinum {
         this.kubernetesEngine = clusterProvider;
         this.configuration = configuration;
         this.apiRerun = apiRerun;
+    }
+
+    public static Platinum create(final String runName, final PlatinumConfiguration configuration, final String input,
+            final Storage storage) {
+        final HmfApi api = HmfApi.create(HmfApi.PRODUCTION);
+        return new Platinum(runName,
+                input,
+                storage,
+                IamProvider.get(),
+                ResourceManagerProvider.get(),
+                new KubernetesEngine(ContainerProvider.get(), new ProcessRunner(), configuration),
+                configuration,
+                new ApiRerun(api.runs(), api.sets(), api.samples(), configuration.outputBucket().get(), "5.27.1"));
     }
 
     public void run() {
@@ -83,8 +101,9 @@ public class Platinum {
                     return null;
                 }).filter(Objects::nonNull).collect(toList());
             } else {
-                return configuration.sampleIds().stream().map(SampleArgument::biopsy).collect(toList());
+                return configuration.sampleIds().stream().map(s -> SampleArgument.biopsy(s, runName)).collect(toList());
             }
         }
     }
+
 }

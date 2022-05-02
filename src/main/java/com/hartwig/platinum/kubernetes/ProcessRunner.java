@@ -15,11 +15,8 @@ public class ProcessRunner {
         ProcessBuilder processBuilder = new ProcessBuilder(arguments);
         try {
             LOGGER.debug("Starting [{}]", arguments);
-            Process process = processBuilder.inheritIO().start();
-            BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+            Process process = processBuilder.start();
             process.waitFor();
-            LOGGER.debug(reader.lines().collect(Collectors.joining("\n")));
-            LOGGER.debug("Process [{}] complete with exit code {}", arguments, process.exitValue());
             return process.exitValue() == 0;
         } catch (Exception e) {
             LOGGER.warn("Unable to run [{}]", arguments, e);
