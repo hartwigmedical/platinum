@@ -36,6 +36,11 @@ public interface PlatinumConfiguration {
         return false;
     }
 
+    @Value.Default
+    default boolean inCluster() {
+        return false;
+    }
+
     Optional<BatchConfiguration> batch();
 
     Optional<String> outputBucket();

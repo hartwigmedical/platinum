@@ -130,21 +130,23 @@ public class KubernetesEngine {
             if (find(fullPath(gcpConfiguration.projectOrThrow(), gcpConfiguration.regionOrThrow(), clusterName)).isEmpty()) {
                 create(containerApi, parent, clusterName, gcpConfiguration);
             }
-            if (!processRunner.execute(of("gcloud",
-                    "container",
-                    "clusters",
-                    "get-credentials",
-                    clusterName,
-                    "--region",
-                    gcpConfiguration.regionOrThrow(),
-                    "--project",
-                    gcpConfiguration.projectOrThrow()))) {
-                throw new RuntimeException("Failed to get credentials for cluster");
+            if (!configuration.inCluster()) {
+                if (!processRunner.execute(of("gcloud",
+                        "container",
+                        "clusters",
+                        "get-credentials",
+                        clusterName,
+                        "--region",
+                        gcpConfiguration.regionOrThrow(),
+                        "--project",
+                        gcpConfiguration.projectOrThrow()))) {
+                    throw new RuntimeException("Failed to get credentials for cluster");
+                }
+                if (!processRunner.execute(of("kubectl", "get", "configmaps"))) {
+                    throw new RuntimeException("Failed to run kubectl command against cluster");
+                }
+                LOGGER.info("Connection to cluster {} configured via gcloud and kubectl", Console.bold(clusterName));
             }
-            if (!processRunner.execute(of("kubectl", "get", "configmaps"))) {
-                throw new RuntimeException("Failed to run kubectl command against cluster");
-            }
-            LOGGER.info("Connection to cluster {} configured via gcloud and kubectl", Console.bold(clusterName));
             DefaultKubernetesClient kubernetesClient = new DefaultKubernetesClient();
 
             TargetNodePool targetNodePool = configuration.gcp()
