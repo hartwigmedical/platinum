@@ -17,6 +17,7 @@ steps:
     args: [ 'versions:set', '-DnewVersion=${SHORT_SHA}' ]
 
   - name: 'gcr.io/cloud-builders/mvn'
+    id: 'Deploy JAR to Maven'
     args:
       - 'deploy'
       - '-Drelease'
@@ -28,7 +29,7 @@ steps:
       - MAVEN_OPTS=-Dmaven.repo.local=/cache/.m2
 
   - name: 'gcr.io/cloud-builders/docker'
-    id: Building Platinum image
+    id: Build Platinum image
     args: [ 'build', '-t', 'eu.gcr.io/$PROJECT_ID/platinum:${SHORT_SHA}', '.', '--build-arg', 'VERSION=${SHORT_SHA}' ]
 
   - name: 'gcr.io/cloud-builders/docker'
