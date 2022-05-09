@@ -28,7 +28,7 @@ public class PlatinumMain implements Callable<Integer> {
 
     @Option(names = { "-i" },
             required = true,
-            description = "JSON file that contains arguments to be passed to the pipeline jobs and a list of samples")
+            description = "JSON or YAML file that contains arguments to be passed to the pipeline jobs and a list of samples")
     private String inputJson;
 
     @Option(names = { "-p" },
