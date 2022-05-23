@@ -44,20 +44,22 @@ public class PipelineArguments {
 
     private Map<String, String> fixed(final String secretsPath, final String serviceAccountKeySecretName) {
         GcpConfiguration gcpConfiguration = platinumConfiguration.gcp();
-        ImmutableMap.Builder<String, String> builder = ImmutableMap.<String, String>builder().put("-output_bucket", outputBucket)
+        ImmutableMap.Builder<String, String> builder = ImmutableMap.<String, String>builder()
+                .put("-output_bucket", outputBucket)
                 .put("-private_key_path", format("%s/%s", secretsPath, serviceAccountKeySecretName))
                 .put("-project", gcpConfiguration.projectOrThrow())
                 .put("-region", gcpConfiguration.regionOrThrow())
                 .put("-network", gcpConfiguration.networkUrl())
                 .put("-subnet", gcpConfiguration.subnetUrl())
-                .put("-service_account_email", serviceAccountEmail)
-                .put("-context", "PLATINUM");
+                .put("-service_account_email", serviceAccountEmail);
         if (!gcpConfiguration.networkTags().isEmpty()) {
             builder.put("-network_tags", String.join(",", gcpConfiguration.networkTags()));
         }
         if (platinumConfiguration.apiUrl().isPresent()) {
             builder.put("-profile", "production");
             builder.put("-context", "RESEARCH");
+        } else {
+            builder.put("-context", "PLATINUM");
         }
         if (platinumConfiguration.cmek().isPresent()) {
             builder.put("-cmek", platinumConfiguration.cmek().get());

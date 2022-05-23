@@ -53,7 +53,7 @@ public class PlatinumMain implements Callable<Integer> {
                     ResourceManagerProvider.get(),
                     new KubernetesEngine(ContainerProvider.get(), new ProcessRunner(), configuration),
                     configuration,
-                    new ApiRerun(api.runs(), api.sets(), api.samples(), configuration.outputBucket().get(), "5.27.1")).run();
+                    new ApiRerun(api.runs(), api.sets(), api.samples(), configuration.outputBucket().get(), "5.28.2")).run();
             return 0;
         } catch (Exception e) {
             LOGGER.error("Unexpected exception", e);
