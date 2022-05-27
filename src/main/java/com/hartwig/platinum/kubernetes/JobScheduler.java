@@ -19,9 +19,11 @@ public class JobScheduler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(JobScheduler.class);
     private KubernetesClient kubernetesClient;
+    private final boolean retryFailed;
 
-    public JobScheduler(final KubernetesClient kubernetesClient) {
+    public JobScheduler(final KubernetesClient kubernetesClient, final boolean retryFailed) {
         this.kubernetesClient = kubernetesClient;
+        this.retryFailed = retryFailed;
     }
 
     boolean submit(final PipelineJob job) {
@@ -33,9 +35,14 @@ public class JobScheduler {
             LOGGER.info("Job [{}] existed and completed successfully, skipping", job.getName());
             return false;
         } else {
-            LOGGER.info("Job [{}] existed but failed, restarting", job.getName());
-            kubernetesClient.batch().jobs().delete(existing);
-            return submit(job, spec);
+            if (retryFailed) {
+                LOGGER.info("Job [{}] existed but failed, restarting", job.getName());
+                kubernetesClient.batch().jobs().delete(existing);
+                return submit(job, spec);
+            } else {
+                LOGGER.info("Job [{}] existed but failed, skipping", job.getName());
+                return false;
+            }
         }
     }
 

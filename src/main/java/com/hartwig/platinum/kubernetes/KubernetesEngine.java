@@ -165,7 +165,7 @@ public class KubernetesEngine {
                         gcpConfiguration.projectOrThrow());
             }
             return new KubernetesCluster(runName,
-                    new JobScheduler(kubernetesClient),
+                    new JobScheduler(kubernetesClient, configuration.retryFailed()),
                     new PipelineServiceAccountSecretVolume(jsonKey, kubernetesClient, "service-account-key"),
                     new PipelineConfigMapVolume(pairs, kubernetesClient, runName),
                     outputBucketName,

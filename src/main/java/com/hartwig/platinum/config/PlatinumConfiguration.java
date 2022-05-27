@@ -72,6 +72,11 @@ public interface PlatinumConfiguration {
         return false;
     }
 
+    @Value.Default
+    default boolean retryFailed() {
+        return false;
+    }
+
     static ImmutablePlatinumConfiguration.Builder builder() {
         return ImmutablePlatinumConfiguration.builder();
     }
