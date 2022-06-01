@@ -52,7 +52,7 @@ public class PipelineJob implements KubernetesComponent<JobSpec> {
                     .withTolerations(List.of(new Toleration("NoSchedule", "reserved-pool", "Equal", null, "true")));
         }
         JobSpec spec = dsl.endSpec().endTemplate().build();
-        spec.setAdditionalProperty("backoffLimit", 1);
+        spec.setBackoffLimit(1);
         if (!ttl.equals(Duration.ZERO)) {
             spec.setTtlSecondsAfterFinished(Math.toIntExact(ttl.getSeconds()));
         }
