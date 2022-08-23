@@ -40,11 +40,6 @@ public class PipelineContainer implements KubernetesComponent<Container> {
         container.setCommand(command);
         container.setVolumeMounts(List.of(new VolumeMountBuilder().withMountPath(SAMPLES_PATH).withName(configMapName).build(),
                 new VolumeMountBuilder().withMountPath(SECRETS_PATH).withName(serviceAccountKeySecretName).build()));
-        final ResourceRequirements resourceRequirements = new ResourceRequirements();
-        final Map<String, Quantity> resources = Map.of("cpu", new Quantity("100m"), "memory", new Quantity("512Mi"));
-        resourceRequirements.setLimits(resources);
-        resourceRequirements.setRequests(resources);
-        container.setResources(resourceRequirements);
         return container;
     }
 }
