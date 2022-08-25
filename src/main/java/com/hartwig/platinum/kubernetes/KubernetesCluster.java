@@ -62,7 +62,7 @@ public class KubernetesCluster {
                                 configuration),
                         secretVolume.getName(),
                         configMapVolume.getName(),
-                        configuration.image());
+                        configuration.image(), configuration);
                 if (scheduler.submit(new PipelineJob(runName,
                         sample.id(),
                         configuration.keystorePassword()
