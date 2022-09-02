@@ -10,7 +10,6 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 
 import org.immutables.value.Value;
 import org.immutables.value.Value.Immutable;
@@ -23,7 +22,7 @@ public interface PlatinumConfiguration {
 
     @Value.Default
     default String image() {
-        return "eu.gcr.io/hmf-images/pipeline5:platinum-5.18";
+        return "eu.gcr.io/hmf-images/pipeline5:platinum-5.28";
     }
 
     @Value.Default
