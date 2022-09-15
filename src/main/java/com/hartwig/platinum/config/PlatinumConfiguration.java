@@ -22,7 +22,7 @@ public interface PlatinumConfiguration {
 
     @Value.Default
     default String image() {
-        return "eu.gcr.io/hmf-images/pipeline5:platinum-5.28";
+        return "eu.gcr.io/hmf-images/pipeline5:public-v5.29";
     }
 
     @Value.Default

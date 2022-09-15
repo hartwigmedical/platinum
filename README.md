@@ -60,12 +60,12 @@ Different inputs can lead to variation in cost and runtime, but to give some ind
 * Tumor DNA 100x depth and 4 lanes
 * The following minimum quotas (see [Scaling Up](#scaling-up) for more info on Quotas)
 
-Quota | Value |
------ | ------ |
-CPU   | 768
-CPU_ALL_REGIONS | 768 |
-PREEMPTIBLE_LOCAL_SSD_TOTAL_GB | 9TB |
-PERSISTENT_DISK_SSD_GB | 1TB |
+| Quota                          | Value |
+|--------------------------------|-------|
+| CPU                            | 768   |
+| CPU_ALL_REGIONS                | 768   |
+| PREEMPTIBLE_LOCAL_SSD_TOTAL_GB | 9TB   |
+| PERSISTENT_DISK_SSD_GB         | 1TB   |
 
 With these settings we get a cost of approximately €20 and runtime of 15 hours.
 
@@ -96,7 +96,7 @@ these installed:
 
 ### Quickstart
 
-Run the following from the root of this repo where `examples/quickstart/input.json` is your input
+Run the following from the root of this repo where `examples/quickstart/colomini.json` is your input
 file (make sure to adjust the `export` lines):
 
 ```shell script
@@ -106,7 +106,7 @@ export REGION='your region'
 export EXPERIMENT_NAME='experiment_name'
 ./platinum configure -p $PROJECT -r $REGION
 ./platinum login
-./platinum run -n $EXPERIMENT_NAME -p $PROJECT -r $REGION -i examples/quickstart/input.yaml
+./platinum run -n $EXPERIMENT_NAME -p $PROJECT -r $REGION -i examples/quickstart/colomini.yaml
 ./platinum status
 # Keep checking this until you see the pod is complete. Then cleanup
 ./platinum cleanup -n $EXPERIMENT_NAME -p $PROJECT -r $REGION
@@ -158,35 +158,35 @@ samples:
     tumors:
       - name: TUMOR1
         fastq:
-          - read1: "gs://hmf-public/cancerPanel/CPCT12345678T_AHHKYHDSXX_S12_L001_R1_001.fastq.gz"
-            read2: "gs://hmf-public/cancerPanel/CPCT12345678T_AHHKYHDSXX_S12_L001_R2_001.fastq.gz"
-          - read1: "gs://hmf-public/cancerPanel/CPCT12345678T_AHHKYHDSXX_S12_L002_R1_001.fastq.gz"
-            read2: "gs://hmf-public/cancerPanel/CPCT12345678T_AHHKYHDSXX_S12_L002_R2_001.fastq.gz"
-          - read1: "gs://hmf-public/cancerPanel/CPCT12345678T_AHHKYHDSXX_S12_L003_R1_001.fastq.gz"
-            read2: "gs://hmf-public/cancerPanel/CPCT12345678T_AHHKYHDSXX_S12_L003_R2_001.fastq.gz"
-          - read1: "gs://hmf-public/cancerPanel/CPCT12345678T_AHHKYHDSXX_S12_L004_R1_001.fastq.gz"
-            read2: "gs://hmf-public/cancerPanel/CPCT12345678T_AHHKYHDSXX_S12_L004_R2_001.fastq.gz"
+          - read1: "gs://hmf-public/fastq/COLO829Mini/COLO829v003T_AHHKYHDSXX_S12_L001_R1_001.fastq.gz"
+            read2: "gs://hmf-public/fastq/COLO829Mini/COLO829v003T_AHHKYHDSXX_S12_L001_R2_001.fastq.gz"
+          - read1: "gs://hmf-public/fastq/COLO829Mini/COLO829v003T_AHHKYHDSXX_S12_L002_R1_001.fastq.gz"
+            read2: "gs://hmf-public/fastq/COLO829Mini/COLO829v003T_AHHKYHDSXX_S12_L002_R2_001.fastq.gz"
+          - read1: "gs://hmf-public/fastq/COLO829Mini/COLO829v003T_AHHKYHDSXX_S12_L003_R1_001.fastq.gz"
+            read2: "gs://hmf-public/fastq/COLO829Mini/COLO829v003T_AHHKYHDSXX_S12_L003_R2_001.fastq.gz"
+          - read1: "gs://hmf-public/fastq/COLO829Mini/COLO829v003T_AHHKYHDSXX_S12_L004_R1_001.fastq.gz"
+            read2: "gs://hmf-public/fastq/COLO829Mini/COLO829v003T_AHHKYHDSXX_S12_L004_R2_001.fastq.gz"
       - name: TUMOR2 #Optional
         fastq:
-          - read1: "gs://hmf-public/cancerPanel/CPCT12345678T_AHHKYHDSXX_S12_L001_R1_001.fastq.gz"
-            read2: "gs://hmf-public/cancerPanel/CPCT12345678T_AHHKYHDSXX_S12_L001_R2_001.fastq.gz"
-          - read1: "gs://hmf-public/cancerPanel/CPCT12345678T_AHHKYHDSXX_S12_L002_R1_001.fastq.gz"
-            read2: "gs://hmf-public/cancerPanel/CPCT12345678T_AHHKYHDSXX_S12_L002_R2_001.fastq.gz"
-          - read1: "gs://hmf-public/cancerPanel/CPCT12345678T_AHHKYHDSXX_S12_L003_R1_001.fastq.gz"
-            read2: "gs://hmf-public/cancerPanel/CPCT12345678T_AHHKYHDSXX_S12_L003_R2_001.fastq.gz"
-          - read1: "gs://hmf-public/cancerPanel/CPCT12345678T_AHHKYHDSXX_S12_L004_R1_001.fastq.gz"
-            read2: "gs://hmf-public/cancerPanel/CPCT12345678T_AHHKYHDSXX_S12_L004_R2_001.fastq.gz"
+          - read1: "gs://hmf-public/fastq/COLO829Mini/COLO829v003T_AHHKYHDSXX_S12_L001_R1_001.fastq.gz"
+            read2: "gs://hmf-public/fastq/COLO829Mini/COLO829v003T_AHHKYHDSXX_S12_L001_R2_001.fastq.gz"
+          - read1: "gs://hmf-public/fastq/COLO829Mini/COLO829v003T_AHHKYHDSXX_S12_L002_R1_001.fastq.gz"
+            read2: "gs://hmf-public/fastq/COLO829Mini/COLO829v003T_AHHKYHDSXX_S12_L002_R2_001.fastq.gz"
+          - read1: "gs://hmf-public/fastq/COLO829Mini/COLO829v003T_AHHKYHDSXX_S12_L003_R1_001.fastq.gz"
+            read2: "gs://hmf-public/fastq/COLO829Mini/COLO829v003T_AHHKYHDSXX_S12_L003_R2_001.fastq.gz"
+          - read1: "gs://hmf-public/fastq/COLO829Mini/COLO829v003T_AHHKYHDSXX_S12_L004_R1_001.fastq.gz"
+            read2: "gs://hmf-public/fastq/COLO829Mini/COLO829v003T_AHHKYHDSXX_S12_L004_R2_001.fastq.gz"          
     normal:
       name: NORMAL
       fastq:
-        - read1: "gs://hmf-public/cancerPanel/CPCT12345678R_AHHKYHDSXX_S13_L001_R1_001.fastq.gz"
-          read2: "gs://hmf-public/cancerPanel/CPCT12345678R_AHHKYHDSXX_S13_L001_R2_001.fastq.gz"
-        - read1: "gs://hmf-public/cancerPanel/CPCT12345678R_AHHKYHDSXX_S13_L002_R1_001.fastq.gz"
-          read2: "gs://hmf-public/cancerPanel/CPCT12345678R_AHHKYHDSXX_S13_L002_R1_001.fastq.gz"
-        - read1: "gs://hmf-public/cancerPanel/CPCT12345678R_AHHKYHDSXX_S13_L001_R1_001.fastq.gz"
-          read2: "gs://hmf-public/cancerPanel/CPCT12345678R_AHHKYHDSXX_S13_L001_R1_001.fastq.gz"
-        - read1: "gs://hmf-public/cancerPanel/CPCT12345678R_AHHKYHDSXX_S13_L001_R1_001.fastq.gz"
-          read2: "gs://hmf-public/cancerPanel/CPCT12345678R_AHHKYHDSXX_S13_L001_R1_001.fastq.gz"
+        - read1: "gs://hmf-public/fastq/COLO829Mini/COLO829v003R_AHHKYHDSXX_S13_L001_R1_001.fastq.gz"
+          read2: "gs://hmf-public/fastq/COLO829Mini/COLO829v003R_AHHKYHDSXX_S13_L001_R2_001.fastq.gz"
+        - read1: "gs://hmf-public/fastq/COLO829Mini/COLO829v003R_AHHKYHDSXX_S13_L002_R1_001.fastq.gz"
+          read2: "gs://hmf-public/fastq/COLO829Mini/COLO829v003R_AHHKYHDSXX_S13_L002_R2_001.fastq.gz"
+        - read1: "gs://hmf-public/fastq/COLO829Mini/COLO829v003R_AHHKYHDSXX_S13_L003_R1_001.fastq.gz"
+          read2: "gs://hmf-public/fastq/COLO829Mini/COLO829v003R_AHHKYHDSXX_S13_L003_R2_001.fastq.gz"
+        - read1: "gs://hmf-public/fastq/COLO829Mini/COLO829v003R_AHHKYHDSXX_S13_L004_R1_001.fastq.gz"
+          read2: "gs://hmf-public/fastq/COLO829Mini/COLO829v003R_AHHKYHDSXX_S13_L004_R2_001.fastq.gz"
 ```
 
 ### Reference Genomes
@@ -300,12 +300,12 @@ First, please review GCP's documentation on [Raising Quotas](https://cloud.googl
 An overview of the key quota limits are defined below. All the peaks occur during the alignment process, which uses many VMs with large core counts.
 In our 4 ref + 4 tumor lane benchmark, the peak lasts approx. 45 minutes.  
 
-Quota | Peak | Description |
---- | --- | --- |
-CPU | 96 x # of lanes | Each lane is aligned individually on a 96 core VM. While we use preemptible VMs, CPU count in the selected region is still contrained by this quota.|
-CPU_ALL_REGIONS |  96 x # of lanes | This quota is another limit on CPUs, but also includes any CPUs used in other regions |
-PREEMPTIBLE_LOCAL_SSD_TOTAL_GB | 1.125 TB  x # of lanes  | Local SSDs can be attaches to a VM in 375Gb increments. Attaching 3 local SSDs to each VM ensures we have enough space for the input, output and temporary files involved in alignment and somatic calling. |
-PERSISTENT_DISK_SSD_GB | 200GB  x # of lanes  | Used for the O/S of each VM, along with HMF resources and tools |
+| Quota                          | Peak                   | Description                                                                                                                                                                                                 |
+|--------------------------------|------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| CPU                            | 96 x # of lanes        | Each lane is aligned individually on a 96 core VM. While we use preemptible VMs, CPU count in the selected region is still contrained by this quota.                                                        |
+| CPU_ALL_REGIONS                | 96 x # of lanes        | This quota is another limit on CPUs, but also includes any CPUs used in other regions                                                                                                                       |
+| PREEMPTIBLE_LOCAL_SSD_TOTAL_GB | 1.125 TB  x # of lanes | Local SSDs can be attaches to a VM in 375Gb increments. Attaching 3 local SSDs to each VM ensures we have enough space for the input, output and temporary files involved in alignment and somatic calling. |
+| PERSISTENT_DISK_SSD_GB         | 200GB  x # of lanes    | Used for the O/S of each VM, along with HMF resources and tools                                                                                                                                             |
 
 Getting large quota increases can be difficult if you have a new GCP account without a billing track record. Also, quotas are generally allocated for sustained use, 
 and not the bursty requirements of running a large pipeline. You may need to contact Google in order to explain your requirements. If you are having trouble getting
@@ -342,9 +342,9 @@ argumentOverrides:
 The following starting points are supported, in order, as each starting point logically proceeds the others. See the [HMF cancer analysis pipeline](https://github.com/hartwigmedical/pipeline5)
 documentation for a complete description of all stages.
 
-Starting Point | Description
---- | ---
-alignment_complete | Skip alignment and use persisted BAM files, WGS metrics and flagstats
-calling_complete | Skip germline, small variant, and structural variant calling, as well as cobalt and amber and use their persisted output
-gripss_complete | Skip gripss, the structural caller filtering and annotation.
-purple_complete | Skips purple, and only runs the final tertiary steps.
+| Starting Point     | Description                                                                                                              |
+|--------------------|--------------------------------------------------------------------------------------------------------------------------|
+| alignment_complete | Skip alignment and use persisted BAM files, WGS metrics and flagstats                                                    |
+| calling_complete   | Skip germline, small variant, and structural variant calling, as well as cobalt and amber and use their persisted output |
+| gripss_complete    | Skip gripss, the structural caller filtering and annotation.                                                             |
+| purple_complete    | Skips purple, and only runs the final tertiary steps.                                                                    |
