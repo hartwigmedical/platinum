@@ -1,5 +1,5 @@
 cluster: research-cluster-prod-1
-outputBucket: platinum-test-output-svl
+outputBucket: platinum-test-output
 argumentOverrides:
   image_name: hmf-public-pipeline-v5-29
 samples:
