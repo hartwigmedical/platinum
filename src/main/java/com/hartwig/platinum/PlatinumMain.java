@@ -45,7 +45,7 @@ public class PlatinumMain implements Callable<Integer> {
             PlatinumConfiguration configuration = addRegionAndProject(PlatinumConfiguration.from(inputJson));
             Validation.apply(runName, configuration);
 
-            final HmfApi api = HmfApi.create(HmfApi.PRODUCTION);
+            final HmfApi api = HmfApi.create(configuration.apiUrl().orElse(HmfApi.PRODUCTION));
             new Platinum(runName,
                     inputJson,
                     StorageOptions.newBuilder().setProjectId(configuration.gcp().projectOrThrow()).build().getService(),
