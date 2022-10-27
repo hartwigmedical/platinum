@@ -3,7 +3,6 @@ package com.hartwig.platinum;
 import java.util.List;
 import java.util.Optional;
 
-import com.hartwig.ApiException;
 import com.hartwig.api.RunApi;
 import com.hartwig.api.SampleApi;
 import com.hartwig.api.SetApi;
@@ -58,6 +57,7 @@ public class ApiRerun {
                                     .ini(Ini.RERUN_INI)
                                     .version(version)
                                     .status(Status.PENDING)
+                                    .isHidden(true)
                                     .setId(sampleSet.getId())).getId();
                             LOGGER.info("Created API run for sample [{}] id [{}]", sampleId, id);
                             return id;
