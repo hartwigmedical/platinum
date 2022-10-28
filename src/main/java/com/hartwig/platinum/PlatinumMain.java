@@ -57,7 +57,7 @@ public class PlatinumMain implements Callable<Integer> {
                             api.sets(),
                             api.samples(),
                             configuration.outputBucket().get(),
-                            configuration.image().split(":")[1])).run();
+                            (configuration.image().split(":")[1]).split("-")[0])).run();
             return 0;
         } catch (Exception e) {
             LOGGER.error("Unexpected exception", e);
