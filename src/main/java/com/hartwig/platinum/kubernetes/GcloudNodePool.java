@@ -1,5 +1,7 @@
 package com.hartwig.platinum.kubernetes;
 
+import static java.lang.String.format;
+
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -20,7 +22,7 @@ public class GcloudNodePool {
                 targetNodePool.name(),
                 targetNodePool.machineType(),
                 targetNodePool.numNodes());
-        processRunner.execute(List.of("gcloud",
+        List<String> arguments = List.of("gcloud",
                 "container",
                 "node-pools",
                 "create",
@@ -32,6 +34,9 @@ public class GcloudNodePool {
                 "--num-nodes=" + targetNodePool.numNodes(),
                 "--region=europe-west4",
                 "--project=" + project,
-                "--service-account=" + serviceAccount));
+                "--service-account=" + serviceAccount);
+        if (!processRunner.execute(arguments)) {
+            throw new RuntimeException(format("Failed to create node pool via command: [%s]", String.join(" ", arguments)));
+        }
     }
 }
