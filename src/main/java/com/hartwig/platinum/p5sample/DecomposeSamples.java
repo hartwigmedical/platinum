@@ -1,15 +1,15 @@
 package com.hartwig.platinum.p5sample;
 
+import com.hartwig.platinum.config.FastqConfiguration;
+import com.hartwig.platinum.config.RawDataConfiguration;
+import com.hartwig.platinum.config.SampleConfiguration;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-
-import com.hartwig.platinum.config.FastqConfiguration;
-import com.hartwig.platinum.config.RawDataConfiguration;
-import com.hartwig.platinum.config.SampleConfiguration;
 
 public class DecomposeSamples {
 
@@ -25,31 +25,38 @@ public class DecomposeSamples {
             }
             boolean indexTumors = sample.tumors().size() > 1;
             int tumorIndex = 1;
-            for (RawDataConfiguration tumor : sample.tumors()) {
-                if (tumor.bam().isPresent()) {
-                    pairs.add(ImmutableTumorNormalPair.builder()
-                            .reference(sample.normal().map(n -> ImmutableSample.builder().name(n.name()).bam(n.bam()).build()))
-                            .tumor(ImmutableSample.builder()
-                                    .name(tumor.name())
-                                    .bam(tumor.bam())
-                                    .primaryTumorDoids(sample.primaryTumorDoids())
-                                    .build())
-                            .tumorIndex(indexTumors ? Optional.of(tumorIndexString(tumorIndex)) : Optional.empty())
-                            .name(indexTumors ? sample.name() + "-" + tumorIndexString(tumorIndex) : sample.name())
-                            .build());
-                } else {
-                    pairs.add(ImmutableTumorNormalPair.builder()
-                            .reference(sample.normal().map(n -> ImmutableSample.builder().name(n.name()).lanes(toLanes(n.fastq())).build()))
-                            .tumor(ImmutableSample.builder()
-                                    .name(tumor.name())
-                                    .lanes(toLanes(tumor.fastq()))
-                                    .primaryTumorDoids(sample.primaryTumorDoids())
-                                    .build())
-                            .tumorIndex(indexTumors ? Optional.of(tumorIndexString(tumorIndex)) : Optional.empty())
-                            .name(indexTumors ? sample.name() + "-" + tumorIndexString(tumorIndex) : sample.name())
-                            .build());
+            if (!sample.tumors().isEmpty()) {
+                for (RawDataConfiguration tumor : sample.tumors()) {
+                    if (tumor.bam().isPresent()) {
+                        pairs.add(ImmutableTumorNormalPair.builder()
+                                .reference(sample.normal().map(n -> ImmutableSample.builder().name(n.name()).bam(n.bam()).build()))
+                                .tumor(ImmutableSample.builder()
+                                        .name(tumor.name())
+                                        .bam(tumor.bam())
+                                        .primaryTumorDoids(sample.primaryTumorDoids())
+                                        .build())
+                                .tumorIndex(indexTumors ? Optional.of(tumorIndexString(tumorIndex)) : Optional.empty())
+                                .name(indexTumors ? sample.name() + "-" + tumorIndexString(tumorIndex) : sample.name())
+                                .build());
+                    } else {
+                        pairs.add(ImmutableTumorNormalPair.builder()
+                                .reference(sample.normal().map(n -> ImmutableSample.builder().name(n.name()).lanes(toLanes(n.fastq())).build()))
+                                .tumor(ImmutableSample.builder()
+                                        .name(tumor.name())
+                                        .lanes(toLanes(tumor.fastq()))
+                                        .primaryTumorDoids(sample.primaryTumorDoids())
+                                        .build())
+                                .tumorIndex(indexTumors ? Optional.of(tumorIndexString(tumorIndex)) : Optional.empty())
+                                .name(indexTumors ? sample.name() + "-" + tumorIndexString(tumorIndex) : sample.name())
+                                .build());
+                    }
+                    tumorIndex++;
                 }
-                tumorIndex++;
+            } else if (sample.normal().isPresent()) {
+                pairs.add(ImmutableTumorNormalPair.builder()
+                        .reference(sample.normal().map(n -> ImmutableSample.builder().name(n.name()).lanes(toLanes(n.fastq())).build()))
+                        .name(sample.name())
+                        .build());
             }
         }
         return pairs;
