@@ -164,8 +164,10 @@ public class KubernetesEngine {
                         clusterName,
                         gcpConfiguration.projectOrThrow());
             }
+            JobSubmitter jobSubmitter = new JobSubmitter(clusterName, configuration.gcp(), configuration.retryFailed());
+            ConstantJobCountScheduler jobScheduler = new ConstantJobCountScheduler(jobSubmitter, kubernetesClient,150);
             return new KubernetesCluster(runName,
-                    new JobScheduler(kubernetesClient, configuration.retryFailed()),
+                    jobScheduler,
                     new PipelineServiceAccountSecretVolume(jsonKey, kubernetesClient, "service-account-key"),
                     new PipelineConfigMapVolume(pairs, kubernetesClient, runName),
                     outputBucketName,
