@@ -24,7 +24,6 @@ import com.hartwig.platinum.config.BatchConfiguration;
 import com.hartwig.platinum.config.GcpConfiguration;
 import com.hartwig.platinum.config.PlatinumConfiguration;
 import com.hartwig.platinum.iam.JsonKey;
-import com.hartwig.platinum.p5sample.TumorNormalPair;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

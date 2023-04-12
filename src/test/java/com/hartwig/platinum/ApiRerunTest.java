@@ -9,6 +9,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.Collections;
 import java.util.List;
 
 import com.hartwig.api.RunApi;
@@ -51,52 +52,40 @@ public class ApiRerunTest {
         sampleSet = new SampleSet().id(sampleSetId);
 
         when(sampleApi.list(null, null, null, null, SampleType.TUMOR, biopsy)).thenReturn(samples);
-        when(runs.list(null, null, sampleSet.getId(), null, null, null, null, null))
-                .thenReturn(List.of(validatedRun));
+        when(runs.list(null, null, sampleSet.getId(), null, null, null, null, null)).thenReturn(List.of(validatedRun));
     }
 
     @Test
     public void shouldReturnIdOfExistingRunIfItIsNotInvalidated() {
         when(sets.list(null, samples.get(0).getId(), true)).thenReturn(List.of(sampleSet));
-        when(runs.list(null, Ini.RERUN_INI, sampleSet.getId(), version, version, null, null, null))
-                .thenReturn(List.of(existingReRun));
+        when(runs.list(null, Ini.RERUN_INI, sampleSet.getId(), version, version, null, null, null)).thenReturn(List.of(existingReRun));
 
-        assertThat(new ApiRerun(runs, sets, sampleApi, bucket, version).create(biopsy)).isEqualTo(3L);
+        assertThat(new ApiRerun(runs, sets, sampleApi, bucket, version, version1).create(biopsy)).isEqualTo(3L);
         verify(runs, never()).create(any());
     }
 
-    @Test
-    public void shouldReturnNullAndCreateNoRunsIfNoSamplesMatchGivenId() {
+    @Test(expected = IllegalArgumentException.class)
+    public void shouldThrowIllegalArgumentIfNoSamplesMatchGivenId() {
         when(sampleApi.list(null, null, null, null, SampleType.TUMOR, biopsy)).thenReturn(emptyList());
-        assertThat(new ApiRerun(runs, sets, sampleApi, bucket, version).create(biopsy)).isNull();
+        assertThat(new ApiRerun(runs, sets, sampleApi, bucket, version, version1).create(biopsy)).isNull();
         verify(runs, never()).create(any());
     }
 
-    @Test
-    public void shouldReturnNullAndCreateNoRunsIfNoSampleSetExistsForSample() {
-        when(sets.list(null, samples.get(0).getId(), true)).thenReturn(null);
-        assertThat(new ApiRerun(runs, sets, sampleApi, bucket, version).create(biopsy)).isNull();
-        verify(runs, never()).create(any());
-    }
-
-    @Test
-    public void shouldReturnNullAndCreateNoRunsIfNoValidatedRunExistsForSample() {
-        when(sets.list(null, samples.get(0).getId(), true)).thenReturn(List.of(sampleSet));
-        when(runs.list(null, null, sampleSet.getId(), null, null, null, null, null))
-                .thenReturn(emptyList());
-        assertThat(new ApiRerun(runs, sets, sampleApi, bucket, version).create(biopsy)).isNull();
+    @Test(expected = IllegalArgumentException.class)
+    public void shouldThrowIllegalArgumentIfNoSampleSetExistsForSample() {
+        when(sets.list(null, samples.get(0).getId(), true)).thenReturn(Collections.emptyList());
+        assertThat(new ApiRerun(runs, sets, sampleApi, bucket, version, version1).create(biopsy)).isNull();
         verify(runs, never()).create(any());
     }
 
     @Test
     public void shouldCreateRunForSampleIfNoneExists() {
-        when(runs.list(null, Ini.RERUN_INI, sampleSet.getId(), version, version, null, null, null))
-                .thenReturn(emptyList());
+        when(runs.list(null, Ini.RERUN_INI, sampleSet.getId(), version, version, null, null, null)).thenReturn(emptyList());
         when(sets.list(null, samples.get(0).getId(), true)).thenReturn(List.of(sampleSet));
         ArgumentCaptor<CreateRun> createRunCaptor = ArgumentCaptor.forClass(CreateRun.class);
         when(runs.create(createRunCaptor.capture())).thenReturn(new RunCreated().id(3L));
 
-        assertThat(new ApiRerun(runs, sets, sampleApi, bucket, version).create(biopsy)).isNotNull();
+        assertThat(new ApiRerun(runs, sets, sampleApi, bucket, version, version1).create(biopsy)).isNotNull();
         CreateRun createRun = createRunCaptor.getValue();
         assertThat(createRun).isNotNull();
         assertThat(createRun.getCluster()).isEqualTo("gcp");
