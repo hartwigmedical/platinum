@@ -4,7 +4,7 @@ import static java.lang.String.format;
 
 import java.util.Map;
 
-import com.hartwig.platinum.p5sample.TumorNormalPair;
+import com.hartwig.pdl.PipelineInput;
 
 import org.immutables.value.Value;
 
@@ -15,12 +15,11 @@ public interface SampleArgument {
 
     Map<String, String> arguments();
 
-    static SampleArgument sampleJson(final TumorNormalPair pair, final String runName) {
+    static SampleArgument sampleJson(final PipelineInput pipelineInput, final String runName) {
         return ImmutableSampleArgument.builder()
-                .id(pair.name().toLowerCase())
-                .putArguments("-sample_json", format("samples/%s-%s", pair.name().toLowerCase(), runName))
-                .putArguments("-set_id", pair.name())
-                .putArguments("-run_id", runName + pair.tumorIndex().map(ti -> "-" + ti).orElse(""))
+                .id(pipelineInput.setName().orElseThrow().toLowerCase())
+                .putArguments("-sample_json", format("%s/%s-%s", PipelineContainer.SAMPLES_PATH, pipelineInput.setName().orElseThrow().toLowerCase(), runName))
+                .putArguments("-set_id", pipelineInput.setName().orElseThrow())
                 .build();
     }
 

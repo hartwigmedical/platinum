@@ -13,7 +13,7 @@ import io.fabric8.kubernetes.api.model.ResourceRequirements;
 import io.fabric8.kubernetes.api.model.VolumeMountBuilder;
 
 public class PipelineContainer implements KubernetesComponent<Container> {
-    private final static String SAMPLES_PATH = "/samples";
+    public final static String SAMPLES_PATH = "/samples";
     private final static String SECRETS_PATH = "/secrets";
     private final SampleArgument sample;
     private final String runName;

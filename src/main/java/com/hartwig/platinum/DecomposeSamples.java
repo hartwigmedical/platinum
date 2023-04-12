@@ -1,22 +1,24 @@
-package com.hartwig.platinum.p5sample;
-
-import com.hartwig.platinum.config.FastqConfiguration;
-import com.hartwig.platinum.config.RawDataConfiguration;
-import com.hartwig.platinum.config.SampleConfiguration;
+package com.hartwig.platinum;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+
+import com.hartwig.pdl.LaneInput;
+import com.hartwig.pdl.PipelineInput;
+import com.hartwig.pdl.SampleInput;
+import com.hartwig.platinum.config.FastqConfiguration;
+import com.hartwig.platinum.config.RawDataConfiguration;
+import com.hartwig.platinum.config.SampleConfiguration;
 
 public class DecomposeSamples {
 
     public static final int GCP_VM_LIMIT = 55;
 
-    public static List<TumorNormalPair> apply(final List<SampleConfiguration> configurations) {
-        List<TumorNormalPair> pairs = new ArrayList<>();
+    public static List<PipelineInput> apply(final List<SampleConfiguration> configurations) {
+        List<PipelineInput> pairs = new ArrayList<>();
         for (SampleConfiguration sample : configurations) {
             if (sample.name().length() >= GCP_VM_LIMIT) {
                 throw new IllegalArgumentException(
@@ -28,34 +30,32 @@ public class DecomposeSamples {
             if (!sample.tumors().isEmpty()) {
                 for (RawDataConfiguration tumor : sample.tumors()) {
                     if (tumor.bam().isPresent()) {
-                        pairs.add(ImmutableTumorNormalPair.builder()
-                                .reference(sample.normal().map(n -> ImmutableSample.builder().name(n.name()).bam(n.bam()).build()))
-                                .tumor(ImmutableSample.builder()
+                        pairs.add(PipelineInput.builder()
+                                .reference(sample.normal().map(n -> SampleInput.builder().name(n.name()).bam(n.bam()).build()))
+                                .tumor(SampleInput.builder()
                                         .name(tumor.name())
                                         .bam(tumor.bam())
                                         .primaryTumorDoids(sample.primaryTumorDoids())
                                         .build())
-                                .tumorIndex(indexTumors ? Optional.of(tumorIndexString(tumorIndex)) : Optional.empty())
-                                .name(indexTumors ? sample.name() + "-" + tumorIndexString(tumorIndex) : sample.name())
+                                .setName(indexTumors ? sample.name() + "-" + tumorIndexString(tumorIndex) : sample.name())
                                 .build());
                     } else {
-                        pairs.add(ImmutableTumorNormalPair.builder()
-                                .reference(sample.normal().map(n -> ImmutableSample.builder().name(n.name()).lanes(toLanes(n.fastq())).build()))
-                                .tumor(ImmutableSample.builder()
+                        pairs.add(PipelineInput.builder()
+                                .reference(sample.normal().map(n -> SampleInput.builder().name(n.name()).lanes(toLanes(n.fastq())).build()))
+                                .tumor(SampleInput.builder()
                                         .name(tumor.name())
                                         .lanes(toLanes(tumor.fastq()))
                                         .primaryTumorDoids(sample.primaryTumorDoids())
                                         .build())
-                                .tumorIndex(indexTumors ? Optional.of(tumorIndexString(tumorIndex)) : Optional.empty())
-                                .name(indexTumors ? sample.name() + "-" + tumorIndexString(tumorIndex) : sample.name())
+                                .setName(indexTumors ? sample.name() + "-" + tumorIndexString(tumorIndex) : sample.name())
                                 .build());
                     }
                     tumorIndex++;
                 }
             } else if (sample.normal().isPresent()) {
-                pairs.add(ImmutableTumorNormalPair.builder()
-                        .reference(sample.normal().map(n -> ImmutableSample.builder().name(n.name()).lanes(toLanes(n.fastq())).build()))
-                        .name(sample.name())
+                pairs.add(PipelineInput.builder()
+                        .reference(sample.normal().map(n -> SampleInput.builder().name(n.name()).lanes(toLanes(n.fastq())).build()))
+                        .setName(sample.name())
                         .build());
             }
         }
@@ -66,11 +66,11 @@ public class DecomposeSamples {
         return "t" + tumorIndex;
     }
 
-    private static List<ImmutableLane> toLanes(final List<FastqConfiguration> referenceFastq) {
+    private static List<LaneInput> toLanes(final List<FastqConfiguration> referenceFastq) {
         return IntStream.rangeClosed(1, referenceFastq.size())
                 .boxed()
                 .map(i -> Map.entry(String.valueOf(i), referenceFastq.get(i - 1)))
-                .map(e -> ImmutableLane.builder()
+                .map(e -> LaneInput.builder()
                         .laneNumber(e.getKey())
                         .firstOfPairPath(stripGs(e.getValue().read1()))
                         .secondOfPairPath(stripGs(e.getValue().read2()))

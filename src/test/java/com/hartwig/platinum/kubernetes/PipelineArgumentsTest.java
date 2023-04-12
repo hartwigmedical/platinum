@@ -5,6 +5,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.util.List;
 import java.util.Map;
 
+import com.hartwig.pdl.PipelineInput;
+import com.hartwig.pdl.SampleInput;
 import com.hartwig.platinum.config.GcpConfiguration;
 import com.hartwig.platinum.config.PlatinumConfiguration;
 import com.hartwig.platinum.p5sample.ImmutableSample;
@@ -39,10 +41,10 @@ public class PipelineArgumentsTest {
     }
 
     private List<String> asCommand(final PipelineArguments victim) {
-        return victim.asCommand(SampleArgument.sampleJson(ImmutableTumorNormalPair.builder()
-                .name("sample")
-                .tumor(ImmutableSample.builder().name("tumor").build())
-                .reference(ImmutableSample.builder().name("normal").build())
+        return victim.asCommand(SampleArgument.sampleJson(PipelineInput.builder()
+                .setName("sample")
+                .tumor(SampleInput.builder().name("tumor").build())
+                .reference(SampleInput.builder().name("normal").build())
                 .build(), "run"), "/secrets", "key.json");
     }
 

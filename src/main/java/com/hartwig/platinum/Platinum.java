@@ -9,9 +9,11 @@ import com.google.api.services.cloudresourcemanager.CloudResourceManager;
 import com.google.api.services.iam.v1.Iam;
 import com.google.cloud.storage.Storage;
 import com.hartwig.api.HmfApi;
+import com.hartwig.pdl.PipelineInput;
 import com.hartwig.platinum.config.GcpConfiguration;
 import com.hartwig.platinum.config.PlatinumConfiguration;
 import com.hartwig.platinum.config.SampleBucket;
+import com.hartwig.platinum.config.SampleConfiguration;
 import com.hartwig.platinum.iam.IamProvider;
 import com.hartwig.platinum.iam.JsonKey;
 import com.hartwig.platinum.iam.PipelineServiceAccount;
@@ -21,8 +23,6 @@ import com.hartwig.platinum.kubernetes.ContainerProvider;
 import com.hartwig.platinum.kubernetes.KubernetesEngine;
 import com.hartwig.platinum.kubernetes.ProcessRunner;
 import com.hartwig.platinum.kubernetes.SampleArgument;
-import com.hartwig.platinum.p5sample.DecomposeSamples;
-import com.hartwig.platinum.p5sample.TumorNormalPair;
 import com.hartwig.platinum.storage.OutputBucket;
 
 import org.slf4j.Logger;
@@ -75,9 +75,10 @@ public class Platinum {
         String serviceAccountEmail = serviceAccount.findOrCreate();
         ServiceAccountPrivateKey privateKey = ServiceAccountPrivateKey.from(configuration, iam);
         JsonKey jsonKey = privateKey.create(gcpConfiguration.projectOrThrow(), serviceAccountEmail);
-        List<TumorNormalPair> pairs = DecomposeSamples.apply(configuration.sampleBucket()
+        List<SampleConfiguration> samples = configuration.sampleBucket()
                 .map(b -> new SampleBucket(storage.get(b)).apply())
-                .orElseGet(configuration::samples));
+                .orElseGet(configuration::samples);
+        List<PipelineInput> pairs = DecomposeSamples.apply(samples);
         int submitted = kubernetesEngine.findOrCreate(runName,
                 pairs,
                 jsonKey,
@@ -87,10 +88,10 @@ public class Platinum {
         LOGGER.info("You can monitor their progress with: {}", Console.bold("./platinum status"));
     }
 
-    private List<SampleArgument> samples(final PlatinumConfiguration configuration, final List<TumorNormalPair> pairs,
+    private List<SampleArgument> samples(final PlatinumConfiguration configuration, final List<PipelineInput> pipelineInputs,
             final String runName) {
         if (configuration.sampleIds().isEmpty()) {
-            return pairs.stream().map(p -> SampleArgument.sampleJson(p, runName)).collect(toList());
+            return pipelineInputs.stream().map(p -> SampleArgument.sampleJson(p, runName)).collect(toList());
         } else {
             if (configuration.apiUrl().isPresent()) {
                 return configuration.sampleIds().parallelStream().map(s -> {

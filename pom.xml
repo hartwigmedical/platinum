@@ -53,6 +53,12 @@
     <dependencies>
 
         <dependency>
+            <groupId>com.hartwig.pdl</groupId>
+            <artifactId>pdl-generator</artifactId>
+            <version>local-SNAPSHOT</version>
+        </dependency>
+
+        <dependency>
             <groupId>com.hartwig.api</groupId>
             <artifactId>java-client</artifactId>
             <version>${java-client.version}</version>

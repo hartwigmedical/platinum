@@ -6,7 +6,7 @@ import java.util.stream.Collectors;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
-import com.hartwig.platinum.p5sample.TumorNormalPair;
+import com.hartwig.pdl.PipelineInput;
 
 import io.fabric8.kubernetes.api.model.ConfigMapBuilder;
 import io.fabric8.kubernetes.api.model.Volume;
@@ -16,14 +16,15 @@ import io.fabric8.kubernetes.client.KubernetesClient;
 public class PipelineConfigMapVolume implements KubernetesComponent<Volume> {
 
     private static final String SAMPLES = "samples";
-    private final List<TumorNormalPair> pairs;
+    private final List<PipelineInput> pipelineInputs;
     private final KubernetesClient kubernetesClient;
     private final String runName;
 
-    public PipelineConfigMapVolume(final List<TumorNormalPair> pairs, final KubernetesClient kubernetesClient, final String runName) {
+    public PipelineConfigMapVolume(final List<PipelineInput> pipelineInputs, final KubernetesClient kubernetesClient,
+            final String runName) {
         this.kubernetesClient = kubernetesClient;
         this.runName = runName;
-        this.pairs = pairs;
+        this.pipelineInputs = pipelineInputs;
     }
 
     public Volume asKubernetes() {
@@ -33,8 +34,11 @@ public class PipelineConfigMapVolume implements KubernetesComponent<Volume> {
         kubernetesClient.configMaps()
                 .inNamespace(KubernetesCluster.NAMESPACE)
                 .withName(name)
-                .createOrReplace(new ConfigMapBuilder().addToData(pairs.stream()
-                        .collect(Collectors.toMap(p -> p.name().toLowerCase() + "-" + runName, p -> toJson(objectMapper, p))))
+                .createOrReplace(new ConfigMapBuilder().addToData(pipelineInputs.stream()
+                                .collect(Collectors.toMap(p -> {
+                                    final String setName = p.setName().orElseThrow().toLowerCase();
+                                    return setName + "-" + runName;
+                                }, p -> toJson(objectMapper, p))))
                         .withNewMetadata()
                         .withName(name)
                         .withNamespace(KubernetesCluster.NAMESPACE)
@@ -43,9 +47,9 @@ public class PipelineConfigMapVolume implements KubernetesComponent<Volume> {
         return new VolumeBuilder().withName(name).editOrNewConfigMap().withName(name).endConfigMap().build();
     }
 
-    private String toJson(final ObjectMapper objectMapper, final TumorNormalPair tumorNormalPair) {
+    private String toJson(final ObjectMapper objectMapper, final PipelineInput pipelineInput) {
         try {
-            return objectMapper.writeValueAsString(tumorNormalPair);
+            return objectMapper.writeValueAsString(pipelineInput);
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
