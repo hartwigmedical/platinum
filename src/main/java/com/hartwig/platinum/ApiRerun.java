@@ -1,7 +1,6 @@
 package com.hartwig.platinum;
 
 import java.util.List;
-import java.util.Optional;
 
 import com.hartwig.api.RunApi;
 import com.hartwig.api.SampleApi;
@@ -28,7 +27,8 @@ public class ApiRerun {
     private final String bucket;
     private final String version;
 
-    public ApiRerun(final RunApi runApi, final SetApi setApi, final SampleApi sampleApi, final String bucket, final String version) {
+    public ApiRerun(final RunApi runApi, final SetApi setApi, final SampleApi sampleApi, final String bucket,
+            final String version) {
         this.runApi = runApi;
         this.setApi = setApi;
         this.sampleApi = sampleApi;
@@ -36,39 +36,41 @@ public class ApiRerun {
         this.version = version;
     }
 
-    Long create(final String sampleId) {
-        try {
-            List<Sample> samples = sampleApi.list(null, null, null, null, SampleType.TUMOR, sampleId);
-            for (Sample sample : samples) {
-                Optional<SampleSet> maybeSampleSet = OnlyOne.ofNullable(setApi.list(null, sample.getId(), true), SampleSet.class);
-                if (maybeSampleSet.isPresent()) {
-                    SampleSet sampleSet = maybeSampleSet.get();
-                    if (runApi.list(null, null, sampleSet.getId(), null, null, null, null, null)
-                            .stream()
-                            .anyMatch(r1 -> r1.getStatus().equals(Status.VALIDATED))) {
-                        return OnlyOne.ofNullable(runApi.list(null, Ini.RERUN_INI, sampleSet.getId(), version, version, null, null, null),
-                                Run.class).filter(r -> !r.getStatus().equals(Status.INVALIDATED)).map(r -> {
-                            LOGGER.info("Using existing run for sample [{}] id [{}]", sampleId, r.getId());
-                            return r.getId();
-                        }).orElseGet(() -> {
-                            final Long id = runApi.create(new CreateRun().bucket(bucket)
-                                    .cluster("gcp")
-                                    .context("RESEARCH")
-                                    .ini(Ini.RERUN_INI)
-                                    .version(version)
-                                    .status(Status.PENDING)
-                                    .isHidden(true)
-                                    .setId(sampleSet.getId())).getId();
-                            LOGGER.info("Created API run for sample [{}] id [{}]", sampleId, id);
-                            return id;
-                        });
-                    }
-                }
-            }
-        } catch (Exception e) {
-            LOGGER.error("Unable to create run for [{}] reason [{}]", sampleId, e.getMessage());
-            return null;
+    public Long create(final String tumorSampleName) {
+        List<Sample> samples = sampleApi.list(null, null, null, null, SampleType.TUMOR, tumorSampleName);
+        for (Sample sample : samples) {
+            return OnlyOne.ofNullable(setApi.list(null, sample.getId(), true), SampleSet.class)
+                    .map(sampleSet -> OnlyOne.ofNullable(runApi.list(null,
+                            Ini.RERUN_INI,
+                            sampleSet.getId(),
+                            version,
+                            version,
+                            null,
+                            null,
+                            null), Run.class).filter(r -> !r.getStatus().equals(Status.INVALIDATED)).map(r -> {
+                        LOGGER.info("Using existing run for sample [{}] id [{}]", tumorSampleName, r.getId());
+                        return r.getId();
+                    }).orElseGet(() -> {
+                        final Long id = runApi.create(new CreateRun().bucket(bucket)
+                                .cluster("gcp")
+                                .context("RESEARCH")
+                                .ini(Ini.RERUN_INI)
+                                .version(version)
+                                .status(Status.PENDING)
+                                .isHidden(true)
+                                .setId(sampleSet.getId())).getId();
+                        LOGGER.info("Created API run for sample [{}] id [{}]", tumorSampleName, id);
+                        return id;
+                    }))
+                    .orElseThrow(() -> illegalArgumentException(tumorSampleName,
+                            "No sets with consent for database could be found."));
         }
-        return null;
+        throw illegalArgumentException(tumorSampleName, "It did not exist in the API");
+    }
+
+    private static IllegalArgumentException illegalArgumentException(final String tumorSampleName, String message) {
+        return new IllegalArgumentException(String.format("Tumor sample [%s] could not be rerun. %s",
+                tumorSampleName,
+                message));
     }
 }

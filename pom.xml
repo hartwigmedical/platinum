@@ -57,6 +57,16 @@
             <artifactId>java-client</artifactId>
             <version>${java-client.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.hartwig.pdl</groupId>
+            <artifactId>pdl-spec</artifactId>
+            <version>local-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>com.hartwig.pdl</groupId>
+            <artifactId>pdl-generator</artifactId>
+            <version>local-SNAPSHOT</version>
+        </dependency>
 
         <dependency>
             <groupId>com.google.cloud</groupId>
