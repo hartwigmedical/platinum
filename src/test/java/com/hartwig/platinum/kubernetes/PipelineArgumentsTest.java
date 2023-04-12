@@ -5,10 +5,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.util.List;
 import java.util.Map;
 
+import com.hartwig.pdl.ImmutablePipelineInput;
+import com.hartwig.pdl.ImmutableSampleInput;
 import com.hartwig.platinum.config.GcpConfiguration;
 import com.hartwig.platinum.config.PlatinumConfiguration;
-import com.hartwig.platinum.pdl.ImmutableSample;
-import com.hartwig.platinum.pdl.ImmutableTumorNormalPair;
 
 import org.junit.Test;
 
@@ -39,19 +39,17 @@ public class PipelineArgumentsTest {
     }
 
     private List<String> asCommand(final PipelineArguments victim) {
-        return victim.asCommand(SampleArgument.sampleJson(ImmutableTumorNormalPair.builder()
-                .name("sample")
-                .tumor(ImmutableSample.builder().name("tumor").build())
-                .reference(ImmutableSample.builder().name("normal").build())
+        return victim.asCommand(SampleArgument.sampleJson(ImmutablePipelineInput.builder()
+                .setName("sample")
+                .tumor(ImmutableSampleInput.builder().name("tumor").build())
+                .reference(ImmutableSampleInput.builder().name("normal").build())
                 .build(), "run"), "/secrets", "key.json");
     }
 
     private PipelineArguments createVictimWithOverrides(final String s, final String value) {
         return new PipelineArguments(Map.of(s, value),
                 "output",
-                "email",
-                "run",
-                PlatinumConfiguration.builder()
+                "email", PlatinumConfiguration.builder()
                         .gcp(GcpConfiguration.builder().region("region").project("project").privateCluster(false).build())
                         .build());
     }

@@ -3,7 +3,6 @@ package com.hartwig.platinum;
 import java.util.concurrent.Callable;
 
 import com.google.cloud.storage.StorageOptions;
-import com.hartwig.api.HmfApi;
 import com.hartwig.platinum.config.PlatinumConfiguration;
 import com.hartwig.platinum.config.Validation;
 import com.hartwig.platinum.iam.IamProvider;
@@ -11,6 +10,7 @@ import com.hartwig.platinum.iam.ResourceManagerProvider;
 import com.hartwig.platinum.kubernetes.ContainerProvider;
 import com.hartwig.platinum.kubernetes.KubernetesEngine;
 import com.hartwig.platinum.kubernetes.ProcessRunner;
+import com.hartwig.platinum.pdl.PDLConversion;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,7 +45,6 @@ public class PlatinumMain implements Callable<Integer> {
             PlatinumConfiguration configuration = addRegionAndProject(PlatinumConfiguration.from(inputJson));
             Validation.apply(runName, configuration);
 
-            final HmfApi api = HmfApi.create(configuration.apiUrl().orElse(HmfApi.PRODUCTION));
             new Platinum(runName,
                     inputJson,
                     StorageOptions.newBuilder().setProjectId(configuration.gcp().projectOrThrow()).build().getService(),
@@ -53,11 +52,7 @@ public class PlatinumMain implements Callable<Integer> {
                     ResourceManagerProvider.get(),
                     new KubernetesEngine(ContainerProvider.get(), new ProcessRunner(), configuration),
                     configuration,
-                    new ApiRerun(api.runs(),
-                            api.sets(),
-                            api.samples(),
-                            configuration.outputBucket().get(),
-                            (configuration.image().split(":")[1]).split("-")[0], version1)).run();
+                    PDLConversion.create(configuration)).run();
             return 0;
         } catch (Exception e) {
             LOGGER.error("Unexpected exception", e);
@@ -73,7 +68,8 @@ public class PlatinumMain implements Callable<Integer> {
 
     private PlatinumConfiguration addRegion(final PlatinumConfiguration configuration) {
         if (configuration.gcp().region().isPresent() && region != null) {
-            throw new IllegalArgumentException("Region cannot be specified in both JSON input and CLI. Choose one or the other");
+            throw new IllegalArgumentException(
+                    "Region cannot be specified in both JSON input and CLI. Choose one or the other");
         } else if (region != null) {
             return configuration.withGcp(configuration.gcp().withRegion(region));
         }
@@ -82,7 +78,8 @@ public class PlatinumMain implements Callable<Integer> {
 
     private PlatinumConfiguration addProject(final PlatinumConfiguration configuration) {
         if (configuration.gcp().project().isPresent() && project != null) {
-            throw new IllegalArgumentException("Project cannot be specified in both JSON input and CLI. Choose one or the other");
+            throw new IllegalArgumentException(
+                    "Project cannot be specified in both JSON input and CLI. Choose one or the other");
         } else if (project != null) {
             return configuration.withGcp(configuration.gcp().withProject(project));
         }

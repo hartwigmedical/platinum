@@ -17,19 +17,18 @@ public class PipelineArguments {
     private final Map<String, String> overrides;
     private final String outputBucket;
     private final String serviceAccountEmail;
-    private final String runName;
     private final PlatinumConfiguration platinumConfiguration;
 
-    public PipelineArguments(final Map<String, String> overrides, final String outputBucket, final String serviceAccountEmail,
-            final String runName, final PlatinumConfiguration platinumConfiguration) {
+    public PipelineArguments(final Map<String, String> overrides, final String outputBucket,
+            final String serviceAccountEmail, final PlatinumConfiguration platinumConfiguration) {
         this.overrides = overrides;
         this.outputBucket = outputBucket;
         this.serviceAccountEmail = serviceAccountEmail;
-        this.runName = runName;
         this.platinumConfiguration = platinumConfiguration;
     }
 
-    public List<String> asCommand(final SampleArgument sampleArgument, final String secretsPath, final String serviceAccountKeySecretName) {
+    public List<String> asCommand(final SampleArgument sampleArgument, final String secretsPath,
+            final String serviceAccountKeySecretName) {
         return of(Map.of("-profile", "public", "-output_cram", "false")).override(of(addDashesIfNeeded()))
                 .override(of(fixed(secretsPath, serviceAccountKeySecretName)))
                 .override(of(sampleArgument.arguments()))
@@ -39,7 +38,8 @@ public class PipelineArguments {
     private Map<String, String> addDashesIfNeeded() {
         return overrides.entrySet()
                 .stream()
-                .collect(Collectors.toMap(e -> e.getKey().startsWith("-") ? e.getKey() : "-" + e.getKey(), Map.Entry::getValue));
+                .collect(Collectors.toMap(e -> e.getKey().startsWith("-") ? e.getKey() : "-" + e.getKey(),
+                        Map.Entry::getValue));
     }
 
     private Map<String, String> fixed(final String secretsPath, final String serviceAccountKeySecretName) {
@@ -55,7 +55,7 @@ public class PipelineArguments {
         if (!gcpConfiguration.networkTags().isEmpty()) {
             builder.put("-network_tags", String.join(",", gcpConfiguration.networkTags()));
         }
-        if (platinumConfiguration.apiUrl().isPresent()) {
+        if (platinumConfiguration.hmfConfiguration().isPresent()) {
             builder.put("-profile", "production");
             builder.put("-context", "RESEARCH");
         } else {

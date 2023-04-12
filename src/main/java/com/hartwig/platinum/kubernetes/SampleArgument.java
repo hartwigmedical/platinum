@@ -18,7 +18,6 @@ public interface SampleArgument {
         return ImmutableSampleArgument.builder()
                 .id(setName.toLowerCase())
                 .putArguments("-sample_json", String.format("samples/%s-%s", setName.toLowerCase(), runName))
-                .putArguments("-set_id", setName)
                 .putArguments("-run_tag", runName)
                 .build();
     }

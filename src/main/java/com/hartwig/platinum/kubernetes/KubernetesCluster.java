@@ -57,9 +57,7 @@ public class KubernetesCluster {
                         runName,
                         new PipelineArguments(configuration.argumentOverrides(),
                                 outputBucketName,
-                                serviceAccountEmail,
-                                runName,
-                                configuration),
+                                serviceAccountEmail, configuration),
                         secretVolume.getName(),
                         configMapVolume.getName(),
                         configuration.image(), configuration);

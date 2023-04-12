@@ -19,6 +19,7 @@ import com.google.api.services.container.v1beta1.model.NodeConfig;
 import com.google.api.services.container.v1beta1.model.NodePool;
 import com.google.api.services.container.v1beta1.model.Operation;
 import com.google.api.services.container.v1beta1.model.PrivateClusterConfig;
+import com.hartwig.pdl.PipelineInput;
 import com.hartwig.platinum.Console;
 import com.hartwig.platinum.config.BatchConfiguration;
 import com.hartwig.platinum.config.GcpConfiguration;
@@ -120,7 +121,7 @@ public class KubernetesEngine {
         }
     }
 
-    public KubernetesCluster findOrCreate(final String runName, final List<TumorNormalPair> pairs, final JsonKey jsonKey,
+    public KubernetesCluster findOrCreate(final String runName, final List<PipelineInput> pipelineInputs, final JsonKey jsonKey,
             final String outputBucketName, final String serviceAccountEmail) {
         try {
             String clusterName = configuration.cluster().orElse(runName);
@@ -166,7 +167,7 @@ public class KubernetesEngine {
             return new KubernetesCluster(runName,
                     new JobScheduler(kubernetesClient, configuration.retryFailed()),
                     new PipelineServiceAccountSecretVolume(jsonKey, kubernetesClient, "service-account-key"),
-                    new PipelineConfigMapVolume(pairs, kubernetesClient, runName),
+                    new PipelineConfigMapVolume(pipelineInputs, kubernetesClient, runName),
                     outputBucketName,
                     serviceAccountEmail,
                     configuration,

@@ -39,7 +39,7 @@ public class Platinum {
 
     public Platinum(final String runName, final String input, final Storage storage, final Iam iam,
             final CloudResourceManager resourceManager, final KubernetesEngine clusterProvider,
-            final PlatinumConfiguration configuration, PDLConversion pdlConversion) {
+            final PlatinumConfiguration configuration, final PDLConversion pdlConversion) {
         this.runName = runName;
         this.input = input;
         this.storage = storage;
