@@ -1,4 +1,4 @@
-package com.hartwig.platinum.pdl;
+package com.hartwig.platinum.p5sample;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -17,12 +17,12 @@ public class DecomposeSamplesTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void throwsIllegalArgumentWhenSampleNameExceeds55Chars() {
-        ConvertFromGCSPaths.apply(List.of(ImmutableSampleConfiguration.builder().name(stringOf(55)).normal(data("normal")).build()));
+        DecomposeSamples.apply(List.of(ImmutableSampleConfiguration.builder().name(stringOf(55)).normal(data("normal")).build()));
     }
 
     @Test
     public void decomposesMultiNormalSamplesIntoPairs() {
-        List<TumorNormalPair> pairs = ConvertFromGCSPaths.apply(List.of(ImmutableSampleConfiguration.builder()
+        List<TumorNormalPair> pairs = DecomposeSamples.apply(List.of(ImmutableSampleConfiguration.builder()
                 .name("sample")
                 .tumors(List.of(data("first_tumor"), data("second_tumor")))
                 .normal(data("normal"))
@@ -42,7 +42,7 @@ public class DecomposeSamplesTest {
 
     @Test
     public void populatesTumorAndNormalLanes() {
-        List<TumorNormalPair> pairs = ConvertFromGCSPaths.apply(List.of(ImmutableSampleConfiguration.builder()
+        List<TumorNormalPair> pairs = DecomposeSamples.apply(List.of(ImmutableSampleConfiguration.builder()
                 .name("sample")
                 .tumors(List.of(data("first_tumor",
                         ImmutableFastqConfiguration.builder().read1("first_tumor_read1.fastq").read2("first_tumor_read2.fastq").build())))

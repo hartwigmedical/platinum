@@ -50,7 +50,7 @@ public interface PlatinumConfiguration {
 
     Optional<String> cluster();
 
-    Optional<HmfConfiguration> hmfConfiguration();
+    Optional<String> apiUrl();
 
     Optional<String> keystorePassword();
 
@@ -81,13 +81,11 @@ public interface PlatinumConfiguration {
     }
 
     static PlatinumConfiguration from(final String inputFile) {
-        ObjectMapper objectMapper =
-                inputFile.endsWith("yaml") ? new ObjectMapper(new YAMLFactory()) : new ObjectMapper();
+        ObjectMapper objectMapper = inputFile.endsWith("yaml") ? new ObjectMapper(new YAMLFactory()) : new ObjectMapper();
         objectMapper.findAndRegisterModules();
         try {
-            PlatinumConfiguration platinumConfiguration =
-                    objectMapper.readValue(new File(inputFile), new TypeReference<>() {
-                    });
+            PlatinumConfiguration platinumConfiguration = objectMapper.readValue(new File(inputFile), new TypeReference<>() {
+            });
             if (!platinumConfiguration.samples().isEmpty() && !platinumConfiguration.sampleIds().isEmpty()) {
                 throw new IllegalArgumentException("Cannot specify both a list of sample jsons and a list of biopsies. "
                         + "Split this configuration into two platinum runs.");

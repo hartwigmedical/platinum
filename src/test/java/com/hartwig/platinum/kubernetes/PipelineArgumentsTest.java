@@ -7,8 +7,8 @@ import java.util.Map;
 
 import com.hartwig.platinum.config.GcpConfiguration;
 import com.hartwig.platinum.config.PlatinumConfiguration;
-import com.hartwig.platinum.pdl.ImmutableSample;
-import com.hartwig.platinum.pdl.ImmutableTumorNormalPair;
+import com.hartwig.platinum.p5sample.ImmutableSample;
+import com.hartwig.platinum.p5sample.ImmutableTumorNormalPair;
 
 import org.junit.Test;
 
