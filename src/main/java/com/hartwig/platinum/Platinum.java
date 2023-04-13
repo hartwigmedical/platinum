@@ -73,14 +73,14 @@ public class Platinum {
         String serviceAccountEmail = serviceAccount.findOrCreate();
         ServiceAccountPrivateKey privateKey = ServiceAccountPrivateKey.from(configuration, iam);
         JsonKey jsonKey = privateKey.create(gcpConfiguration.projectOrThrow(), serviceAccountEmail);
-        List<PipelineInput> pairs = pdlConversion.apply(configuration);
+        List<PipelineInput> pipelineInputs = pdlConversion.apply(configuration);
         int submitted = kubernetesEngine.findOrCreate(runName,
-                        pairs,
+                        pipelineInputs,
                         jsonKey,
                         OutputBucket.from(storage)
                                 .findOrCreate(runName, gcpConfiguration.regionOrThrow(), serviceAccountEmail, configuration),
                         serviceAccountEmail)
-                .submit(pairs.stream()
+                .submit(pipelineInputs.stream()
                         .map(pipelineInput -> SampleArgument.sampleJson(pipelineInput, runName))
                         .collect(Collectors.toList()));
         LOGGER.info("Platinum started {} pipelines on GCP", Console.bold(String.valueOf(submitted)));

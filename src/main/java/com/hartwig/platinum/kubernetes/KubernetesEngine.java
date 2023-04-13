@@ -39,7 +39,8 @@ public class KubernetesEngine {
     private final ProcessRunner processRunner;
     private final PlatinumConfiguration configuration;
 
-    public KubernetesEngine(final Container containerApi, final ProcessRunner processRunner, final PlatinumConfiguration configuration) {
+    public KubernetesEngine(final Container containerApi, final ProcessRunner processRunner,
+            final PlatinumConfiguration configuration) {
         this.containerApi = containerApi;
         this.processRunner = processRunner;
         this.configuration = configuration;
@@ -86,7 +87,8 @@ public class KubernetesEngine {
                 newCluster.setPrivateClusterConfig(privateClusterConfig);
                 ipAllocationPolicy.setUseIpAliases(true);
             }
-            if (gcpConfiguration.secondaryRangeNamePods().isPresent() && gcpConfiguration.secondaryRangeNameServices().isPresent()) {
+            if (gcpConfiguration.secondaryRangeNamePods().isPresent() && gcpConfiguration.secondaryRangeNameServices()
+                    .isPresent()) {
                 ipAllocationPolicy.setClusterSecondaryRangeName(gcpConfiguration.secondaryRangeNamePods().get());
                 ipAllocationPolicy.setServicesSecondaryRangeName(gcpConfiguration.secondaryRangeNameServices().get());
             }
@@ -96,7 +98,8 @@ public class KubernetesEngine {
             createRequest.setCluster(newCluster);
             Create created = containerApi.projects().locations().clusters().create(parent, createRequest);
             Operation execute = created.execute();
-            LOGGER.info("Creating new kubernetes cluster {} in project {} and region {}, this can take upwards of 5 minutes...",
+            LOGGER.info(
+                    "Creating new kubernetes cluster {} in project {} and region {}, this can take upwards of 5 minutes...",
                     Console.bold(newCluster.getName()),
                     Console.bold(gcpConfiguration.projectOrThrow()),
                     Console.bold(gcpConfiguration.regionOrThrow()));
@@ -121,13 +124,17 @@ public class KubernetesEngine {
         }
     }
 
-    public KubernetesCluster findOrCreate(final String runName, final List<PipelineInput> pipelineInputs, final JsonKey jsonKey,
-            final String outputBucketName, final String serviceAccountEmail) {
+    public KubernetesCluster findOrCreate(final String runName, final List<PipelineInput> pipelineInputs,
+            final JsonKey jsonKey, final String outputBucketName, final String serviceAccountEmail) {
         try {
             String clusterName = configuration.cluster().orElse(runName);
             GcpConfiguration gcpConfiguration = configuration.gcp();
-            String parent = String.format("projects/%s/locations/%s", gcpConfiguration.projectOrThrow(), gcpConfiguration.regionOrThrow());
-            if (find(fullPath(gcpConfiguration.projectOrThrow(), gcpConfiguration.regionOrThrow(), clusterName)).isEmpty()) {
+            String parent = String.format("projects/%s/locations/%s",
+                    gcpConfiguration.projectOrThrow(),
+                    gcpConfiguration.regionOrThrow());
+            if (find(fullPath(gcpConfiguration.projectOrThrow(),
+                    gcpConfiguration.regionOrThrow(),
+                    clusterName)).isEmpty()) {
                 create(containerApi, parent, clusterName, gcpConfiguration);
             }
             if (!configuration.inCluster()) {

@@ -14,7 +14,7 @@ public interface SampleArgument {
     Map<String, String> arguments();
 
     static SampleArgument sampleJson(final PipelineInput pair, final String runName) {
-        String setName = pair.setName().get();
+        String setName = pair.setName();
         return ImmutableSampleArgument.builder()
                 .id(setName.toLowerCase())
                 .putArguments("-sample_json", String.format("samples/%s-%s", setName.toLowerCase(), runName))
