@@ -68,8 +68,7 @@ public class PlatinumMain implements Callable<Integer> {
 
     private PlatinumConfiguration addRegion(final PlatinumConfiguration configuration) {
         if (configuration.gcp().region().isPresent() && region != null) {
-            throw new IllegalArgumentException(
-                    "Region cannot be specified in both JSON input and CLI. Choose one or the other");
+            throw new IllegalArgumentException("Region cannot be specified in both JSON input and CLI. Choose one or the other");
         } else if (region != null) {
             return configuration.withGcp(configuration.gcp().withRegion(region));
         }
@@ -78,8 +77,7 @@ public class PlatinumMain implements Callable<Integer> {
 
     private PlatinumConfiguration addProject(final PlatinumConfiguration configuration) {
         if (configuration.gcp().project().isPresent() && project != null) {
-            throw new IllegalArgumentException(
-                    "Project cannot be specified in both JSON input and CLI. Choose one or the other");
+            throw new IllegalArgumentException("Project cannot be specified in both JSON input and CLI. Choose one or the other");
         } else if (project != null) {
             return configuration.withGcp(configuration.gcp().withProject(project));
         }

@@ -38,8 +38,8 @@ public class Platinum {
     private final PDLConversion pdlConversion;
 
     public Platinum(final String runName, final String input, final Storage storage, final Iam iam,
-            final CloudResourceManager resourceManager, final KubernetesEngine clusterProvider,
-            final PlatinumConfiguration configuration, final PDLConversion pdlConversion) {
+            final CloudResourceManager resourceManager, final KubernetesEngine clusterProvider, final PlatinumConfiguration configuration,
+            final PDLConversion pdlConversion) {
         this.runName = runName;
         this.input = input;
         this.storage = storage;
@@ -65,11 +65,8 @@ public class Platinum {
     public void run() {
         LOGGER.info("Starting platinum run with name {} and input {}", Console.bold(runName), Console.bold(input));
         GcpConfiguration gcpConfiguration = configuration.gcp();
-        PipelineServiceAccount serviceAccount = PipelineServiceAccount.from(iam,
-                resourceManager,
-                runName,
-                gcpConfiguration.projectOrThrow(),
-                configuration);
+        PipelineServiceAccount serviceAccount =
+                PipelineServiceAccount.from(iam, resourceManager, runName, gcpConfiguration.projectOrThrow(), configuration);
         String serviceAccountEmail = serviceAccount.findOrCreate();
         ServiceAccountPrivateKey privateKey = ServiceAccountPrivateKey.from(configuration, iam);
         JsonKey jsonKey = privateKey.create(gcpConfiguration.projectOrThrow(), serviceAccountEmail);
@@ -77,8 +74,7 @@ public class Platinum {
         int submitted = kubernetesEngine.findOrCreate(runName,
                         pipelineInputs,
                         jsonKey,
-                        OutputBucket.from(storage)
-                                .findOrCreate(runName, gcpConfiguration.regionOrThrow(), serviceAccountEmail, configuration),
+                        OutputBucket.from(storage).findOrCreate(runName, gcpConfiguration.regionOrThrow(), serviceAccountEmail, configuration),
                         serviceAccountEmail)
                 .submit(pipelineInputs.stream()
                         .map(pipelineInput -> SampleArgument.sampleJson(pipelineInput, runName))

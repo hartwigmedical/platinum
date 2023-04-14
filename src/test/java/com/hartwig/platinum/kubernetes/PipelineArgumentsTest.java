@@ -49,7 +49,8 @@ public class PipelineArgumentsTest {
     private PipelineArguments createVictimWithOverrides(final String s, final String value) {
         return new PipelineArguments(Map.of(s, value),
                 "output",
-                "email", PlatinumConfiguration.builder()
+                "email",
+                PlatinumConfiguration.builder()
                         .gcp(GcpConfiguration.builder().region("region").project("project").privateCluster(false).build())
                         .build());
     }

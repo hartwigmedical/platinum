@@ -13,8 +13,8 @@ public interface SampleArgument {
 
     Map<String, String> arguments();
 
-    static SampleArgument sampleJson(final PipelineInput pair, final String runName) {
-        String setName = pair.setName();
+    static SampleArgument sampleJson(final PipelineInput pipelineInput, final String runName) {
+        String setName = pipelineInput.setName();
         return ImmutableSampleArgument.builder()
                 .id(setName.toLowerCase())
                 .putArguments("-sample_json", String.format("samples/%s-%s", setName.toLowerCase(), runName))

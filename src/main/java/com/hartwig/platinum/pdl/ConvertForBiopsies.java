@@ -24,8 +24,7 @@ public class ConvertForBiopsies implements PDLConversion {
     private final SetApi setApi;
     private final PdlGenerator pdlGenerator;
 
-    public ConvertForBiopsies(final RunApi runApi, final SampleApi sampleApi, final SetApi setApi,
-            final PdlGenerator pdlGenerator) {
+    public ConvertForBiopsies(final RunApi runApi, final SampleApi sampleApi, final SetApi setApi, final PdlGenerator pdlGenerator) {
         this.runApi = runApi;
         this.sampleApi = sampleApi;
         this.setApi = setApi;

@@ -35,8 +35,7 @@ public class PipelineConfigMapVolume implements KubernetesComponent<Volume> {
                 .inNamespace(KubernetesCluster.NAMESPACE)
                 .withName(name)
                 .createOrReplace(new ConfigMapBuilder().addToData(pipelineInputs.stream()
-                                .collect(Collectors.toMap(p -> p.setName().toLowerCase() + "-" + runName,
-                                        p -> toJson(objectMapper, p))))
+                                .collect(Collectors.toMap(p -> p.setName().toLowerCase() + "-" + runName, p -> toJson(objectMapper, p))))
                         .withNewMetadata()
                         .withName(name)
                         .withNamespace(KubernetesCluster.NAMESPACE)
