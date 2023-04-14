@@ -20,9 +20,6 @@ public class ConvertForRerun implements PDLConversion {
 
     @Override
     public List<PipelineInput> apply(final PlatinumConfiguration configuration) {
-        return configuration.sampleIds()
-                .stream()
-                .map(sample -> generator.generate(apiRerun.create(sample)))
-                .collect(Collectors.toList());
+        return configuration.sampleIds().stream().map(sample -> generator.generate(apiRerun.create(sample))).collect(Collectors.toList());
     }
 }

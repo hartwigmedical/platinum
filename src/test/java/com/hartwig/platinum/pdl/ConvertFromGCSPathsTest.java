@@ -28,12 +28,11 @@ public class ConvertFromGCSPathsTest {
 
     @Test
     public void decomposesMultiNormalSamplesIntoPairs() {
-        List<PipelineInput> pipelineInputs =
-                new ConvertFromGCSPaths().apply(createConfiguration(List.of(SampleConfiguration.builder()
-                        .name("sample")
-                        .tumors(List.of(data("first_tumor"), data("second_tumor")))
-                        .normal(data("normal"))
-                        .build())));
+        List<PipelineInput> pipelineInputs = new ConvertFromGCSPaths().apply(createConfiguration(List.of(SampleConfiguration.builder()
+                .name("sample")
+                .tumors(List.of(data("first_tumor"), data("second_tumor")))
+                .normal(data("normal"))
+                .build())));
         assertThat(pipelineInputs).hasSize(2);
         PipelineInput firstPair = pipelineInputs.get(0);
         assertThat(firstPair.setName()).isEqualTo("sample-t1");
@@ -47,20 +46,13 @@ public class ConvertFromGCSPathsTest {
 
     @Test
     public void populatesTumorAndNormalLanes() {
-        List<PipelineInput> pairs =
-                new ConvertFromGCSPaths().apply(createConfiguration(List.of(SampleConfiguration.builder()
-                        .name("sample")
-                        .tumors(List.of(data("first_tumor",
-                                ImmutableFastqConfiguration.builder()
-                                        .read1("first_tumor_read1.fastq")
-                                        .read2("first_tumor_read2.fastq")
-                                        .build())))
-                        .normal(data("normal",
-                                ImmutableFastqConfiguration.builder()
-                                        .read1("normal_read1.fastq")
-                                        .read2("normal_read2.fastq")
-                                        .build()))
-                        .build())));
+        List<PipelineInput> pairs = new ConvertFromGCSPaths().apply(createConfiguration(List.of(SampleConfiguration.builder()
+                .name("sample")
+                .tumors(List.of(data("first_tumor",
+                        ImmutableFastqConfiguration.builder().read1("first_tumor_read1.fastq").read2("first_tumor_read2.fastq").build())))
+                .normal(data("normal",
+                        ImmutableFastqConfiguration.builder().read1("normal_read1.fastq").read2("normal_read2.fastq").build()))
+                .build())));
         PipelineInput pair = pairs.get(0);
         assertThat(pair.tumor().orElseThrow().lanes()).containsOnly(LaneInput.builder()
                 .laneNumber("1")

@@ -55,12 +55,11 @@ public class KubernetesCluster {
             try {
                 PipelineContainer pipelineContainer = new PipelineContainer(sample,
                         runName,
-                        new PipelineArguments(configuration.argumentOverrides(),
-                                outputBucketName,
-                                serviceAccountEmail, configuration),
+                        new PipelineArguments(configuration.argumentOverrides(), outputBucketName, serviceAccountEmail, configuration),
                         secretVolume.getName(),
                         configMapVolume.getName(),
-                        configuration.image(), configuration);
+                        configuration.image(),
+                        configuration);
                 if (scheduler.submit(new PipelineJob(runName,
                         sample.id(),
                         configuration.keystorePassword()
