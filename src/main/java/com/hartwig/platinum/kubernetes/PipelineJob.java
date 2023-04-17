@@ -31,7 +31,7 @@ public class PipelineJob implements KubernetesComponent<JobSpec> {
         this.volumes = volumes;
         this.nodePool = nodePool;
         this.ttl = ttl;
-        this.name = sample + "-" + run;
+        this.name = KubernetesUtil.toValidRFC1123Label(sample, run);
     }
 
     public String getName() {

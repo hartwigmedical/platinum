@@ -37,7 +37,7 @@ public class PipelineContainer implements KubernetesComponent<Container> {
 
     @Override
     public Container asKubernetes() {
-        String containerName = format("%s-%s", runName, sample.id()).toLowerCase();
+        String containerName = KubernetesUtil.toValidRFC1123Label(sample.id(), runName);
         Container container = new Container();
         container.setImage(imageName);
         container.setName(containerName);
