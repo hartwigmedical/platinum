@@ -6,6 +6,7 @@ import static java.util.stream.Stream.of;
 
 import java.time.Duration;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import com.hartwig.platinum.config.BatchConfiguration;
 import com.hartwig.platinum.config.PlatinumConfiguration;
@@ -25,7 +26,7 @@ public class KubernetesCluster {
 
     final static String NAMESPACE = "default";
     private final KubernetesComponent<Volume> serviceAccountSecret;
-    private final KubernetesComponent<Volume> configMap;
+    private final PipelineConfigMapVolume configMap;
     private final String outputBucketName;
     private final String serviceAccountEmail;
     private final PlatinumConfiguration configuration;
@@ -33,7 +34,7 @@ public class KubernetesCluster {
     private final TargetNodePool targetNodePool;
 
     KubernetesCluster(final String runName, final JobScheduler scheduler, final KubernetesComponent<Volume> serviceAccountSecret,
-            final KubernetesComponent<Volume> configMap, final String outputBucketName, final String serviceAccountEmail,
+            final PipelineConfigMapVolume configMap, final String outputBucketName, final String serviceAccountEmail,
             final PlatinumConfiguration configuration, final Delay delay, final TargetNodePool targetNodePool) {
         this.runName = runName.toLowerCase();
         this.scheduler = scheduler;
@@ -46,10 +47,15 @@ public class KubernetesCluster {
         this.targetNodePool = targetNodePool;
     }
 
-    public int submit(final List<SampleArgument> samples) {
+    public int submit() {
         Volume configMapVolume = configMap.asKubernetes();
         Volume secretVolume = serviceAccountSecret.asKubernetes();
         Volume maybeJksVolume = new JksSecret().asKubernetes();
+        var samples = configMap.getConfigmapContents()
+                .keySet()
+                .stream()
+                .map(sampleName -> SampleArgument.sampleJson(sampleName, runName))
+                .collect(toList());
         int numSubmitted = 0;
         for (SampleArgument sample : samples) {
             try {

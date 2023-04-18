@@ -7,7 +7,11 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import com.hartwig.platinum.config.GcpConfiguration;
 import com.hartwig.platinum.config.ImmutableBatchConfiguration;
@@ -23,25 +27,23 @@ import io.fabric8.kubernetes.api.model.Volume;
 import io.fabric8.kubernetes.api.model.VolumeBuilder;
 
 public class KubernetesClusterTest {
-
-    private static final List<SampleArgument> SAMPLES = List.of(sample("sample"));
-
     private static final ImmutableGcpConfiguration GCP = GcpConfiguration.builder().project("project").region("region").build();
     private static final String SECRET = "secret";
     private static final String CONFIG = "config";
     private KubernetesCluster victim;
     private JobScheduler scheduler;
     private Volume secret;
-    private Volume configMap;
     private Delay delay;
+    private PipelineConfigMapVolume configmapVolume;
 
     @Before
     public void setUp() {
         secret = new VolumeBuilder().withName(SECRET).build();
-        configMap = new VolumeBuilder().withName(CONFIG).build();
         scheduler = mock(JobScheduler.class);
         when(scheduler.submit(any())).thenReturn(true);
         delay = mock(Delay.class);
+        configmapVolume = mock(PipelineConfigMapVolume.class);
+        when(configmapVolume.asKubernetes()).thenReturn(new VolumeBuilder().withName(CONFIG).build());
     }
 
     @Test
@@ -50,13 +52,14 @@ public class KubernetesClusterTest {
         victim = new KubernetesCluster("test",
                 scheduler,
                 () -> secret,
-                () -> configMap,
+                configmapVolume,
                 "output",
                 "sa@gcloud.com",
                 PlatinumConfiguration.builder().keystorePassword("changeit").gcp(GCP).build(),
                 delay,
                 TargetNodePool.defaultPool());
-        victim.submit(List.of(sample("sample")));
+        mockConfigmapContents("sample");
+        victim.submit();
         verify(scheduler).submit(job.capture());
         PipelineJob result = job.getValue();
         assertThat(result.getVolumes()).extracting(Volume::getName).contains("jks");
@@ -72,13 +75,14 @@ public class KubernetesClusterTest {
         victim = new KubernetesCluster("test",
                 scheduler,
                 () -> secret,
-                () -> configMap,
+                configmapVolume,
                 "output",
                 "sa@gcloud.com",
                 PlatinumConfiguration.builder().gcp(GCP).build(),
                 delay,
                 TargetNodePool.defaultPool());
-        victim.submit(SAMPLES);
+        mockConfigmapContents("sample");
+        victim.submit();
         verify(scheduler).submit(job.capture());
         PipelineJob result = job.getValue();
         assertThat(result.getVolumes()).extracting(Volume::getName).containsExactly(CONFIG, SECRET);
@@ -89,13 +93,14 @@ public class KubernetesClusterTest {
         victim = new KubernetesCluster("test",
                 scheduler,
                 () -> secret,
-                () -> configMap,
+                configmapVolume,
                 "output",
                 "sa@gcloud.com",
                 PlatinumConfiguration.builder().gcp(GCP).batch(ImmutableBatchConfiguration.builder().size(2).delay(1).build()).build(),
                 delay,
                 TargetNodePool.defaultPool());
-        victim.submit(List.of(sample("1"), sample("2"), sample("3"), sample("4"), sample("5")));
+        mockConfigmapContents("1", "2", "3", "4", "5");
+        victim.submit();
 
         ArgumentCaptor<Integer> delayCaptor = ArgumentCaptor.forClass(Integer.class);
         verify(delay, times(2)).forMinutes(delayCaptor.capture());
@@ -104,7 +109,8 @@ public class KubernetesClusterTest {
         assertThat(delayCaptor.getAllValues().get(1)).isEqualTo(1);
     }
 
-    private static ImmutableSampleArgument sample(final String id) {
-        return ImmutableSampleArgument.builder().id(id).build();
+    private void mockConfigmapContents(String... keys) {
+        var contents = Arrays.stream(keys).collect(Collectors.toMap(key -> key, key -> ""));
+        when(configmapVolume.getConfigmapContents()).thenReturn(contents);
     }
 }

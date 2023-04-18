@@ -14,11 +14,7 @@ public interface SampleArgument {
 
     Map<String, String> arguments();
 
-    static SampleArgument sampleJson(final PipelineInput pipelineInput, final String runName) {
-        String sampleName = pipelineInput.tumor()
-                .or(pipelineInput::reference)
-                .map(sampleInput -> KubernetesUtil.toValidRFC1123Label(sampleInput.name(), runName))
-                .orElseThrow(() -> new IllegalArgumentException("Need to specify either tumor or reference."));
+    static SampleArgument sampleJson(final String sampleName, final String runName) {
         return ImmutableSampleArgument.builder()
                 .id(sampleName)
                 .putArguments("-sample_json", "samples/" + sampleName)

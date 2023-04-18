@@ -76,9 +76,7 @@ public class Platinum {
                         jsonKey,
                         OutputBucket.from(storage).findOrCreate(runName, gcpConfiguration.regionOrThrow(), serviceAccountEmail, configuration),
                         serviceAccountEmail)
-                .submit(pipelineInputs.stream()
-                        .map(pipelineInput -> SampleArgument.sampleJson(pipelineInput, runName))
-                        .collect(Collectors.toList()));
+                .submit();
         LOGGER.info("Platinum started {} pipelines on GCP", Console.bold(String.valueOf(submitted)));
         LOGGER.info("You can monitor their progress with: {}", Console.bold("./platinum status"));
     }
