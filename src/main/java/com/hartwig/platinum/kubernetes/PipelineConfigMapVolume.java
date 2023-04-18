@@ -1,7 +1,9 @@
 package com.hartwig.platinum.kubernetes;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -17,18 +19,15 @@ import io.fabric8.kubernetes.client.KubernetesClient;
 public class PipelineConfigMapVolume implements KubernetesComponent<Volume> {
 
     private static final String SAMPLES = "samples";
-    private final List<PipelineInput> pipelineInputs;
     private final KubernetesClient kubernetesClient;
     private final String runName;
-    private final ObjectMapper objectMapper;
+    private final Map<String, String> configMapContents;
 
     public PipelineConfigMapVolume(final List<PipelineInput> pipelineInputs, final KubernetesClient kubernetesClient,
             final String runName) {
         this.kubernetesClient = kubernetesClient;
         this.runName = runName;
-        this.pipelineInputs = pipelineInputs;
-        objectMapper = new ObjectMapper();
-        objectMapper.registerModule(new Jdk8Module());
+        this.configMapContents = inputAsConfigMap(pipelineInputs, runName);
     }
 
     public Volume asKubernetes() {
@@ -36,7 +35,7 @@ public class PipelineConfigMapVolume implements KubernetesComponent<Volume> {
         kubernetesClient.configMaps()
                 .inNamespace(KubernetesCluster.NAMESPACE)
                 .withName(name)
-                .createOrReplace(new ConfigMapBuilder().addToData(getConfigmapContents())
+                .createOrReplace(new ConfigMapBuilder().addToData(configMapContents)
                         .withNewMetadata()
                         .withName(name)
                         .withNamespace(KubernetesCluster.NAMESPACE)
@@ -45,16 +44,25 @@ public class PipelineConfigMapVolume implements KubernetesComponent<Volume> {
         return new VolumeBuilder().withName(name).editOrNewConfigMap().withName(name).endConfigMap().build();
     }
 
-    public Map<String, String> getConfigmapContents() {
-        return pipelineInputs.stream()
-                .collect(Collectors.toMap(pipelineInput -> pipelineInput.tumor()
-                                .or(pipelineInput::reference)
-                                .map(sampleInput -> KubernetesUtil.toValidRFC1123Label(sampleInput.name(), runName))
-                                .orElseThrow(() -> new IllegalArgumentException("Need to specify either tumor or reference.")),
-                        p -> toJson(objectMapper, p)));
+    public Set<String> getConfigMapKeys() {
+        return Collections.unmodifiableSet(configMapContents.keySet());
     }
 
-    private String toJson(final ObjectMapper objectMapper, final PipelineInput pipelineInput) {
+    private static Map<String, String> inputAsConfigMap(final List<PipelineInput> pipelineInputs, final String runName) {
+        return pipelineInputs.stream()
+                .collect(Collectors.toMap(pipelineInput -> toLabel(pipelineInput, runName), PipelineConfigMapVolume::toJson));
+    }
+
+    private static String toLabel(final PipelineInput pipelineInput, final String runName) {
+        return pipelineInput.tumor()
+                .or(pipelineInput::reference)
+                .map(sampleInput -> KubernetesUtil.toValidRFC1123Label(sampleInput.name(), runName))
+                .orElseThrow(() -> new IllegalArgumentException("Need to specify either tumor or reference."));
+    }
+
+    private static String toJson(final PipelineInput pipelineInput) {
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new Jdk8Module());
         try {
             return objectMapper.writeValueAsString(pipelineInput);
         } catch (JsonProcessingException e) {

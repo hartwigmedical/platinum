@@ -5,8 +5,6 @@ import static java.util.stream.Stream.concat;
 import static java.util.stream.Stream.of;
 
 import java.time.Duration;
-import java.util.List;
-import java.util.stream.Collectors;
 
 import com.hartwig.platinum.config.BatchConfiguration;
 import com.hartwig.platinum.config.PlatinumConfiguration;
@@ -51,11 +49,8 @@ public class KubernetesCluster {
         Volume configMapVolume = configMap.asKubernetes();
         Volume secretVolume = serviceAccountSecret.asKubernetes();
         Volume maybeJksVolume = new JksSecret().asKubernetes();
-        var samples = configMap.getConfigmapContents()
-                .keySet()
-                .stream()
-                .map(sampleName -> SampleArgument.sampleJson(sampleName, runName))
-                .collect(toList());
+        var samples =
+                configMap.getConfigMapKeys().stream().map(sampleName -> SampleArgument.sampleJson(sampleName, runName)).collect(toList());
         int numSubmitted = 0;
         for (SampleArgument sample : samples) {
             try {

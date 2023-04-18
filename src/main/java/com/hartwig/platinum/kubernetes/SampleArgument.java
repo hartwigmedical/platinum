@@ -2,9 +2,6 @@ package com.hartwig.platinum.kubernetes;
 
 import java.util.Map;
 
-import com.hartwig.pdl.PipelineInput;
-import com.hartwig.pdl.SampleInput;
-
 import org.immutables.value.Value;
 
 @Value.Immutable

@@ -8,9 +8,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 import com.hartwig.platinum.config.GcpConfiguration;
@@ -110,7 +107,7 @@ public class KubernetesClusterTest {
     }
 
     private void mockConfigmapContents(String... keys) {
-        var contents = Arrays.stream(keys).collect(Collectors.toMap(key -> key, key -> ""));
-        when(configmapVolume.getConfigmapContents()).thenReturn(contents);
+        var contents = Arrays.stream(keys).collect(Collectors.toSet());
+        when(configmapVolume.getConfigMapKeys()).thenReturn(contents);
     }
 }

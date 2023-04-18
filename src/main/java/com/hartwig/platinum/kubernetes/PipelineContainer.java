@@ -35,10 +35,9 @@ public class PipelineContainer implements KubernetesComponent<Container> {
 
     @Override
     public Container asKubernetes() {
-        String containerName = sample.id();
         Container container = new Container();
         container.setImage(imageName);
-        container.setName(containerName);
+        container.setName(sample.id());
         List<String> command = arguments.asCommand(sample, SECRETS_PATH, serviceAccountKeySecretName);
         container.setCommand(command);
         container.setVolumeMounts(List.of(new VolumeMountBuilder().withMountPath(SAMPLES_PATH).withName(configMapName).build(),
