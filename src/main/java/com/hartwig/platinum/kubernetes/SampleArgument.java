@@ -3,6 +3,7 @@ package com.hartwig.platinum.kubernetes;
 import java.util.Map;
 
 import com.hartwig.pdl.PipelineInput;
+import com.hartwig.pdl.SampleInput;
 
 import org.immutables.value.Value;
 
@@ -14,10 +15,13 @@ public interface SampleArgument {
     Map<String, String> arguments();
 
     static SampleArgument sampleJson(final PipelineInput pipelineInput, final String runName) {
-        String setName = pipelineInput.setName();
+        String sampleName = pipelineInput.tumor()
+                .or(pipelineInput::reference)
+                .map(sampleInput -> KubernetesUtil.toValidRFC1123Label(sampleInput.name(), runName))
+                .orElseThrow(() -> new IllegalArgumentException("Need to specify either tumor or reference."));
         return ImmutableSampleArgument.builder()
-                .id(setName.toLowerCase())
-                .putArguments("-sample_json", String.format("samples/%s-%s", setName.toLowerCase(), runName))
+                .id(sampleName)
+                .putArguments("-sample_json", "samples/" + sampleName)
                 .putArguments("-run_tag", runName)
                 .build();
     }

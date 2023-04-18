@@ -54,14 +54,12 @@ public class KubernetesCluster {
         for (SampleArgument sample : samples) {
             try {
                 PipelineContainer pipelineContainer = new PipelineContainer(sample,
-                        runName,
                         new PipelineArguments(configuration.argumentOverrides(), outputBucketName, serviceAccountEmail, configuration),
                         secretVolume.getName(),
                         configMapVolume.getName(),
                         configuration.image(),
                         configuration);
-                if (scheduler.submit(new PipelineJob(runName,
-                        sample.id(),
+                if (scheduler.submit(new PipelineJob(sample.id(),
                         configuration.keystorePassword()
                                 .map(p -> new JksEnabledContainer(pipelineContainer.asKubernetes(), maybeJksVolume, p).asKubernetes())
                                 .orElse(pipelineContainer.asKubernetes()),
