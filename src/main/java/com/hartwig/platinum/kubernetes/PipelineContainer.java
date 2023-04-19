@@ -16,18 +16,16 @@ public class PipelineContainer implements KubernetesComponent<Container> {
     private final static String SAMPLES_PATH = "/samples";
     private final static String SECRETS_PATH = "/secrets";
     private final SampleArgument sample;
-    private final String runName;
     private final PipelineArguments arguments;
     private final String serviceAccountKeySecretName;
     private final String configMapName;
     private final String imageName;
     private final PlatinumConfiguration configuration;
 
-    public PipelineContainer(final SampleArgument sample, final String runName, final PipelineArguments arguments,
+    public PipelineContainer(final SampleArgument sample, final PipelineArguments arguments,
             final String serviceAccountKeySecretName, final String configMapName, final String imageName,
             final PlatinumConfiguration configuration) {
         this.sample = sample;
-        this.runName = runName;
         this.arguments = arguments;
         this.serviceAccountKeySecretName = serviceAccountKeySecretName;
         this.configMapName = configMapName;
@@ -37,10 +35,9 @@ public class PipelineContainer implements KubernetesComponent<Container> {
 
     @Override
     public Container asKubernetes() {
-        String containerName = format("%s-%s", runName, sample.id()).toLowerCase();
         Container container = new Container();
         container.setImage(imageName);
-        container.setName(containerName);
+        container.setName(sample.id());
         List<String> command = arguments.asCommand(sample, SECRETS_PATH, serviceAccountKeySecretName);
         container.setCommand(command);
         container.setVolumeMounts(List.of(new VolumeMountBuilder().withMountPath(SAMPLES_PATH).withName(configMapName).build(),

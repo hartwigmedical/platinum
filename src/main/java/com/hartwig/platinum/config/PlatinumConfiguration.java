@@ -50,7 +50,7 @@ public interface PlatinumConfiguration {
 
     Optional<String> cluster();
 
-    Optional<String> apiUrl();
+    Optional<HmfConfiguration> hmfConfiguration();
 
     Optional<String> keystorePassword();
 

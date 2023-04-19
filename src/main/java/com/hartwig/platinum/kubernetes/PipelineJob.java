@@ -25,13 +25,13 @@ public class PipelineJob implements KubernetesComponent<JobSpec> {
     private final TargetNodePool nodePool;
     private final Duration ttl;
 
-    public PipelineJob(final String run, final String sample, final Container container, final List<Volume> volumes,
+    public PipelineJob(final String name, final Container container, final List<Volume> volumes,
             final TargetNodePool nodePool, final Duration ttl) {
         this.container = container;
         this.volumes = volumes;
         this.nodePool = nodePool;
         this.ttl = ttl;
-        this.name = sample + "-" + run;
+        this.name = name;
     }
 
     public String getName() {

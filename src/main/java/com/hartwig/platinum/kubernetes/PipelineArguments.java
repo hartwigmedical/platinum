@@ -17,15 +17,13 @@ public class PipelineArguments {
     private final Map<String, String> overrides;
     private final String outputBucket;
     private final String serviceAccountEmail;
-    private final String runName;
     private final PlatinumConfiguration platinumConfiguration;
 
     public PipelineArguments(final Map<String, String> overrides, final String outputBucket, final String serviceAccountEmail,
-            final String runName, final PlatinumConfiguration platinumConfiguration) {
+            final PlatinumConfiguration platinumConfiguration) {
         this.overrides = overrides;
         this.outputBucket = outputBucket;
         this.serviceAccountEmail = serviceAccountEmail;
-        this.runName = runName;
         this.platinumConfiguration = platinumConfiguration;
     }
 
@@ -55,7 +53,7 @@ public class PipelineArguments {
         if (!gcpConfiguration.networkTags().isEmpty()) {
             builder.put("-network_tags", String.join(",", gcpConfiguration.networkTags()));
         }
-        if (platinumConfiguration.apiUrl().isPresent()) {
+        if (platinumConfiguration.hmfConfiguration().isPresent()) {
             builder.put("-profile", "production");
             builder.put("-context", "RESEARCH");
         } else {

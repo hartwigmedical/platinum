@@ -26,9 +26,11 @@
         <mockito.version>4.3.1</mockito.version>
         <assertj-core.version>3.8.0</assertj-core.version>
         <google-api-services-iam.version>v1-rev20200709-1.30.10</google-api-services-iam.version>
-        <google-api-services-cloudresourcemanager.version>v1-rev20200720-1.30.10</google-api-services-cloudresourcemanager.version>
+        <google-api-services-cloudresourcemanager.version>v1-rev20200720-1.30.10
+        </google-api-services-cloudresourcemanager.version>
         <google-api-services-container.version>v1beta1-rev20200724-1.30.10</google-api-services-container.version>
-        <java-client.version>1.26.0</java-client.version>
+        <java-client.version>1.31.1</java-client.version>
+        <pdl.version>1.0.2</pdl.version>
     </properties>
 
     <distributionManagement>
@@ -56,6 +58,16 @@
             <groupId>com.hartwig.api</groupId>
             <artifactId>java-client</artifactId>
             <version>${java-client.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.hartwig.pdl</groupId>
+            <artifactId>pdl-generator</artifactId>
+            <version>${pdl.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.hartwig.pdl</groupId>
+            <artifactId>pdl-spec</artifactId>
+            <version>${pdl.version}</version>
         </dependency>
 
         <dependency>
@@ -159,6 +171,11 @@
                 <artifactId>google-storage-wagon</artifactId>
                 <version>1.0</version>
             </extension>
+            <extension>
+                <groupId>com.google.cloud.artifactregistry</groupId>
+                <artifactId>artifactregistry-maven-wagon</artifactId>
+                <version>2.1.0</version>
+            </extension>
         </extensions>
         <plugins>
             <plugin>
@@ -211,6 +228,16 @@
         <repository>
             <id>hmf-maven-repository-release</id>
             <url>gs://hmf-maven-repository/release</url>
+        </repository>
+        <repository>
+            <id>artifact-registry</id>
+            <url>artifactregistry://europe-west4-maven.pkg.dev/hmf-build/hmf-maven</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
         </repository>
     </repositories>
 </project>
