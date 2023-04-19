@@ -1,7 +1,7 @@
 FROM google/cloud-sdk:latest
 
 RUN apt update
-RUN apt --yes install openjdk-11-jre kubectl google-cloud-sdk 
+RUN apt --yes install openjdk-11-jre kubectl
 
 ADD platinum platinum
 ARG VERSION
