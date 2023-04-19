@@ -14,7 +14,7 @@ public class PipelineJobTest {
     @Test
     public void namesJobWithRunAndSample() {
         PipelineJob victim =
-                new PipelineJob("run", "sample", new Container(), Collections.emptyList(), TargetNodePool.defaultPool(), Duration.ZERO);
+                new PipelineJob("sample-run", new Container(), Collections.emptyList(), TargetNodePool.defaultPool(), Duration.ZERO);
         assertThat(victim.getName()).isEqualTo("sample-run");
     }
 }

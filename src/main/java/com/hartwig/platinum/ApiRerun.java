@@ -1,7 +1,5 @@
 package com.hartwig.platinum;
 
-import java.util.Optional;
-
 import com.hartwig.api.RunApi;
 import com.hartwig.api.SampleApi;
 import com.hartwig.api.SetApi;
@@ -35,7 +33,7 @@ public class ApiRerun {
     }
 
     public long create(final String tumorSampleName) {
-        return sampleApi.list(null, null, null, null, SampleType.TUMOR, tumorSampleName)
+        return sampleApi.list(null, null, null, null, SampleType.TUMOR, tumorSampleName, null)
                 .stream()
                 .findFirst()
                 .flatMap(sample -> OnlyOne.ofNullable(setApi.list(null, sample.getId(), true), SampleSet.class))

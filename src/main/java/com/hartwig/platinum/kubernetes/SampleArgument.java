@@ -2,8 +2,6 @@ package com.hartwig.platinum.kubernetes;
 
 import java.util.Map;
 
-import com.hartwig.pdl.PipelineInput;
-
 import org.immutables.value.Value;
 
 @Value.Immutable
@@ -13,11 +11,10 @@ public interface SampleArgument {
 
     Map<String, String> arguments();
 
-    static SampleArgument sampleJson(final PipelineInput pipelineInput, final String runName) {
-        String setName = pipelineInput.setName();
+    static SampleArgument sampleJson(final String sampleName, final String runName) {
         return ImmutableSampleArgument.builder()
-                .id(setName.toLowerCase())
-                .putArguments("-sample_json", String.format("samples/%s-%s", setName.toLowerCase(), runName))
+                .id(sampleName)
+                .putArguments("-sample_json", "samples/" + sampleName)
                 .putArguments("-run_tag", runName)
                 .build();
     }

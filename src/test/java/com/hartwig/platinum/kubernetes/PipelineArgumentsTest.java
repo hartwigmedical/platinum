@@ -39,11 +39,7 @@ public class PipelineArgumentsTest {
     }
 
     private List<String> asCommand(final PipelineArguments victim) {
-        return victim.asCommand(SampleArgument.sampleJson(ImmutablePipelineInput.builder()
-                .setName("sample")
-                .tumor(ImmutableSampleInput.builder().name("tumor").build())
-                .reference(ImmutableSampleInput.builder().name("normal").build())
-                .build(), "run"), "/secrets", "key.json");
+        return victim.asCommand(SampleArgument.sampleJson("tumor-run", "run"), "/secrets", "key.json");
     }
 
     private PipelineArguments createVictimWithOverrides(final String s, final String value) {

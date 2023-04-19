@@ -51,7 +51,7 @@ public class ApiRerunTest {
         samples = List.of(new Sample().name(biopsy).id(sampleId));
         sampleSet = new SampleSet().id(sampleSetId);
 
-        when(sampleApi.list(null, null, null, null, SampleType.TUMOR, biopsy)).thenReturn(samples);
+        when(sampleApi.list(null, null, null, null, SampleType.TUMOR, biopsy, null)).thenReturn(samples);
         when(runs.list(null, null, sampleSet.getId(), null, null, null, null, null)).thenReturn(List.of(validatedRun));
     }
 
@@ -66,7 +66,7 @@ public class ApiRerunTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void shouldThrowIllegalArgumentIfNoSamplesMatchGivenId() {
-        when(sampleApi.list(null, null, null, null, SampleType.TUMOR, biopsy)).thenReturn(emptyList());
+        when(sampleApi.list(null, null, null, null, SampleType.TUMOR, biopsy, null)).thenReturn(emptyList());
         assertThat(new ApiRerun(runs, sets, sampleApi, bucket, version).create(biopsy)).isNull();
         verify(runs, never()).create(any());
     }
