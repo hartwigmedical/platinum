@@ -78,6 +78,48 @@ public class ApiRerunTest {
         verify(runs, never()).create(any());
     }
 
+    @Test(expected = IllegalStateException.class)
+    public void shouldThrowIllegalStateExceptionIfMultipleSetsWithNonInvalidatedRunsExistForSample() {
+        Run secondValidatedRun = new Run().status(Status.VALIDATED);
+        SampleSet secondSetWithValidatedRuns = new SampleSet().id(sampleSetId + 1);
+        when(runs.list(null,
+                null,
+                secondSetWithValidatedRuns.getId(),
+                null,
+                null,
+                null,
+                null,
+                null)).thenReturn(List.of(secondValidatedRun));
+        when(sets.list(null, samples.get(0).getId(), true)).thenReturn(List.of(sampleSet, secondSetWithValidatedRuns));
+
+        new ApiRerun(runs, sets, sampleApi, bucket, version).create(biopsy);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void shouldThrowIllegalArgumentExceptionIfNoSetsWithNonInvalidatedRunsExistForSample() {
+        Run invalidatedRun = new Run().status(Status.INVALIDATED);
+        when(runs.list(null, null, sampleSet.getId(), null, null, null, null, null)).thenReturn(List.of(invalidatedRun));
+
+        new ApiRerun(runs, sets, sampleApi, bucket, version).create(biopsy);
+    }
+
+    @Test
+    public void shouldSelectSetWithNonInvalidatedRunsAsParentOfRunWhenMultipleSetsExist() {
+        Run invalidatedRun = new Run().status(Status.INVALIDATED);
+        SampleSet setWithOnlyInvalidatedRuns = new SampleSet().id(sampleSetId + 1);
+        when(runs.list(null, null, setWithOnlyInvalidatedRuns.getId(), null, null, null, null, null)).thenReturn(List.of(invalidatedRun));
+        when(sets.list(null, samples.get(0).getId(), true)).thenReturn(List.of(sampleSet, setWithOnlyInvalidatedRuns));
+
+        when(runs.list(null, Ini.RERUN_INI, sampleSet.getId(), version, version, null, null, null)).thenReturn(emptyList());
+        ArgumentCaptor<CreateRun> createRunCaptor = ArgumentCaptor.forClass(CreateRun.class);
+        when(runs.create(createRunCaptor.capture())).thenReturn(new RunCreated().id(3L));
+
+        assertThat(new ApiRerun(runs, sets, sampleApi, bucket, version).create(biopsy)).isNotNull();
+        CreateRun createRun = createRunCaptor.getValue();
+        assertThat(createRun).isNotNull();
+        assertThat(createRun.getSetId()).isEqualTo(sampleSetId);
+    }
+
     @Test
     public void shouldCreateRunForSampleIfNoneExists() {
         when(runs.list(null, Ini.RERUN_INI, sampleSet.getId(), version, version, null, null, null)).thenReturn(emptyList());
