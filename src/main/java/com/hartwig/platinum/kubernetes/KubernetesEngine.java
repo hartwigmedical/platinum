@@ -25,6 +25,7 @@ import com.hartwig.platinum.config.BatchConfiguration;
 import com.hartwig.platinum.config.GcpConfiguration;
 import com.hartwig.platinum.config.PlatinumConfiguration;
 import com.hartwig.platinum.iam.JsonKey;
+import com.hartwig.platinum.kubernetes.PipelineConfigMapVolume.PipelineConfigMapVolumeBuilder;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -167,7 +168,7 @@ public class KubernetesEngine {
             return new KubernetesCluster(runName,
                     new JobScheduler(kubernetesClient, configuration.retryFailed()),
                     new PipelineServiceAccountSecretVolume(jsonKey, kubernetesClient, "service-account-key"),
-                    new PipelineConfigMapVolume(pipelineInputs, kubernetesClient, runName),
+                    new PipelineConfigMaps(pipelineInputs, new PipelineConfigMapVolumeBuilder(kubernetesClient), runName),
                     outputBucketName,
                     serviceAccountEmail,
                     configuration,

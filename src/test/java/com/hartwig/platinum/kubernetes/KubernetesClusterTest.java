@@ -8,6 +8,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
+import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.hartwig.platinum.config.GcpConfiguration;
@@ -31,7 +33,7 @@ public class KubernetesClusterTest {
     private JobScheduler scheduler;
     private Volume secret;
     private Delay delay;
-    private PipelineConfigMapVolume configmapVolume;
+    private PipelineConfigMaps configMaps;
 
     @Before
     public void setUp() {
@@ -39,8 +41,8 @@ public class KubernetesClusterTest {
         scheduler = mock(JobScheduler.class);
         when(scheduler.submit(any())).thenReturn(true);
         delay = mock(Delay.class);
-        configmapVolume = mock(PipelineConfigMapVolume.class);
-        when(configmapVolume.asKubernetes()).thenReturn(new VolumeBuilder().withName(CONFIG).build());
+        configMaps = mock(PipelineConfigMaps.class);
+        when(configMaps.forSample(any())).thenReturn(new VolumeBuilder().withName(CONFIG).build());
     }
 
     @Test
@@ -49,7 +51,7 @@ public class KubernetesClusterTest {
         victim = new KubernetesCluster("test",
                 scheduler,
                 () -> secret,
-                configmapVolume,
+                configMaps,
                 "output",
                 "sa@gcloud.com",
                 PlatinumConfiguration.builder().keystorePassword("changeit").gcp(GCP).build(),
@@ -72,7 +74,7 @@ public class KubernetesClusterTest {
         victim = new KubernetesCluster("test",
                 scheduler,
                 () -> secret,
-                configmapVolume,
+                configMaps,
                 "output",
                 "sa@gcloud.com",
                 PlatinumConfiguration.builder().gcp(GCP).build(),
@@ -86,11 +88,37 @@ public class KubernetesClusterTest {
     }
 
     @Test
+    public void addsConfigMapForSampleToEachJob() {
+        when(configMaps.getSampleKeys()).thenReturn(Set.of("sample-a", "sample-b"));
+        when(configMaps.forSample("sample-a")).thenReturn(new VolumeBuilder().withName("config-a").build());
+        when(configMaps.forSample("sample-b")).thenReturn(new VolumeBuilder().withName("config-b").build());
+        ArgumentCaptor<PipelineJob> job = ArgumentCaptor.forClass(PipelineJob.class);
+        victim = new KubernetesCluster("test",
+                scheduler,
+                () -> secret,
+                configMaps,
+                "output",
+                "sa@gcloud.com",
+                PlatinumConfiguration.builder().gcp(GCP).build(),
+                delay,
+                TargetNodePool.defaultPool());
+        victim.submit();
+        verify(scheduler, times(2)).submit(job.capture());
+        List<PipelineJob> allJobs = job.getAllValues();
+        List<PipelineJob> jobsA = allJobs.stream().filter(j -> j.getName().equals("sample-a")).collect(Collectors.toList());
+        assertThat(jobsA.size()).isEqualTo(1);
+        assertThat(jobsA.get(0).getVolumes().stream().filter(v -> v.getName().equals("config-a")).collect(Collectors.toList())).hasSize(1);
+        List<PipelineJob> jobsB = allJobs.stream().filter(j -> j.getName().equals("sample-b")).collect(Collectors.toList());
+        assertThat(jobsB.size()).isEqualTo(1);
+        assertThat(jobsB.get(0).getVolumes().stream().filter(v -> v.getName().equals("config-b")).collect(Collectors.toList())).hasSize(1);
+    }
+
+    @Test
     public void runsInBatchesWithDelayWhenConfigured() {
         victim = new KubernetesCluster("test",
                 scheduler,
                 () -> secret,
-                configmapVolume,
+                configMaps,
                 "output",
                 "sa@gcloud.com",
                 PlatinumConfiguration.builder().gcp(GCP).batch(ImmutableBatchConfiguration.builder().size(2).delay(1).build()).build(),
@@ -108,6 +136,6 @@ public class KubernetesClusterTest {
 
     private void mockConfigmapContents(String... keys) {
         var contents = Arrays.stream(keys).collect(Collectors.toSet());
-        when(configmapVolume.getConfigMapKeys()).thenReturn(contents);
+        when(configMaps.getSampleKeys()).thenReturn(contents);
     }
 }

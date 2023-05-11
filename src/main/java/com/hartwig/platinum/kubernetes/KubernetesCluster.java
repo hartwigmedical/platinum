@@ -24,7 +24,7 @@ public class KubernetesCluster {
 
     final static String NAMESPACE = "default";
     private final KubernetesComponent<Volume> serviceAccountSecret;
-    private final PipelineConfigMapVolume configMap;
+    private final PipelineConfigMaps configMaps;
     private final String outputBucketName;
     private final String serviceAccountEmail;
     private final PlatinumConfiguration configuration;
@@ -32,12 +32,12 @@ public class KubernetesCluster {
     private final TargetNodePool targetNodePool;
 
     KubernetesCluster(final String runName, final JobScheduler scheduler, final KubernetesComponent<Volume> serviceAccountSecret,
-            final PipelineConfigMapVolume configMap, final String outputBucketName, final String serviceAccountEmail,
+            final PipelineConfigMaps configMaps, final String outputBucketName, final String serviceAccountEmail,
             final PlatinumConfiguration configuration, final Delay delay, final TargetNodePool targetNodePool) {
         this.runName = runName.toLowerCase();
         this.scheduler = scheduler;
         this.serviceAccountSecret = serviceAccountSecret;
-        this.configMap = configMap;
+        this.configMaps = configMaps;
         this.outputBucketName = outputBucketName;
         this.serviceAccountEmail = serviceAccountEmail;
         this.configuration = configuration;
@@ -46,14 +46,14 @@ public class KubernetesCluster {
     }
 
     public int submit() {
-        Volume configMapVolume = configMap.asKubernetes();
         Volume secretVolume = serviceAccountSecret.asKubernetes();
         Volume maybeJksVolume = new JksSecret().asKubernetes();
         var samples =
-                configMap.getConfigMapKeys().stream().map(sampleName -> SampleArgument.sampleJson(sampleName, runName)).collect(toList());
+                configMaps.getSampleKeys().stream().map(sampleName -> SampleArgument.sampleJson(sampleName, runName)).collect(toList());
         int numSubmitted = 0;
         for (SampleArgument sample : samples) {
             try {
+                Volume configMapVolume = configMaps.forSample(sample.id());
                 PipelineContainer pipelineContainer = new PipelineContainer(sample,
                         new PipelineArguments(configuration.argumentOverrides(), outputBucketName, serviceAccountEmail, configuration),
                         secretVolume.getName(),

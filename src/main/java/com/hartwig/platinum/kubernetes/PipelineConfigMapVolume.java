@@ -1,15 +1,8 @@
 package com.hartwig.platinum.kubernetes;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
+import static java.lang.String.format;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
-import com.hartwig.pdl.PipelineInput;
+import java.util.Map;
 
 import io.fabric8.kubernetes.api.model.ConfigMapBuilder;
 import io.fabric8.kubernetes.api.model.Volume;
@@ -17,56 +10,41 @@ import io.fabric8.kubernetes.api.model.VolumeBuilder;
 import io.fabric8.kubernetes.client.KubernetesClient;
 
 public class PipelineConfigMapVolume implements KubernetesComponent<Volume> {
-
-    private static final String SAMPLES = "samples";
     private final KubernetesClient kubernetesClient;
-    private final String runName;
-    private final Map<String, String> configMapContents;
+    private final String volumeName;
+    private final String sample;
+    private final String content;
 
-    public PipelineConfigMapVolume(final List<PipelineInput> pipelineInputs, final KubernetesClient kubernetesClient,
-            final String runName) {
+    private PipelineConfigMapVolume(final KubernetesClient kubernetesClient, final String runName, final String sample, final String content) {
         this.kubernetesClient = kubernetesClient;
-        this.runName = runName;
-        this.configMapContents = inputAsConfigMap(pipelineInputs, runName);
+        this.volumeName = format("%s-%s", runName, sample);
+        this.sample = sample;
+        this.content = content;
     }
 
+    @Override
     public Volume asKubernetes() {
-        String name = runName + "-" + SAMPLES;
         kubernetesClient.configMaps()
                 .inNamespace(KubernetesCluster.NAMESPACE)
-                .withName(name)
-                .createOrReplace(new ConfigMapBuilder().addToData(configMapContents)
+                .withName(volumeName)
+                .createOrReplace(new ConfigMapBuilder().addToData(Map.of(sample, content))
                         .withNewMetadata()
-                        .withName(name)
+                        .withName(volumeName)
                         .withNamespace(KubernetesCluster.NAMESPACE)
                         .endMetadata()
                         .build());
-        return new VolumeBuilder().withName(name).editOrNewConfigMap().withName(name).endConfigMap().build();
+        return new VolumeBuilder().withName(volumeName).editOrNewConfigMap().withName(volumeName).endConfigMap().build();
     }
 
-    public Set<String> getConfigMapKeys() {
-        return Collections.unmodifiableSet(configMapContents.keySet());
-    }
+    public static class PipelineConfigMapVolumeBuilder {
+        private final KubernetesClient kubernetesClient;
 
-    private static Map<String, String> inputAsConfigMap(final List<PipelineInput> pipelineInputs, final String runName) {
-        return pipelineInputs.stream()
-                .collect(Collectors.toMap(pipelineInput -> toLabel(pipelineInput, runName), PipelineConfigMapVolume::toJson));
-    }
+        public PipelineConfigMapVolumeBuilder(final KubernetesClient kubernetesClient) {
+            this.kubernetesClient = kubernetesClient;
+        }
 
-    private static String toLabel(final PipelineInput pipelineInput, final String runName) {
-        return pipelineInput.tumor()
-                .or(pipelineInput::reference)
-                .map(sampleInput -> KubernetesUtil.toValidRFC1123Label(sampleInput.name(), runName))
-                .orElseThrow(() -> new IllegalArgumentException("Need to specify either tumor or reference."));
-    }
-
-    private static String toJson(final PipelineInput pipelineInput) {
-        ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.registerModule(new Jdk8Module());
-        try {
-            return objectMapper.writeValueAsString(pipelineInput);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
+        public PipelineConfigMapVolume of(String runName, String sample, String content) {
+            return new PipelineConfigMapVolume(kubernetesClient, runName, sample, content);
         }
     }
 }
