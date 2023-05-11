@@ -6,9 +6,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
+import com.hartwig.pdl.PdlJsonConversion;
 import com.hartwig.pdl.PipelineInput;
 import com.hartwig.platinum.kubernetes.PipelineConfigMapVolume.PipelineConfigMapVolumeBuilder;
 
@@ -31,13 +29,13 @@ public class PipelineConfigMaps {
         return pipelineConfigMapVolumeBuilder.of(runName, sample, configsKeyedBySample.get(sample)).asKubernetes();
     }
 
-    public Set<String> getConfigMapKeys() {
+    public Set<String> getSampleKeys() {
         return Collections.unmodifiableSet(configsKeyedBySample.keySet());
     }
 
     private static Map<String, String> inputAsMapKeyedBySample(final List<PipelineInput> pipelineInputs) {
         return pipelineInputs.stream()
-                .collect(Collectors.toMap(PipelineConfigMaps::toLabel, PipelineConfigMaps::toJson));
+                .collect(Collectors.toMap(PipelineConfigMaps::toLabel, PdlJsonConversion.getInstance()::serialize));
     }
 
     private static String toLabel(final PipelineInput pipelineInput) {
@@ -45,15 +43,5 @@ public class PipelineConfigMaps {
                 .or(pipelineInput::reference)
                 .map(sampleInput -> KubernetesUtil.toValidRFC1123Label(sampleInput.name()))
                 .orElseThrow(() -> new IllegalArgumentException("Need to specify either tumor or reference."));
-    }
-
-    private static String toJson(final PipelineInput pipelineInput) {
-        ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.registerModule(new Jdk8Module());
-        try {
-            return objectMapper.writeValueAsString(pipelineInput);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
     }
 }

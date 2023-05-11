@@ -89,7 +89,7 @@ public class KubernetesClusterTest {
 
     @Test
     public void addsConfigMapForSampleToEachJob() {
-        when(configMaps.getConfigMapKeys()).thenReturn(Set.of("sample-a", "sample-b"));
+        when(configMaps.getSampleKeys()).thenReturn(Set.of("sample-a", "sample-b"));
         when(configMaps.forSample("sample-a")).thenReturn(new VolumeBuilder().withName("config-a").build());
         when(configMaps.forSample("sample-b")).thenReturn(new VolumeBuilder().withName("config-b").build());
         ArgumentCaptor<PipelineJob> job = ArgumentCaptor.forClass(PipelineJob.class);
@@ -136,6 +136,6 @@ public class KubernetesClusterTest {
 
     private void mockConfigmapContents(String... keys) {
         var contents = Arrays.stream(keys).collect(Collectors.toSet());
-        when(configMaps.getConfigMapKeys()).thenReturn(contents);
+        when(configMaps.getSampleKeys()).thenReturn(contents);
     }
 }

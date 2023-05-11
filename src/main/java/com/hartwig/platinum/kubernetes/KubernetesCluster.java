@@ -49,7 +49,7 @@ public class KubernetesCluster {
         Volume secretVolume = serviceAccountSecret.asKubernetes();
         Volume maybeJksVolume = new JksSecret().asKubernetes();
         var samples =
-                configMaps.getConfigMapKeys().stream().map(sampleName -> SampleArgument.sampleJson(sampleName, runName)).collect(toList());
+                configMaps.getSampleKeys().stream().map(sampleName -> SampleArgument.sampleJson(sampleName, runName)).collect(toList());
         int numSubmitted = 0;
         for (SampleArgument sample : samples) {
             try {
