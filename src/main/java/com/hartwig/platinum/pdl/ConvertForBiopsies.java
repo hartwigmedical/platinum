@@ -8,10 +8,10 @@ import java.util.stream.Collectors;
 import com.hartwig.api.RunApi;
 import com.hartwig.api.SampleApi;
 import com.hartwig.api.SetApi;
-import com.hartwig.api.model.DbStatus;
 import com.hartwig.api.model.Ini;
 import com.hartwig.api.model.Run;
 import com.hartwig.api.model.SampleType;
+import com.hartwig.api.model.Status;
 import com.hartwig.pdl.ImmutablePipelineInput;
 import com.hartwig.pdl.PipelineInput;
 import com.hartwig.pdl.generator.PdlGenerator;
@@ -37,7 +37,7 @@ public class ConvertForBiopsies implements PDLConversion {
                 .stream()
                 .flatMap(biopsy -> sampleApi.list(null, null, null, null, SampleType.TUMOR, biopsy, null).stream())
                 .flatMap(sample -> setApi.list(null, sample.getId(), true).stream())
-                .flatMap(set -> runApi.list(null, Ini.SOMATIC_INI, null, null, null, DbStatus.ADDED, null, null)
+                .flatMap(set -> runApi.list(Status.VALIDATED, Ini.SOMATIC_INI, set.getId(), null, null, null, null, "RESEARCH")
                         .stream()
                         .filter(run -> run.getEndTime() != null)
                         .max(Comparator.comparing(Run::getEndTime))
