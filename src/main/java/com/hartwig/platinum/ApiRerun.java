@@ -2,8 +2,7 @@ package com.hartwig.platinum;
 
 import static java.lang.String.format;
 
-import java.util.Optional;
-
+import com.hartwig.ApiException;
 import com.hartwig.api.RunApi;
 import com.hartwig.api.SampleApi;
 import com.hartwig.api.SetApi;
@@ -37,12 +36,16 @@ public class ApiRerun {
     }
 
     public long create(final String tumorSampleName) {
-        SampleSet set = Optional.ofNullable(setApi.canonical(sampleApi.list(null, null, null, null, SampleType.TUMOR, tumorSampleName, null)
-                .stream()
-                .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException(format("Cannot find tumor sample [%s]", tumorSampleName)))
-                .getId())).orElseThrow(() -> new IllegalArgumentException(format("No sets with consent for the database could be found for [%s]", tumorSampleName)));
-        return getOrCreateRun(tumorSampleName, set);
+        try {
+            SampleSet set = setApi.canonical(sampleApi.list(null, null, null, null, SampleType.TUMOR, tumorSampleName, null)
+                    .stream()
+                    .findFirst()
+                    .orElseThrow(() -> new IllegalArgumentException(format("Cannot find tumor sample [%s]", tumorSampleName)))
+                    .getId());
+            return getOrCreateRun(tumorSampleName, set);
+        } catch (ApiException e) {
+            throw new IllegalArgumentException(format("No sets with consent for the database could be found for [%s]", tumorSampleName));
+        }
     }
 
     /**
