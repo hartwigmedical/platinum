@@ -1,4 +1,7 @@
-package com.hartwig.platinum.kubernetes;
+package com.hartwig.platinum.kubernetes.scheduling;
+
+import com.hartwig.platinum.kubernetes.JobSubmitter;
+import com.hartwig.platinum.kubernetes.PipelineJob;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -8,14 +11,12 @@ public class TimedBatchScheduler implements JobScheduler {
     private final JobSubmitter jobSubmitter;
     private final Delay delay;
     private final int batchSize;
-    private final int delayMinutes;
     private int numSubmitted;
 
-    public TimedBatchScheduler(final JobSubmitter jobSubmitter, final Delay delay, final int batchSize, final int delayMinutes) {
+    public TimedBatchScheduler(final JobSubmitter jobSubmitter, final Delay delay, final int batchSize) {
         this.jobSubmitter = jobSubmitter;
         this.delay = delay;
         this.batchSize = batchSize;
-        this.delayMinutes = delayMinutes;
     }
 
     @Override
@@ -23,10 +24,10 @@ public class TimedBatchScheduler implements JobScheduler {
         if (jobSubmitter.submit(job)) {
             numSubmitted++;
             if (numSubmitted % batchSize == 0) {
-                LOGGER.info("Batch [{}] scheduled, waiting [{}] minutes",
+                LOGGER.info("Batch [{}] scheduled, waiting [{}]",
                         (numSubmitted / batchSize),
-                        delayMinutes);
-                delay.forMinutes(delayMinutes);
+                        delay.toString());
+                delay.threadSleep();
             }
         }
     }

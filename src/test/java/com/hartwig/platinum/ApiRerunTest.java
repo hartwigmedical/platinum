@@ -11,6 +11,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.List;
 
+import com.hartwig.ApiException;
 import com.hartwig.api.RunApi;
 import com.hartwig.api.SampleApi;
 import com.hartwig.api.SetApi;
@@ -31,14 +32,12 @@ public class ApiRerunTest {
     private RunApi runs;
     private SetApi sets;
     private SampleApi sampleApi;
-    private String bucket = "bucket";
-    private String version = "notarealversion";
-    private String biopsy = "sample";
-    private Long sampleId = 1L;
-    private Long sampleSetId = 2L;
-    private Run validatedRun = new Run().status(Status.VALIDATED);
-    private Run existingReRun = new Run().status(Status.PENDING).id(3L);
-    private List<Sample> samples;
+    private final String bucket = "bucket";
+    private final String version = "notarealversion";
+    private final String biopsy = "sample";
+    private final Long sampleSetId = 2L;
+    private final Run validatedRun = new Run().status(Status.VALIDATED);
+    private final Run existingReRun = new Run().status(Status.PENDING).id(3L);
     private SampleSet sampleSet;
 
     @Before
@@ -47,41 +46,40 @@ public class ApiRerunTest {
         sets = mock(SetApi.class);
         sampleApi = mock(SampleApi.class);
 
-        samples = List.of(new Sample().name(biopsy).id(sampleId));
+        Long sampleId = 1L;
+        List<Sample> samples = List.of(new Sample().name(biopsy).id(sampleId));
         sampleSet = new SampleSet().id(sampleSetId);
 
-        when(sampleApi.list(null, null, null, null, SampleType.TUMOR, biopsy)).thenReturn(samples);
+        when(sampleApi.list(null, null, null, null, SampleType.TUMOR, biopsy, null)).thenReturn(samples);
         when(runs.list(null, null, sampleSet.getId(), null, null, null, null, null))
                 .thenReturn(List.of(validatedRun));
+        when(sets.canonical(sampleId)).thenReturn(sampleSet);
     }
 
     @Test
     public void shouldReturnIdOfExistingRunIfItIsNotInvalidated() {
-        when(sets.list(null, samples.get(0).getId(), true)).thenReturn(List.of(sampleSet));
         when(runs.list(null, Ini.RERUN_INI, sampleSet.getId(), version, version, null, null, null))
                 .thenReturn(List.of(existingReRun));
-
         assertThat(new ApiRerun(runs, sets, sampleApi, bucket, version).create(biopsy)).isEqualTo(3L);
         verify(runs, never()).create(any());
     }
 
     @Test
     public void shouldReturnNullAndCreateNoRunsIfNoSamplesMatchGivenId() {
-        when(sampleApi.list(null, null, null, null, SampleType.TUMOR, biopsy)).thenReturn(emptyList());
+        when(sampleApi.list(null, null, null, null, SampleType.TUMOR, biopsy, null)).thenReturn(emptyList());
         assertThat(new ApiRerun(runs, sets, sampleApi, bucket, version).create(biopsy)).isNull();
         verify(runs, never()).create(any());
     }
 
     @Test
     public void shouldReturnNullAndCreateNoRunsIfNoSampleSetExistsForSample() {
-        when(sets.list(null, samples.get(0).getId(), true)).thenReturn(null);
+        when(sets.canonical(any())).thenThrow(new ApiException());
         assertThat(new ApiRerun(runs, sets, sampleApi, bucket, version).create(biopsy)).isNull();
         verify(runs, never()).create(any());
     }
 
     @Test
     public void shouldReturnNullAndCreateNoRunsIfNoValidatedRunExistsForSample() {
-        when(sets.list(null, samples.get(0).getId(), true)).thenReturn(List.of(sampleSet));
         when(runs.list(null, null, sampleSet.getId(), null, null, null, null, null))
                 .thenReturn(emptyList());
         assertThat(new ApiRerun(runs, sets, sampleApi, bucket, version).create(biopsy)).isNull();
@@ -92,7 +90,6 @@ public class ApiRerunTest {
     public void shouldCreateRunForSampleIfNoneExists() {
         when(runs.list(null, Ini.RERUN_INI, sampleSet.getId(), version, version, null, null, null))
                 .thenReturn(emptyList());
-        when(sets.list(null, samples.get(0).getId(), true)).thenReturn(List.of(sampleSet));
         ArgumentCaptor<CreateRun> createRunCaptor = ArgumentCaptor.forClass(CreateRun.class);
         when(runs.create(createRunCaptor.capture())).thenReturn(new RunCreated().id(3L));
 

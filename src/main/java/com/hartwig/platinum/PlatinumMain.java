@@ -2,6 +2,8 @@ package com.hartwig.platinum;
 
 import java.util.concurrent.Callable;
 
+import javax.inject.Provider;
+
 import com.google.cloud.storage.StorageOptions;
 import com.hartwig.api.HmfApi;
 import com.hartwig.platinum.config.PlatinumConfiguration;
@@ -9,12 +11,16 @@ import com.hartwig.platinum.config.Validation;
 import com.hartwig.platinum.iam.IamProvider;
 import com.hartwig.platinum.iam.ResourceManagerProvider;
 import com.hartwig.platinum.kubernetes.ContainerProvider;
+import com.hartwig.platinum.kubernetes.JobSubmitter;
 import com.hartwig.platinum.kubernetes.KubernetesEngine;
 import com.hartwig.platinum.kubernetes.ProcessRunner;
+import com.hartwig.platinum.kubernetes.scheduling.JobScheduler;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import io.fabric8.kubernetes.client.DefaultKubernetesClient;
+import io.fabric8.kubernetes.client.KubernetesClient;
 import picocli.CommandLine;
 import picocli.CommandLine.Option;
 
@@ -46,12 +52,18 @@ public class PlatinumMain implements Callable<Integer> {
             Validation.apply(runName, configuration);
 
             final HmfApi api = HmfApi.create(configuration.apiUrl().orElse(HmfApi.PRODUCTION));
+
+            Provider<KubernetesClient> kubernetesClientProvider = DefaultKubernetesClient::new;
+            String clusterName = configuration.cluster().orElse(runName);
+            JobSubmitter jobSubmitter = new JobSubmitter(clusterName, configuration.gcp(), configuration.retryFailed());
+            JobScheduler jobScheduler = JobScheduler.fromConfiguration(configuration, jobSubmitter);
+
             new Platinum(runName,
                     inputJson,
                     StorageOptions.newBuilder().setProjectId(configuration.gcp().projectOrThrow()).build().getService(),
                     IamProvider.get(),
                     ResourceManagerProvider.get(),
-                    new KubernetesEngine(ContainerProvider.get(), new ProcessRunner(), configuration),
+                    new KubernetesEngine(ContainerProvider.get(), new ProcessRunner(), configuration, jobScheduler, kubernetesClientProvider),
                     configuration,
                     new ApiRerun(api.runs(),
                             api.sets(),

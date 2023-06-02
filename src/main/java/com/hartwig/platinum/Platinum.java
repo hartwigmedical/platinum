@@ -8,18 +8,13 @@ import java.util.Objects;
 import com.google.api.services.cloudresourcemanager.CloudResourceManager;
 import com.google.api.services.iam.v1.Iam;
 import com.google.cloud.storage.Storage;
-import com.hartwig.api.HmfApi;
 import com.hartwig.platinum.config.GcpConfiguration;
 import com.hartwig.platinum.config.PlatinumConfiguration;
 import com.hartwig.platinum.config.SampleBucket;
-import com.hartwig.platinum.iam.IamProvider;
 import com.hartwig.platinum.iam.JsonKey;
 import com.hartwig.platinum.iam.PipelineServiceAccount;
-import com.hartwig.platinum.iam.ResourceManagerProvider;
 import com.hartwig.platinum.iam.ServiceAccountPrivateKey;
-import com.hartwig.platinum.kubernetes.ContainerProvider;
 import com.hartwig.platinum.kubernetes.KubernetesEngine;
-import com.hartwig.platinum.kubernetes.ProcessRunner;
 import com.hartwig.platinum.kubernetes.SampleArgument;
 import com.hartwig.platinum.p5sample.DecomposeSamples;
 import com.hartwig.platinum.p5sample.TumorNormalPair;
@@ -54,22 +49,10 @@ public class Platinum {
         this.apiRerun = apiRerun;
     }
 
-    public static Platinum create(final String runName, final PlatinumConfiguration configuration, final String input,
-            final Storage storage) {
-        final HmfApi api = HmfApi.create(HmfApi.PRODUCTION);
-        return new Platinum(runName,
-                input,
-                storage,
-                IamProvider.get(),
-                ResourceManagerProvider.get(),
-                new KubernetesEngine(ContainerProvider.get(), new ProcessRunner(), configuration),
-                configuration,
-                new ApiRerun(api.runs(), api.sets(), api.samples(), configuration.outputBucket().get(), "5.28.2"));
-    }
-
     public void run() {
         LOGGER.info("Starting platinum run with name {} and input {}", Console.bold(runName), Console.bold(input));
         GcpConfiguration gcpConfiguration = configuration.gcp();
+        String clusterName = configuration.cluster().orElse(runName);
         PipelineServiceAccount serviceAccount =
                 PipelineServiceAccount.from(iam, resourceManager, runName, gcpConfiguration.projectOrThrow(), configuration);
         String serviceAccountEmail = serviceAccount.findOrCreate();
@@ -78,7 +61,8 @@ public class Platinum {
         List<TumorNormalPair> pairs = DecomposeSamples.apply(configuration.sampleBucket()
                 .map(b -> new SampleBucket(storage.get(b)).apply())
                 .orElseGet(configuration::samples));
-        int submitted = kubernetesEngine.findOrCreate(runName,
+        int submitted = kubernetesEngine.findOrCreate(clusterName,
+                runName,
                 pairs,
                 jsonKey,
                 OutputBucket.from(storage).findOrCreate(runName, gcpConfiguration.regionOrThrow(), serviceAccountEmail, configuration),

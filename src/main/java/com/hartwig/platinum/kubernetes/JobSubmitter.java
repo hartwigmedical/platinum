@@ -31,7 +31,7 @@ public class JobSubmitter {
         this.kubernetesClient = this.refreshClient();
     }
 
-    boolean submit(final PipelineJob job) {
+    public boolean submit(final PipelineJob job) {
         try {
             JobSpec spec = job.asKubernetes();
             Job existing = kubernetesClient.batch().jobs().inNamespace(NAMESPACE).withName(job.getName()).get();
@@ -76,7 +76,7 @@ public class JobSubmitter {
         }
     }
 
-    protected KubernetesClient refreshClient() {
+    public KubernetesClient refreshClient() {
         ProcessRunner processRunner = new ProcessRunner();
         if (!processRunner.execute(of("gcloud",
                 "container",

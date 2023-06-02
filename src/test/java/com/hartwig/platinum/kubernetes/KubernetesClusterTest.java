@@ -1,18 +1,15 @@
 package com.hartwig.platinum.kubernetes;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 import java.util.List;
 
 import com.hartwig.platinum.config.GcpConfiguration;
-import com.hartwig.platinum.config.ImmutableBatchConfiguration;
 import com.hartwig.platinum.config.ImmutableGcpConfiguration;
 import com.hartwig.platinum.config.PlatinumConfiguration;
+import com.hartwig.platinum.kubernetes.scheduling.JobScheduler;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -33,15 +30,12 @@ public class KubernetesClusterTest {
     private JobScheduler scheduler;
     private Volume secret;
     private Volume configMap;
-    private Delay delay;
 
     @Before
     public void setUp() {
         secret = new VolumeBuilder().withName(SECRET).build();
         configMap = new VolumeBuilder().withName(CONFIG).build();
         scheduler = mock(JobScheduler.class);
-        when(scheduler.submit(any())).thenReturn(true);
-        delay = mock(Delay.class);
     }
 
     @Test
@@ -54,7 +48,6 @@ public class KubernetesClusterTest {
                 "output",
                 "sa@gcloud.com",
                 PlatinumConfiguration.builder().keystorePassword("changeit").gcp(GCP).build(),
-                delay,
                 TargetNodePool.defaultPool());
         victim.submit(List.of(sample("sample")));
         verify(scheduler).submit(job.capture());
@@ -76,7 +69,6 @@ public class KubernetesClusterTest {
                 "output",
                 "sa@gcloud.com",
                 PlatinumConfiguration.builder().gcp(GCP).build(),
-                delay,
                 TargetNodePool.defaultPool());
         victim.submit(SAMPLES);
         verify(scheduler).submit(job.capture());
@@ -85,23 +77,19 @@ public class KubernetesClusterTest {
     }
 
     @Test
-    public void runsInBatchesWithDelayWhenConfigured() {
+    public void submitsJobsToTheScheduler() {
+        ArgumentCaptor<PipelineJob> job = ArgumentCaptor.forClass(PipelineJob.class);
         victim = new KubernetesCluster("test",
                 scheduler,
                 () -> secret,
                 () -> configMap,
                 "output",
                 "sa@gcloud.com",
-                PlatinumConfiguration.builder().gcp(GCP).batch(ImmutableBatchConfiguration.builder().size(2).delay(1).build()).build(),
-                delay,
+                PlatinumConfiguration.builder().keystorePassword("changeit").gcp(GCP).build(),
                 TargetNodePool.defaultPool());
-        victim.submit(List.of(sample("1"), sample("2"), sample("3"), sample("4"), sample("5")));
-
-        ArgumentCaptor<Integer> delayCaptor = ArgumentCaptor.forClass(Integer.class);
-        verify(delay, times(2)).forMinutes(delayCaptor.capture());
-        assertThat(delayCaptor.getAllValues()).hasSize(2);
-        assertThat(delayCaptor.getAllValues().get(0)).isEqualTo(1);
-        assertThat(delayCaptor.getAllValues().get(1)).isEqualTo(1);
+        victim.submit(SAMPLES);
+        verify(scheduler).submit(job.capture());
+        assertThat(job.getAllValues().size()).isEqualTo(SAMPLES.size());
     }
 
     private static ImmutableSampleArgument sample(final String id) {

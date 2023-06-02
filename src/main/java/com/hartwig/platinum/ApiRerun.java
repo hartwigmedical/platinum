@@ -1,7 +1,6 @@
 package com.hartwig.platinum;
 
 import java.util.List;
-import java.util.Optional;
 
 import com.hartwig.api.RunApi;
 import com.hartwig.api.SampleApi;
@@ -38,31 +37,28 @@ public class ApiRerun {
 
     Long create(final String sampleId) {
         try {
-            List<Sample> samples = sampleApi.list(null, null, null, null, SampleType.TUMOR, sampleId);
+            List<Sample> samples = sampleApi.list(null, null, null, null, SampleType.TUMOR, sampleId, null);
             for (Sample sample : samples) {
-                Optional<SampleSet> maybeSampleSet = OnlyOne.ofNullable(setApi.list(null, sample.getId(), true), SampleSet.class);
-                if (maybeSampleSet.isPresent()) {
-                    SampleSet sampleSet = maybeSampleSet.get();
-                    if (runApi.list(null, null, sampleSet.getId(), null, null, null, null, null)
-                            .stream()
-                            .anyMatch(r1 -> r1.getStatus().equals(Status.VALIDATED))) {
-                        return OnlyOne.ofNullable(runApi.list(null, Ini.RERUN_INI, sampleSet.getId(), version, version, null, null, null),
-                                Run.class).filter(r -> !r.getStatus().equals(Status.INVALIDATED)).map(r -> {
-                            LOGGER.info("Using existing run for sample [{}] id [{}]", sampleId, r.getId());
-                            return r.getId();
-                        }).orElseGet(() -> {
-                            final Long id = runApi.create(new CreateRun().bucket(bucket)
-                                    .cluster("gcp")
-                                    .context("RESEARCH")
-                                    .ini(Ini.RERUN_INI)
-                                    .version(version)
-                                    .status(Status.PENDING)
-                                    .isHidden(true)
-                                    .setId(sampleSet.getId())).getId();
-                            LOGGER.info("Created API run for sample [{}] id [{}]", sampleId, id);
-                            return id;
-                        });
-                    }
+                SampleSet sampleSet = setApi.canonical(sample.getId());
+                if (runApi.list(null, null, sampleSet.getId(), null, null, null, null, null)
+                        .stream()
+                        .anyMatch(r1 -> r1.getStatus().equals(Status.VALIDATED))) {
+                    return OnlyOne.ofNullable(runApi.list(null, Ini.RERUN_INI, sampleSet.getId(), version, version, null, null, null),
+                            Run.class).filter(r -> !r.getStatus().equals(Status.INVALIDATED)).map(r -> {
+                        LOGGER.info("Using existing run for sample [{}] id [{}]", sampleId, r.getId());
+                        return r.getId();
+                    }).orElseGet(() -> {
+                        final Long id = runApi.create(new CreateRun().bucket(bucket)
+                                .cluster("gcp")
+                                .context("RESEARCH")
+                                .ini(Ini.RERUN_INI)
+                                .version(version)
+                                .status(Status.PENDING)
+                                .isHidden(true)
+                                .setId(sampleSet.getId())).getId();
+                        LOGGER.info("Created API run for sample [{}] id [{}]", sampleId, id);
+                        return id;
+                    });
                 }
             }
         } catch (Exception e) {
