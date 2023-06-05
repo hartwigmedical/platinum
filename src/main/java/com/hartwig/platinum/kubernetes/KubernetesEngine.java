@@ -21,13 +21,14 @@ import com.google.api.services.container.v1beta1.model.NodeConfig;
 import com.google.api.services.container.v1beta1.model.NodePool;
 import com.google.api.services.container.v1beta1.model.Operation;
 import com.google.api.services.container.v1beta1.model.PrivateClusterConfig;
+import com.hartwig.pdl.PipelineInput;
 import com.hartwig.platinum.Console;
 import com.hartwig.platinum.config.BatchConfiguration;
 import com.hartwig.platinum.config.GcpConfiguration;
 import com.hartwig.platinum.config.PlatinumConfiguration;
 import com.hartwig.platinum.iam.JsonKey;
+import com.hartwig.platinum.kubernetes.PipelineConfigMapVolume.PipelineConfigMapVolumeBuilder;
 import com.hartwig.platinum.kubernetes.scheduling.JobScheduler;
-import com.hartwig.platinum.p5sample.TumorNormalPair;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -129,7 +130,7 @@ public class KubernetesEngine {
         }
     }
 
-    public KubernetesCluster findOrCreate(final String clusterName, final String runName, final List<TumorNormalPair> pairs,
+    public KubernetesCluster findOrCreate(final String clusterName, final String runName, final List<PipelineInput> pipelineInputs,
             final JsonKey jsonKey, final String outputBucketName, final String serviceAccountEmail) {
         try {
             GcpConfiguration gcpConfiguration = configuration.gcp();
@@ -174,7 +175,7 @@ public class KubernetesEngine {
             return new KubernetesCluster(runName,
                     jobScheduler,
                     new PipelineServiceAccountSecretVolume(jsonKey, kubernetesClient, "service-account-key"),
-                    new PipelineConfigMapVolume(pairs, kubernetesClient, runName),
+                    new PipelineConfigMaps(pipelineInputs, new PipelineConfigMapVolumeBuilder(kubernetesClient), runName),
                     outputBucketName,
                     serviceAccountEmail,
                     configuration,
