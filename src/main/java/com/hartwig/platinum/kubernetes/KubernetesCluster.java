@@ -66,6 +66,7 @@ public class KubernetesCluster {
                             configuration.keystorePassword().map(p -> maybeJksVolume).stream()).collect(toList()),
                     targetNodePool,
                     configuration.gcp().jobTtl().orElse(Duration.ZERO)));
+            numSubmitted++;
         }
         return numSubmitted;
     }
