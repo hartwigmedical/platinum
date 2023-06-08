@@ -5,12 +5,16 @@ import com.hartwig.platinum.kubernetes.JobSubmitter;
 import com.hartwig.platinum.kubernetes.PipelineJob;
 
 public interface JobScheduler {
-    void submit(final PipelineJob job);
+    Delay DELAY_BETWEEN_SUBMISSIONS = Delay.forSeconds(1);
+    Delay POLLING_INTERVAL = Delay.forSeconds(10);
 
     static JobScheduler fromConfiguration(PlatinumConfiguration configuration, JobSubmitter jobSubmitter) {
-        return configuration.batch().map(c -> c.delay() == null ?
-                        new ConstantJobCountScheduler(jobSubmitter, c.size(), Delay.forSeconds(1), Delay.forSeconds(10)) :
-                        new TimedBatchScheduler(jobSubmitter, Delay.forMinutes(c.delay()), c.size()))
-                .orElse(new ConstantJobCountScheduler(jobSubmitter, 1, Delay.forSeconds(1), Delay.forSeconds(10)));
+        return configuration.batch()
+                .map(c -> c.delay().isPresent()
+                        ? new TimedBatchScheduler(jobSubmitter, Delay.forMinutes(c.delay().get()), c.size())
+                        : new ConstantJobCountScheduler(jobSubmitter, c.size(), JobScheduler.DELAY_BETWEEN_SUBMISSIONS, JobScheduler.POLLING_INTERVAL))
+                .orElse(new ConstantJobCountScheduler(jobSubmitter, 1, JobScheduler.DELAY_BETWEEN_SUBMISSIONS, JobScheduler.POLLING_INTERVAL));
     }
+
+    void submit(final PipelineJob job);
 }

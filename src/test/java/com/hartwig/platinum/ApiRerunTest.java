@@ -14,7 +14,6 @@ import java.util.List;
 
 import com.hartwig.ApiException;
 import com.hartwig.api.RunApi;
-import com.hartwig.api.SampleApi;
 import com.hartwig.api.SetApi;
 import com.hartwig.api.model.CreateRun;
 import com.hartwig.api.model.Ini;
@@ -38,45 +37,33 @@ public class ApiRerunTest {
     private final Run existingReRun = new Run().status(Status.PENDING).id(3L);
     private RunApi runs;
     private SetApi sets;
-    private SampleApi sampleApi;
     private SampleSet sampleSet;
 
     @Before
     public void setup() {
         runs = mock(RunApi.class);
         sets = mock(SetApi.class);
-        sampleApi = mock(SampleApi.class);
 
         Long sampleId = 1L;
         List<Sample> samples = List.of(new Sample().name(biopsy).id(sampleId));
         sampleSet = new SampleSet().id(sampleSetId);
 
-        when(sampleApi.list(null, null, null, null, SampleType.TUMOR, biopsy, null)).thenReturn(samples);
         when(runs.list(null, null, sampleSet.getId(), null, null, null, null, null)).thenReturn(List.of(validatedRun));
-        when(sets.canonical(sampleId)).thenReturn(sampleSet);
+        when(sets.canonical(biopsy, SampleType.TUMOR)).thenReturn(sampleSet);
     }
 
     @Test
     public void shouldReturnIdOfExistingRunIfItIsNotInvalidated() {
         when(runs.list(null, Ini.RERUN_INI, sampleSet.getId(), version, version, null, null, null)).thenReturn(List.of(existingReRun));
-        assertThat(new ApiRerun(runs, sets, sampleApi, bucket, version).create(biopsy)).isEqualTo(3L);
-        verify(runs, never()).create(any());
-    }
-
-    @Test
-    public void shouldThrowIllegalArgumentExceptionIfNoSamplesMatchGivenId() {
-        when(sampleApi.list(null, null, null, null, SampleType.TUMOR, biopsy, null)).thenReturn(emptyList());
-        assertThatThrownBy(() -> new ApiRerun(runs, sets, sampleApi, bucket, version).create(biopsy))
-                .isInstanceOf(IllegalArgumentException.class);
+        assertThat(new ApiRerun(runs, sets, bucket, version).create(biopsy)).isEqualTo(3L);
         verify(runs, never()).create(any());
     }
 
     @Test
     public void shouldThrowIllegalArgumentExceptionIfNoCanonicalSetExistsForSample() {
-        when(sets.canonical(any())).thenThrow(new ApiException());
+        when(sets.canonical(any(), any())).thenThrow(new ApiException());
         assertThatThrownBy(() -> new ApiRerun(runs,
                 sets,
-                sampleApi,
                 bucket,
                 version).create(biopsy)).isInstanceOf(IllegalArgumentException.class);
         verify(runs, never()).create(any());
@@ -88,7 +75,7 @@ public class ApiRerunTest {
         ArgumentCaptor<CreateRun> createRunCaptor = ArgumentCaptor.forClass(CreateRun.class);
         when(runs.create(createRunCaptor.capture())).thenReturn(new RunCreated().id(3L));
 
-        assertThat(new ApiRerun(runs, sets, sampleApi, bucket, version).create(biopsy)).isNotNull();
+        assertThat(new ApiRerun(runs, sets, bucket, version).create(biopsy)).isNotNull();
         CreateRun createRun = createRunCaptor.getValue();
         assertThat(createRun).isNotNull();
         assertThat(createRun.getCluster()).isEqualTo("gcp");
