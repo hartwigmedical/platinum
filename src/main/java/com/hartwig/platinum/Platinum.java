@@ -1,7 +1,6 @@
 package com.hartwig.platinum;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import com.google.api.services.cloudresourcemanager.CloudResourceManager;
 import com.google.api.services.iam.v1.Iam;
@@ -17,7 +16,6 @@ import com.hartwig.platinum.iam.ServiceAccountPrivateKey;
 import com.hartwig.platinum.kubernetes.ContainerProvider;
 import com.hartwig.platinum.kubernetes.KubernetesEngine;
 import com.hartwig.platinum.kubernetes.ProcessRunner;
-import com.hartwig.platinum.kubernetes.SampleArgument;
 import com.hartwig.platinum.pdl.PDLConversion;
 import com.hartwig.platinum.storage.OutputBucket;
 
@@ -50,28 +48,18 @@ public class Platinum {
         this.pdlConversion = pdlConversion;
     }
 
-    public static Platinum create(final String runName, final PlatinumConfiguration configuration, final String input,
-            final Storage storage) {
-        return new Platinum(runName,
-                input,
-                storage,
-                IamProvider.get(),
-                ResourceManagerProvider.get(),
-                new KubernetesEngine(ContainerProvider.get(), new ProcessRunner(), configuration),
-                configuration,
-                PDLConversion.create(configuration));
-    }
-
     public void run() {
         LOGGER.info("Starting platinum run with name {} and input {}", Console.bold(runName), Console.bold(input));
         GcpConfiguration gcpConfiguration = configuration.gcp();
+        String clusterName = configuration.cluster().orElse(runName);
         PipelineServiceAccount serviceAccount =
                 PipelineServiceAccount.from(iam, resourceManager, runName, gcpConfiguration.projectOrThrow(), configuration);
         String serviceAccountEmail = serviceAccount.findOrCreate();
         ServiceAccountPrivateKey privateKey = ServiceAccountPrivateKey.from(configuration, iam);
         JsonKey jsonKey = privateKey.create(gcpConfiguration.projectOrThrow(), serviceAccountEmail);
+
         List<PipelineInput> pipelineInputs = pdlConversion.apply(configuration);
-        int submitted = kubernetesEngine.findOrCreate(runName,
+        int submitted = kubernetesEngine.findOrCreate(clusterName, runName,
                         pipelineInputs,
                         jsonKey,
                         OutputBucket.from(storage).findOrCreate(runName, gcpConfiguration.regionOrThrow(), serviceAccountEmail, configuration),

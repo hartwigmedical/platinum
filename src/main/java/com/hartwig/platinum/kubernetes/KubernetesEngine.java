@@ -8,6 +8,8 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
+import javax.inject.Provider;
+
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.services.container.v1beta1.Container;
 import com.google.api.services.container.v1beta1.Container.Projects.Locations.Clusters.Create;
@@ -26,11 +28,12 @@ import com.hartwig.platinum.config.GcpConfiguration;
 import com.hartwig.platinum.config.PlatinumConfiguration;
 import com.hartwig.platinum.iam.JsonKey;
 import com.hartwig.platinum.kubernetes.PipelineConfigMapVolume.PipelineConfigMapVolumeBuilder;
+import com.hartwig.platinum.kubernetes.scheduling.JobScheduler;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.fabric8.kubernetes.client.DefaultKubernetesClient;
+import io.fabric8.kubernetes.client.KubernetesClient;
 import net.jodah.failsafe.Failsafe;
 import net.jodah.failsafe.RetryPolicy;
 
@@ -39,20 +42,16 @@ public class KubernetesEngine {
     private final Container containerApi;
     private final ProcessRunner processRunner;
     private final PlatinumConfiguration configuration;
+    private JobScheduler jobScheduler;
+    private Provider<KubernetesClient> kubernetesClientProvider;
 
-    public KubernetesEngine(final Container containerApi, final ProcessRunner processRunner, final PlatinumConfiguration configuration) {
+    public KubernetesEngine(final Container containerApi, final ProcessRunner processRunner, final PlatinumConfiguration configuration,
+            final JobScheduler jobScheduler, final Provider<KubernetesClient> kubernetesClientProvider) {
         this.containerApi = containerApi;
         this.processRunner = processRunner;
         this.configuration = configuration;
-    }
-
-    private Optional<Cluster> find(final String path) throws IOException {
-        try {
-            Get found = containerApi.projects().locations().clusters().get(path);
-            return Optional.of(found.execute());
-        } catch (GoogleJsonResponseException e) {
-            return Optional.empty();
-        }
+        this.jobScheduler = jobScheduler;
+        this.kubernetesClientProvider = kubernetesClientProvider;
     }
 
     private static String fullPath(final String project, final String region, final String cluster) {
@@ -122,10 +121,18 @@ public class KubernetesEngine {
         }
     }
 
-    public KubernetesCluster findOrCreate(final String runName, final List<PipelineInput> pipelineInputs, final JsonKey jsonKey,
-            final String outputBucketName, final String serviceAccountEmail) {
+    private Optional<Cluster> find(final String path) throws IOException {
         try {
-            String clusterName = configuration.cluster().orElse(runName);
+            Get found = containerApi.projects().locations().clusters().get(path);
+            return Optional.of(found.execute());
+        } catch (GoogleJsonResponseException e) {
+            return Optional.empty();
+        }
+    }
+
+    public KubernetesCluster findOrCreate(final String clusterName, final String runName, final List<PipelineInput> pipelineInputs,
+            final JsonKey jsonKey, final String outputBucketName, final String serviceAccountEmail) {
+        try {
             GcpConfiguration gcpConfiguration = configuration.gcp();
             String parent = String.format("projects/%s/locations/%s", gcpConfiguration.projectOrThrow(), gcpConfiguration.regionOrThrow());
             if (find(fullPath(gcpConfiguration.projectOrThrow(), gcpConfiguration.regionOrThrow(), clusterName)).isEmpty()) {
@@ -148,7 +155,7 @@ public class KubernetesEngine {
                 }
                 LOGGER.info("Connection to cluster {} configured via gcloud and kubectl", Console.bold(clusterName));
             }
-            DefaultKubernetesClient kubernetesClient = new DefaultKubernetesClient();
+            KubernetesClient kubernetesClient = kubernetesClientProvider.get();
 
             TargetNodePool targetNodePool = configuration.gcp()
                     .nodePoolConfiguration()
@@ -166,13 +173,12 @@ public class KubernetesEngine {
                         gcpConfiguration.projectOrThrow());
             }
             return new KubernetesCluster(runName,
-                    new JobScheduler(kubernetesClient, configuration.retryFailed()),
+                    jobScheduler,
                     new PipelineServiceAccountSecretVolume(jsonKey, kubernetesClient, "service-account-key"),
                     new PipelineConfigMaps(pipelineInputs, new PipelineConfigMapVolumeBuilder(kubernetesClient), runName),
                     outputBucketName,
                     serviceAccountEmail,
                     configuration,
-                    Delay.threadSleep(),
                     targetNodePool);
         } catch (Exception e) {
             throw new RuntimeException("Failed to create cluster", e);

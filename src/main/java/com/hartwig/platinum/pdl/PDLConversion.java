@@ -20,7 +20,6 @@ public interface PDLConversion {
                 return new ConvertForRerun(pdlGenerator,
                         new ApiRerun(api.runs(),
                                 api.sets(),
-                                api.samples(),
                                 configuration.outputBucket()
                                         .orElseThrow(() -> new IllegalArgumentException(
                                                 "Cannot execute a rerun without a configured outputBucket in the platinum configuration")),
