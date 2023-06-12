@@ -39,16 +39,16 @@ public class KubernetesEngine {
     private final Container containerApi;
     private final ProcessRunner processRunner;
     private final PlatinumConfiguration configuration;
-    private JobScheduler jobScheduler;
-    private KubernetesClientProxy kubernetesClient;
+    private final JobScheduler jobScheduler;
+    private final KubernetesClientProxy kubernetesClientProxy;
 
     public KubernetesEngine(final Container containerApi, final ProcessRunner processRunner, final PlatinumConfiguration configuration,
-            final JobScheduler jobScheduler, final KubernetesClientProxy kubernetesClient) {
+            final JobScheduler jobScheduler, final KubernetesClientProxy kubernetesClientProxy) {
         this.containerApi = containerApi;
         this.processRunner = processRunner;
         this.configuration = configuration;
         this.jobScheduler = jobScheduler;
-        this.kubernetesClient = kubernetesClient;
+        this.kubernetesClientProxy = kubernetesClientProxy;
     }
 
     private static String fullPath(final String project, final String region, final String cluster) {
@@ -170,8 +170,8 @@ public class KubernetesEngine {
             }
             return new KubernetesCluster(runName,
                     jobScheduler,
-                    new PipelineServiceAccountSecretVolume(jsonKey, kubernetesClient, "service-account-key"),
-                    new PipelineConfigMaps(pipelineInputs, new PipelineConfigMapVolumeBuilder(kubernetesClient), runName),
+                    new PipelineServiceAccountSecretVolume(jsonKey, kubernetesClientProxy, "service-account-key"),
+                    new PipelineConfigMaps(pipelineInputs, new PipelineConfigMapVolumeBuilder(kubernetesClientProxy), runName),
                     outputBucketName,
                     serviceAccountEmail,
                     configuration,

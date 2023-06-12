@@ -2,30 +2,26 @@ package com.hartwig.platinum.kubernetes;
 
 import com.hartwig.platinum.iam.JsonKey;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import io.fabric8.kubernetes.api.model.SecretBuilder;
 import io.fabric8.kubernetes.api.model.Volume;
 import io.fabric8.kubernetes.api.model.VolumeBuilder;
 import io.fabric8.kubernetes.client.KubernetesClientException;
 
 public class PipelineServiceAccountSecretVolume implements KubernetesComponent<Volume> {
-    private static final Logger LOGGER = LoggerFactory.getLogger(PipelineServiceAccountSecretVolume.class);
     private final JsonKey jsonKey;
-    private final KubernetesClientProxy kubernetesClient;
+    private final KubernetesClientProxy kubernetesClientProxy;
     private final String name;
 
-    public PipelineServiceAccountSecretVolume(final JsonKey jsonKey, final KubernetesClientProxy kubernetesClient, final String name) {
+    public PipelineServiceAccountSecretVolume(final JsonKey jsonKey, final KubernetesClientProxy kubernetesClientProxy, final String name) {
         this.jsonKey = jsonKey;
-        this.kubernetesClient = kubernetesClient;
+        this.kubernetesClientProxy = kubernetesClientProxy;
         this.name = name;
     }
 
     public Volume asKubernetes() {
         if (!jsonKey.secretExists()) {
             try {
-                kubernetesClient.secrets()
+                kubernetesClientProxy.secrets()
                         .inNamespace(KubernetesCluster.NAMESPACE)
                         .withName(name)
                         .createOrReplace(new SecretBuilder().addToData(name, jsonKey.jsonBase64())
@@ -35,7 +31,7 @@ public class PipelineServiceAccountSecretVolume implements KubernetesComponent<V
                                 .endMetadata()
                                 .build());
             } catch (KubernetesClientException e) {
-                kubernetesClient.reAuthorise();
+                kubernetesClientProxy.reAuthorise();
                 return asKubernetes();
             }
         }

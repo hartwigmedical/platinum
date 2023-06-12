@@ -10,13 +10,13 @@ import io.fabric8.kubernetes.api.model.VolumeBuilder;
 import io.fabric8.kubernetes.client.KubernetesClientException;
 
 public class PipelineConfigMapVolume implements KubernetesComponent<Volume> {
-    private final KubernetesClientProxy kubernetesClient;
+    private final KubernetesClientProxy kubernetesClientProxy;
     private final String volumeName;
     private final String sample;
     private final String content;
 
-    private PipelineConfigMapVolume(final KubernetesClientProxy kubernetesClient, final String runName, final String sample, final String content) {
-        this.kubernetesClient = kubernetesClient;
+    private PipelineConfigMapVolume(final KubernetesClientProxy kubernetesClientProxy, final String runName, final String sample, final String content) {
+        this.kubernetesClientProxy = kubernetesClientProxy;
         this.volumeName = format("%s-%s", runName, sample);
         this.sample = sample;
         this.content = content;
@@ -25,7 +25,7 @@ public class PipelineConfigMapVolume implements KubernetesComponent<Volume> {
     @Override
     public Volume asKubernetes() {
         try {
-            kubernetesClient.configMaps()
+            kubernetesClientProxy.configMaps()
                     .inNamespace(KubernetesCluster.NAMESPACE)
                     .withName(volumeName)
                     .createOrReplace(new ConfigMapBuilder().addToData(Map.of(sample, content))
@@ -36,7 +36,7 @@ public class PipelineConfigMapVolume implements KubernetesComponent<Volume> {
                             .build());
             return new VolumeBuilder().withName(volumeName).editOrNewConfigMap().withName(volumeName).endConfigMap().build();
         } catch (KubernetesClientException e) {
-            kubernetesClient.reAuthorise();
+            kubernetesClientProxy.reAuthorise();
             return asKubernetes();
         }
     }

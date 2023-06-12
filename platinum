@@ -43,7 +43,7 @@ function run {
     if [ ! -f $JAR ]; then
         install
     fi
-    java -Djava.util.concurrent.ForkJoinPool.common.parallelism=8 -jar $JAR "$@"
+    java -jar $JAR "$@"
 }
 
 function status() {

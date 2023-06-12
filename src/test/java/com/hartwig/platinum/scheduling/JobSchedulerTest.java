@@ -9,11 +9,13 @@ import com.hartwig.platinum.config.BatchConfiguration;
 import com.hartwig.platinum.config.ImmutableBatchConfiguration;
 import com.hartwig.platinum.config.PlatinumConfiguration;
 import com.hartwig.platinum.kubernetes.JobSubmitter;
+import com.hartwig.platinum.kubernetes.KubernetesClientProxy;
 
 import org.junit.Test;
 
 public class JobSchedulerTest {
-    private JobSubmitter jobSubmitter;
+    private final JobSubmitter jobSubmitter = mock(JobSubmitter.class);
+    private final KubernetesClientProxy kubernetesClientProxy = mock(KubernetesClientProxy.class);
 
     @Test
     public void shouldConstructTimedBatchSchedulerInstanceIfDelaySpecified() {
@@ -27,17 +29,16 @@ public class JobSchedulerTest {
 
     @Test
     public void shouldConstructConstantJobCountSchedulerOfSizeOneIfBatchConfigurationUnspecified() {
-        jobSubmitter = mock(JobSubmitter.class);
         PlatinumConfiguration configuration = PlatinumConfiguration.builder().build();
-        assertThat(JobScheduler.fromConfiguration(configuration, jobSubmitter)).isInstanceOf(ConstantJobCountScheduler.class);
+        assertThat(JobScheduler.fromConfiguration(configuration, jobSubmitter, kubernetesClientProxy))
+                .isInstanceOf(ConstantJobCountScheduler.class);
     }
 
     private JobScheduler createFromConfiguration(Integer delay) {
-        jobSubmitter = mock(JobSubmitter.class);
         ImmutableBatchConfiguration.Builder batchConfigurationBuilder = ImmutableBatchConfiguration.builder().size(10);
         Optional.ofNullable(delay).ifPresent(batchConfigurationBuilder::delay);
         BatchConfiguration batchConfiguration = batchConfigurationBuilder.build();
         PlatinumConfiguration configuration = PlatinumConfiguration.builder().batch(batchConfiguration).build();
-        return JobScheduler.fromConfiguration(configuration, jobSubmitter);
+        return JobScheduler.fromConfiguration(configuration, jobSubmitter, kubernetesClientProxy);
     }
 }
