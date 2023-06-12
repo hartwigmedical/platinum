@@ -89,7 +89,7 @@ public class JobSubmitter {
                 gcpConfiguration.projectOrThrow()))) {
             throw new RuntimeException("Failed to get credentials for cluster");
         }
-        if (!processRunner.execute(of("kubectl", "get", "configmaps"))) {
+        if (!processRunner.execute(of("kubectl", "get", "secrets"))) {
             throw new RuntimeException("Failed to run kubectl command against cluster");
         }
         return new DefaultKubernetesClient();

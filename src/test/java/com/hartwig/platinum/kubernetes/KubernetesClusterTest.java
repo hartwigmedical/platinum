@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 import com.hartwig.platinum.config.GcpConfiguration;
 import com.hartwig.platinum.config.ImmutableGcpConfiguration;
 import com.hartwig.platinum.config.PlatinumConfiguration;
-import com.hartwig.platinum.kubernetes.scheduling.JobScheduler;
+import com.hartwig.platinum.scheduling.JobScheduler;
 
 import org.junit.Before;
 import org.junit.Test;

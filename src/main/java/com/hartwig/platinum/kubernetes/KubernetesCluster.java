@@ -7,7 +7,7 @@ import static java.util.stream.Stream.of;
 import java.time.Duration;
 
 import com.hartwig.platinum.config.PlatinumConfiguration;
-import com.hartwig.platinum.kubernetes.scheduling.JobScheduler;
+import com.hartwig.platinum.scheduling.JobScheduler;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

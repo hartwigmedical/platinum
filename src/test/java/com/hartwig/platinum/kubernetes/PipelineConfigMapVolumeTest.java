@@ -16,7 +16,6 @@ import org.mockito.Mockito;
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.ConfigMapList;
 import io.fabric8.kubernetes.api.model.Volume;
-import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.dsl.MixedOperation;
 import io.fabric8.kubernetes.client.dsl.NonNamespaceOperation;
 import io.fabric8.kubernetes.client.dsl.Resource;
@@ -24,7 +23,7 @@ import io.fabric8.kubernetes.client.dsl.Resource;
 public class PipelineConfigMapVolumeTest {
     @Test
     public void shouldBuildVolume() {
-        KubernetesClient kubernetesClient = mock(KubernetesClient.class);
+        KubernetesClientProxy kubernetesClient = mock(KubernetesClientProxy.class);
         MixedOperation<ConfigMap, ConfigMapList, Resource<ConfigMap>> configMaps = Mockito.<MixedOperation>mock(MixedOperation.class);
         NonNamespaceOperation<ConfigMap, ConfigMapList, Resource<ConfigMap>> namespaceable = Mockito.<NonNamespaceOperation>mock(NonNamespaceOperation.class);
         Resource<ConfigMap> nameable = Mockito.<Resource>mock(Resource.class);

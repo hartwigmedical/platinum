@@ -11,10 +11,11 @@ import com.hartwig.platinum.iam.IamProvider;
 import com.hartwig.platinum.iam.ResourceManagerProvider;
 import com.hartwig.platinum.kubernetes.ContainerProvider;
 import com.hartwig.platinum.kubernetes.JobSubmitter;
+import com.hartwig.platinum.kubernetes.KubernetesClientProxy;
 import com.hartwig.platinum.kubernetes.KubernetesEngine;
 import com.hartwig.platinum.kubernetes.ProcessRunner;
-import com.hartwig.platinum.kubernetes.scheduling.JobScheduler;
 import com.hartwig.platinum.pdl.PDLConversion;
+import com.hartwig.platinum.scheduling.JobScheduler;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,13 +56,15 @@ public class PlatinumMain implements Callable<Integer> {
             String clusterName = configuration.cluster().orElse(runName);
             JobSubmitter jobSubmitter = new JobSubmitter(clusterName, configuration.gcp(), configuration.retryFailed());
             JobScheduler jobScheduler = JobScheduler.fromConfiguration(configuration, jobSubmitter);
+            KubernetesClientProxy kubernetesClientProxy = new KubernetesClientProxy(clusterName,
+                    configuration.gcp(), kubernetesClientProvider);
 
             new Platinum(runName,
                     inputJson,
                     StorageOptions.newBuilder().setProjectId(configuration.gcp().projectOrThrow()).build().getService(),
                     IamProvider.get(),
                     ResourceManagerProvider.get(),
-                    new KubernetesEngine(ContainerProvider.get(), new ProcessRunner(), configuration, jobScheduler, kubernetesClientProvider),
+                    new KubernetesEngine(ContainerProvider.get(), new ProcessRunner(), configuration, jobScheduler, kubernetesClientProxy),
                     configuration,
                     PDLConversion.create(configuration)).run();
             return 0;

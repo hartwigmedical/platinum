@@ -1,4 +1,4 @@
-package com.hartwig.platinum.kubernetes.scheduling;
+package com.hartwig.platinum.scheduling;
 
 import com.hartwig.platinum.config.PlatinumConfiguration;
 import com.hartwig.platinum.kubernetes.JobSubmitter;

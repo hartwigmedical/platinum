@@ -1,4 +1,4 @@
-package com.hartwig.platinum.kubernetes.scheduling;
+package com.hartwig.platinum.scheduling;
 
 import java.util.ArrayList;
 import java.util.List;

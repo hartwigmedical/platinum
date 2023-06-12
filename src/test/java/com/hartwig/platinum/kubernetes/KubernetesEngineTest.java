@@ -18,8 +18,6 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 
-import javax.inject.Provider;
-
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.services.container.v1beta1.Container;
 import com.google.api.services.container.v1beta1.Container.Projects;
@@ -35,14 +33,12 @@ import com.hartwig.platinum.config.GcpConfiguration;
 import com.hartwig.platinum.config.ImmutablePlatinumConfiguration;
 import com.hartwig.platinum.config.PlatinumConfiguration;
 import com.hartwig.platinum.iam.JsonKey;
-import com.hartwig.platinum.kubernetes.scheduling.JobScheduler;
+import com.hartwig.platinum.scheduling.JobScheduler;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatcher;
-
-import io.fabric8.kubernetes.client.KubernetesClient;
 
 public class KubernetesEngineTest {
     private static final String PROJECT = "project";
@@ -58,7 +54,7 @@ public class KubernetesEngineTest {
     private Clusters clusters;
     private ProcessRunner processRunner;
     private JobScheduler jobScheduler;
-    private Provider<KubernetesClient> kubernetesClientProvider;
+    private KubernetesClientProxy kubernetesClientProxy;
     private KubernetesEngine victim;
 
     @Before
@@ -69,13 +65,13 @@ public class KubernetesEngineTest {
         locations = mock(Locations.class);
         clusters = mock(Clusters.class);
         jobScheduler = mock(JobScheduler.class);
-        kubernetesClientProvider = mock(Provider.class);
+        kubernetesClientProxy = mock(KubernetesClientProxy.class);
 
         when(container.projects()).thenReturn(projects);
         when(projects.locations()).thenReturn(locations);
         when(locations.clusters()).thenReturn(clusters);
         when(processRunner.execute(anyList())).thenReturn(true);
-        victim = new KubernetesEngine(container, processRunner, CONFIGURATION, jobScheduler, kubernetesClientProvider);
+        victim = new KubernetesEngine(container, processRunner, CONFIGURATION, jobScheduler, kubernetesClientProxy);
     }
 
     @Test

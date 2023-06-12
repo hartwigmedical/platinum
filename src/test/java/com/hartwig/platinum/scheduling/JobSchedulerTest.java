@@ -1,4 +1,4 @@
-package com.hartwig.platinum.kubernetes.scheduling;
+package com.hartwig.platinum.scheduling;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
