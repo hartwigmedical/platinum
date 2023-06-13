@@ -55,7 +55,7 @@ public class JobSubmitter {
             LOGGER.info("Submitted [{}]", job.getName());
             return true;
         } catch (KubernetesClientException e) {
-            kubernetesClientProxy.reAuthorise();
+            kubernetesClientProxy.authorise();
             return submit(job, spec);
         }
     }

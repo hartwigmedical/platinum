@@ -8,6 +8,7 @@ import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -39,6 +40,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatcher;
+import org.mockito.Mockito;
 
 public class KubernetesEngineTest {
     private static final String PROJECT = "project";
@@ -53,7 +55,6 @@ public class KubernetesEngineTest {
     private Locations locations;
     private Clusters clusters;
     private ProcessRunner processRunner;
-    private JobScheduler jobScheduler;
     private KubernetesClientProxy kubernetesClientProxy;
     private KubernetesEngine victim;
 
@@ -64,7 +65,7 @@ public class KubernetesEngineTest {
         final Container container = mock(Container.class);
         locations = mock(Locations.class);
         clusters = mock(Clusters.class);
-        jobScheduler = mock(JobScheduler.class);
+        JobScheduler jobScheduler = mock(JobScheduler.class);
         kubernetesClientProxy = mock(KubernetesClientProxy.class);
 
         when(container.projects()).thenReturn(projects);
@@ -126,16 +127,10 @@ public class KubernetesEngineTest {
     }
 
     @Test(expected = RuntimeException.class)
-    public void shouldThrowIfGcloudCredentialFetchFails() {
+    public void shouldThrowIfAuthoriseFails() {
         mocksForClusterExists();
+        doThrow(RuntimeException.class).when(kubernetesClientProxy).authorise();
         when(processRunner.execute(argThat(startsWithGcloud()))).thenReturn(false);
-        victim.findOrCreate(CLUSTER_NAME, RUN_NAME, Collections.emptyList(), JSON_KEY, BUCKET, SERVICE_ACCOUNT);
-    }
-
-    @Test(expected = RuntimeException.class)
-    public void shouldThrowIfKubectlCommandFails() {
-        mocksForClusterExists();
-        when(processRunner.execute(anyList())).thenReturn(true).thenReturn(false);
         victim.findOrCreate(CLUSTER_NAME, RUN_NAME, Collections.emptyList(), JSON_KEY, BUCKET, SERVICE_ACCOUNT);
     }
 

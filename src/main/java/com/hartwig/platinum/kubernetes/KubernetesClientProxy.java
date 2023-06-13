@@ -46,8 +46,8 @@ public class KubernetesClientProxy {
         return kubernetesClient.batch().jobs().inNamespace(KubernetesCluster.NAMESPACE);
     }
 
-    public void reAuthorise() {
-        LOGGER.info("Re-authorising with cluster");
+    public void authorise() {
+        LOGGER.info("Authorising with cluster");
         ProcessRunner processRunner = new ProcessRunner();
         if (!processRunner.execute(of("gcloud",
                 "container",

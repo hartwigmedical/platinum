@@ -34,7 +34,7 @@ public class PipelineServiceAccountSecretVolume implements KubernetesComponent<V
                                 .endMetadata()
                                 .build());
             } catch (KubernetesClientException e) {
-                kubernetesClientProxy.reAuthorise();
+                kubernetesClientProxy.authorise();
                 return asKubernetes();
             }
         }

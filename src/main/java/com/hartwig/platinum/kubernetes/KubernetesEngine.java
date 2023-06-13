@@ -2,7 +2,6 @@ package com.hartwig.platinum.kubernetes;
 
 import static java.time.Duration.ofMinutes;
 import static java.time.Duration.ofSeconds;
-import static java.util.List.of;
 
 import java.io.IOException;
 import java.util.List;
@@ -138,20 +137,7 @@ public class KubernetesEngine {
                 create(containerApi, parent, clusterName, gcpConfiguration);
             }
             if (!configuration.inCluster()) {
-                if (!processRunner.execute(of("gcloud",
-                        "container",
-                        "clusters",
-                        "get-credentials",
-                        clusterName,
-                        "--region",
-                        gcpConfiguration.regionOrThrow(),
-                        "--project",
-                        gcpConfiguration.projectOrThrow()))) {
-                    throw new RuntimeException("Failed to get credentials for cluster");
-                }
-                if (!processRunner.execute(of("kubectl", "get", "configmaps"))) {
-                    throw new RuntimeException("Failed to run kubectl command against cluster");
-                }
+                kubernetesClientProxy.authorise();
                 LOGGER.info("Connection to cluster {} configured via gcloud and kubectl", Console.bold(clusterName));
             }
 

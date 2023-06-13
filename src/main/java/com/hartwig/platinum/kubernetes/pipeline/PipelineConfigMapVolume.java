@@ -40,7 +40,7 @@ public class PipelineConfigMapVolume implements KubernetesComponent<Volume> {
                             .build());
             return new VolumeBuilder().withName(volumeName).editOrNewConfigMap().withName(volumeName).endConfigMap().build();
         } catch (KubernetesClientException e) {
-            kubernetesClientProxy.reAuthorise();
+            kubernetesClientProxy.authorise();
             return asKubernetes();
         }
     }

@@ -62,7 +62,7 @@ public class ConstantJobCountScheduler implements JobScheduler {
                 for (PipelineJob activeJob : activeJobs) {
                     Failsafe.with(new RetryPolicy<>().handle(KubernetesClientException.class)
                             .withMaxRetries(2)
-                            .onRetry(e -> kubernetesClientProxy.reAuthorise())).run(() -> {
+                            .onRetry(e -> kubernetesClientProxy.authorise())).run(() -> {
                         Job job = kubernetesClientProxy.jobs().withName(activeJob.getName()).get();
                         if (job == null) {
                             LOGGER.warn("Previously-created k8 job [{}] not found, will not schedule another in its place!",

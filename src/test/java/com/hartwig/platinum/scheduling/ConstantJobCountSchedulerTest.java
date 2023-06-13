@@ -108,7 +108,7 @@ public class ConstantJobCountSchedulerTest {
         victim.submit(job2);
         victim.submit(job3);
 
-        verify(kubernetesClientProxy).reAuthorise();
+        verify(kubernetesClientProxy).authorise();
     }
 
     @Test
