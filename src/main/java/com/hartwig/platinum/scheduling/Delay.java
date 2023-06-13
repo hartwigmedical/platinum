@@ -1,4 +1,4 @@
-package com.hartwig.platinum.kubernetes.scheduling;
+package com.hartwig.platinum.scheduling;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

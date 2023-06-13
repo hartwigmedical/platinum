@@ -8,8 +8,6 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
-import javax.inject.Provider;
-
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.services.container.v1beta1.Container;
 import com.google.api.services.container.v1beta1.Container.Projects.Locations.Clusters.Create;
@@ -28,12 +26,11 @@ import com.hartwig.platinum.config.GcpConfiguration;
 import com.hartwig.platinum.config.PlatinumConfiguration;
 import com.hartwig.platinum.iam.JsonKey;
 import com.hartwig.platinum.kubernetes.PipelineConfigMapVolume.PipelineConfigMapVolumeBuilder;
-import com.hartwig.platinum.kubernetes.scheduling.JobScheduler;
+import com.hartwig.platinum.scheduling.JobScheduler;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.fabric8.kubernetes.client.KubernetesClient;
 import net.jodah.failsafe.Failsafe;
 import net.jodah.failsafe.RetryPolicy;
 
@@ -42,16 +39,16 @@ public class KubernetesEngine {
     private final Container containerApi;
     private final ProcessRunner processRunner;
     private final PlatinumConfiguration configuration;
-    private JobScheduler jobScheduler;
-    private Provider<KubernetesClient> kubernetesClientProvider;
+    private final JobScheduler jobScheduler;
+    private final KubernetesClientProxy kubernetesClientProxy;
 
     public KubernetesEngine(final Container containerApi, final ProcessRunner processRunner, final PlatinumConfiguration configuration,
-            final JobScheduler jobScheduler, final Provider<KubernetesClient> kubernetesClientProvider) {
+            final JobScheduler jobScheduler, final KubernetesClientProxy kubernetesClientProxy) {
         this.containerApi = containerApi;
         this.processRunner = processRunner;
         this.configuration = configuration;
         this.jobScheduler = jobScheduler;
-        this.kubernetesClientProvider = kubernetesClientProvider;
+        this.kubernetesClientProxy = kubernetesClientProxy;
     }
 
     private static String fullPath(final String project, final String region, final String cluster) {
@@ -155,7 +152,6 @@ public class KubernetesEngine {
                 }
                 LOGGER.info("Connection to cluster {} configured via gcloud and kubectl", Console.bold(clusterName));
             }
-            KubernetesClient kubernetesClient = kubernetesClientProvider.get();
 
             TargetNodePool targetNodePool = configuration.gcp()
                     .nodePoolConfiguration()
@@ -174,8 +170,8 @@ public class KubernetesEngine {
             }
             return new KubernetesCluster(runName,
                     jobScheduler,
-                    new PipelineServiceAccountSecretVolume(jsonKey, kubernetesClient, "service-account-key"),
-                    new PipelineConfigMaps(pipelineInputs, new PipelineConfigMapVolumeBuilder(kubernetesClient), runName),
+                    new PipelineServiceAccountSecretVolume(jsonKey, kubernetesClientProxy, "service-account-key"),
+                    new PipelineConfigMaps(pipelineInputs, new PipelineConfigMapVolumeBuilder(kubernetesClientProxy), runName),
                     outputBucketName,
                     serviceAccountEmail,
                     configuration,
