@@ -1,8 +1,12 @@
-package com.hartwig.platinum.kubernetes;
+package com.hartwig.platinum.kubernetes.pipeline;
 
 import static java.lang.String.format;
 
 import java.util.Map;
+
+import com.hartwig.platinum.kubernetes.KubernetesClientProxy;
+import com.hartwig.platinum.kubernetes.KubernetesCluster;
+import com.hartwig.platinum.kubernetes.KubernetesComponent;
 
 import io.fabric8.kubernetes.api.model.ConfigMapBuilder;
 import io.fabric8.kubernetes.api.model.Volume;

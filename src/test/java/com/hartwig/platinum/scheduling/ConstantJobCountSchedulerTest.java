@@ -8,7 +8,7 @@ import static org.mockito.Mockito.when;
 
 import com.hartwig.platinum.kubernetes.JobSubmitter;
 import com.hartwig.platinum.kubernetes.KubernetesClientProxy;
-import com.hartwig.platinum.kubernetes.PipelineJob;
+import com.hartwig.platinum.kubernetes.pipeline.PipelineJob;
 
 import org.junit.Before;
 import org.junit.Test;

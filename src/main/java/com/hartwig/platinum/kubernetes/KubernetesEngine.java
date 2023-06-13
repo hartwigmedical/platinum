@@ -25,7 +25,9 @@ import com.hartwig.platinum.config.BatchConfiguration;
 import com.hartwig.platinum.config.GcpConfiguration;
 import com.hartwig.platinum.config.PlatinumConfiguration;
 import com.hartwig.platinum.iam.JsonKey;
-import com.hartwig.platinum.kubernetes.PipelineConfigMapVolume.PipelineConfigMapVolumeBuilder;
+import com.hartwig.platinum.kubernetes.pipeline.PipelineConfigMapVolume.PipelineConfigMapVolumeBuilder;
+import com.hartwig.platinum.kubernetes.pipeline.PipelineConfigMaps;
+import com.hartwig.platinum.kubernetes.pipeline.PipelineServiceAccountSecretVolume;
 import com.hartwig.platinum.scheduling.JobScheduler;
 
 import org.slf4j.Logger;

@@ -34,11 +34,11 @@ public class KubernetesClientProxy {
         this.kubernetesClient = kubernetesClient;
     }
 
-    MixedOperation<ConfigMap, ConfigMapList, Resource<ConfigMap>> configMaps() {
+    public MixedOperation<ConfigMap, ConfigMapList, Resource<ConfigMap>> configMaps() {
         return kubernetesClient.configMaps();
     }
 
-    MixedOperation<Secret, SecretList, Resource<Secret>> secrets() {
+    public MixedOperation<Secret, SecretList, Resource<Secret>> secrets() {
         return kubernetesClient.secrets();
     }
 

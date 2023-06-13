@@ -1,4 +1,4 @@
-package com.hartwig.platinum.kubernetes;
+package com.hartwig.platinum.kubernetes.pipeline;
 
 import static java.lang.String.format;
 
@@ -7,7 +7,9 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.hartwig.platinum.kubernetes.PipelineConfigMapVolume.PipelineConfigMapVolumeBuilder;
+import com.hartwig.platinum.kubernetes.KubernetesClientProxy;
+import com.hartwig.platinum.kubernetes.KubernetesCluster;
+import com.hartwig.platinum.kubernetes.pipeline.PipelineConfigMapVolume.PipelineConfigMapVolumeBuilder;
 
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -22,11 +24,12 @@ import io.fabric8.kubernetes.client.dsl.Resource;
 
 public class PipelineConfigMapVolumeTest {
     @Test
+    @SuppressWarnings("unchecked")
     public void shouldBuildVolume() {
         KubernetesClientProxy kubernetesClient = mock(KubernetesClientProxy.class);
-        MixedOperation<ConfigMap, ConfigMapList, Resource<ConfigMap>> configMaps = Mockito.<MixedOperation>mock(MixedOperation.class);
-        NonNamespaceOperation<ConfigMap, ConfigMapList, Resource<ConfigMap>> namespaceable = Mockito.<NonNamespaceOperation>mock(NonNamespaceOperation.class);
-        Resource<ConfigMap> nameable = Mockito.<Resource>mock(Resource.class);
+        MixedOperation<ConfigMap, ConfigMapList, Resource<ConfigMap>> configMaps = Mockito.mock(MixedOperation.class);
+        NonNamespaceOperation<ConfigMap, ConfigMapList, Resource<ConfigMap>> namespaceable = Mockito.mock(NonNamespaceOperation.class);
+        Resource<ConfigMap> nameable = Mockito.mock(Resource.class);
         when(kubernetesClient.configMaps()).thenReturn(configMaps);
         when(configMaps.inNamespace(KubernetesCluster.NAMESPACE)).thenReturn(namespaceable);
         String runName = "run-name";

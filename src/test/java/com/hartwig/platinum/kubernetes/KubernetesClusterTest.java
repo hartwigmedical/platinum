@@ -15,6 +15,10 @@ import java.util.stream.Collectors;
 import com.hartwig.platinum.config.GcpConfiguration;
 import com.hartwig.platinum.config.ImmutableGcpConfiguration;
 import com.hartwig.platinum.config.PlatinumConfiguration;
+import com.hartwig.platinum.kubernetes.pipeline.ImmutableSampleArgument;
+import com.hartwig.platinum.kubernetes.pipeline.PipelineConfigMaps;
+import com.hartwig.platinum.kubernetes.pipeline.PipelineJob;
+import com.hartwig.platinum.kubernetes.pipeline.SampleArgument;
 import com.hartwig.platinum.scheduling.JobScheduler;
 
 import org.junit.Before;
@@ -29,7 +33,7 @@ public class KubernetesClusterTest {
     private static final ImmutableGcpConfiguration GCP = GcpConfiguration.builder().project("project").region("region").build();
     private static final String SECRET = "secret";
     private static final String CONFIG = "config";
-    private static final List<SampleArgument> SAMPLES = List.of(sample("sample"));
+    private static final List<SampleArgument> SAMPLES = List.of(sample());
     private KubernetesCluster victim;
     private JobScheduler scheduler;
     private Volume secret;
@@ -98,8 +102,8 @@ public class KubernetesClusterTest {
         when(configMaps.getSampleKeys()).thenReturn(Arrays.stream(keys).collect(Collectors.toSet()));
     }
 
-    private static ImmutableSampleArgument sample(final String id) {
-        return ImmutableSampleArgument.builder().id(id).build();
+    private static ImmutableSampleArgument sample() {
+        return ImmutableSampleArgument.builder().id("sample").build();
     }
 
     private KubernetesCluster victimise(PlatinumConfiguration configuration) {

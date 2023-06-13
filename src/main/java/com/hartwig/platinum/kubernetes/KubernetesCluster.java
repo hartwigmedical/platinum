@@ -7,21 +7,19 @@ import static java.util.stream.Stream.of;
 import java.time.Duration;
 
 import com.hartwig.platinum.config.PlatinumConfiguration;
+import com.hartwig.platinum.kubernetes.pipeline.PipelineArguments;
+import com.hartwig.platinum.kubernetes.pipeline.PipelineConfigMaps;
+import com.hartwig.platinum.kubernetes.pipeline.PipelineContainer;
+import com.hartwig.platinum.kubernetes.pipeline.PipelineJob;
+import com.hartwig.platinum.kubernetes.pipeline.SampleArgument;
 import com.hartwig.platinum.scheduling.JobScheduler;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import io.fabric8.kubernetes.api.model.Volume;
 
 public class KubernetesCluster {
-
-    private final static Logger LOGGER = LoggerFactory.getLogger(KubernetesCluster.class);
-
+    public final static String NAMESPACE = "default";
     private final String runName;
     private final JobScheduler scheduler;
-
-    public final static String NAMESPACE = "default";
     private final KubernetesComponent<Volume> serviceAccountSecret;
     private final PipelineConfigMaps configMaps;
     private final String outputBucketName;
@@ -51,19 +49,17 @@ public class KubernetesCluster {
         for (SampleArgument sample : samples) {
             Volume configMapVolume = configMaps.forSample(sample.id());
             PipelineContainer pipelineContainer = new PipelineContainer(sample,
-                    new PipelineArguments(configuration.argumentOverrides(),
-                            outputBucketName,
-                            serviceAccountEmail,
-                            configuration),
+                    new PipelineArguments(configuration.argumentOverrides(), outputBucketName, serviceAccountEmail, configuration),
                     secretVolume.getName(),
                     configMapVolume.getName(),
-                    configuration.image(), configuration);
+                    configuration.image(),
+                    configuration);
             scheduler.submit(new PipelineJob(sample.id(),
                     configuration.keystorePassword()
                             .map(p -> new JksEnabledContainer(pipelineContainer.asKubernetes(), maybeJksVolume, p).asKubernetes())
                             .orElse(pipelineContainer.asKubernetes()),
-                    concat(of(configMapVolume, secretVolume),
-                            configuration.keystorePassword().map(p -> maybeJksVolume).stream()).collect(toList()),
+                    concat(of(configMapVolume, secretVolume), configuration.keystorePassword().map(p -> maybeJksVolume).stream()).collect(
+                            toList()),
                     targetNodePool,
                     configuration.gcp().jobTtl().orElse(Duration.ZERO)));
             numSubmitted++;

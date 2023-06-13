@@ -5,7 +5,7 @@ import java.util.List;
 
 import com.hartwig.platinum.kubernetes.JobSubmitter;
 import com.hartwig.platinum.kubernetes.KubernetesClientProxy;
-import com.hartwig.platinum.kubernetes.PipelineJob;
+import com.hartwig.platinum.kubernetes.pipeline.PipelineJob;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -1,4 +1,4 @@
-package com.hartwig.platinum.kubernetes;
+package com.hartwig.platinum.kubernetes.pipeline;
 
 import static java.lang.String.format;
 

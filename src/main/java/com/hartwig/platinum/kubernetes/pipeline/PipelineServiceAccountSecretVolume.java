@@ -1,6 +1,9 @@
-package com.hartwig.platinum.kubernetes;
+package com.hartwig.platinum.kubernetes.pipeline;
 
 import com.hartwig.platinum.iam.JsonKey;
+import com.hartwig.platinum.kubernetes.KubernetesClientProxy;
+import com.hartwig.platinum.kubernetes.KubernetesCluster;
+import com.hartwig.platinum.kubernetes.KubernetesComponent;
 
 import io.fabric8.kubernetes.api.model.SecretBuilder;
 import io.fabric8.kubernetes.api.model.Volume;
