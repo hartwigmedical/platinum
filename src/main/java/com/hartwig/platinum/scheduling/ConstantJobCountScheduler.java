@@ -36,8 +36,8 @@ public class ConstantJobCountScheduler implements JobScheduler {
         activeJobs = new ArrayList<>(jobCount);
     }
 
-    private static boolean jobIs(Integer status) {
-        return status != null && status == 1;
+    private static boolean jobIsNot(Integer status) {
+        return status != null && status != 1;
     }
 
     @Override
@@ -69,8 +69,8 @@ public class ConstantJobCountScheduler implements JobScheduler {
                                     activeJob.getName());
                             removedJobs.add(activeJob);
                         } else {
-                            if (!jobIs(job.getStatus().getActive())) {
-                                if (!jobIs(job.getStatus().getFailed())) {
+                            if (jobIsNot(job.getStatus().getActive())) {
+                                if (jobIsNot(job.getStatus().getFailed())) {
                                     removedJobs.add(activeJob);
                                 } else {
                                     kubernetesClientProxy.jobs().delete(job);
