@@ -18,7 +18,6 @@ public class ConvertForRerun implements PDLConversion {
 
     private final PdlGenerator generator;
     private final ApiRerun apiRerun;
-
     private final Logger LOGGER = LoggerFactory.getLogger(ConvertForRerun.class);
 
     public ConvertForRerun(final PdlGenerator generator, final ApiRerun apiRerun) {
@@ -30,7 +29,7 @@ public class ConvertForRerun implements PDLConversion {
     public Map<String, Future<PipelineInput>> apply(final PlatinumConfiguration configuration) {
         ExecutorService executorService = Executors.newSingleThreadExecutor();
         Map<String, Future<PipelineInput>> inputs = new HashMap<>();
-        configuration.sampleIds().parallelStream().forEach(sample -> {
+        configuration.sampleIds().stream().sorted().forEach(sample -> {
             try {
                 inputs.put(sample, executorService.submit(() -> generator.generate(apiRerun.create(sample))));
             } catch (Exception e) {

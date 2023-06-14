@@ -8,6 +8,7 @@ import java.time.Duration;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import com.hartwig.pdl.PipelineInput;
 import com.hartwig.platinum.config.PlatinumConfiguration;
@@ -53,8 +54,8 @@ public class KubernetesCluster {
     public int submit() {
         Volume secretVolume = serviceAccountSecret.asKubernetes();
         Volume maybeJksVolume = new JksSecret().asKubernetes();
-        int numSubmitted = 0;
-        for (String sampleName : pipelineInputs.keySet()) {
+        AtomicInteger numSubmitted = new AtomicInteger();
+        pipelineInputs.keySet().stream().sorted().forEach(sampleName -> {
             SampleArgument sample = SampleArgument.sampleJson(sampleName, runName);
             try {
                 Volume configMapVolume = configMaps.forSample(sampleName, pipelineInputs.get(sampleName).get());
@@ -71,11 +72,11 @@ public class KubernetesCluster {
                         concat(of(configMapVolume, secretVolume), configuration.keystorePassword().map(p -> maybeJksVolume).stream()).collect(toList()),
                         targetNodePool,
                         configuration.gcp().jobTtl().orElse(Duration.ZERO)));
-                numSubmitted++;
+                numSubmitted.incrementAndGet();
             } catch (InterruptedException | ExecutionException e) {
                 LOGGER.warn("Interrupted while waiting for future for [{}], ignoring", sampleName);
             }
-        }
-        return numSubmitted;
+        });
+        return numSubmitted.get();
     }
 }
