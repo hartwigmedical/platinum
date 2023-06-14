@@ -5,7 +5,9 @@ import static java.time.Duration.ofSeconds;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.Future;
 
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.services.container.v1beta1.Container;
@@ -24,8 +26,8 @@ import com.hartwig.platinum.config.BatchConfiguration;
 import com.hartwig.platinum.config.GcpConfiguration;
 import com.hartwig.platinum.config.PlatinumConfiguration;
 import com.hartwig.platinum.iam.JsonKey;
+import com.hartwig.platinum.kubernetes.pipeline.PipelineConfigMapBuilder;
 import com.hartwig.platinum.kubernetes.pipeline.PipelineConfigMapVolume.PipelineConfigMapVolumeBuilder;
-import com.hartwig.platinum.kubernetes.pipeline.PipelineConfigMaps;
 import com.hartwig.platinum.kubernetes.pipeline.PipelineServiceAccountSecretVolume;
 import com.hartwig.platinum.scheduling.JobScheduler;
 
@@ -128,7 +130,7 @@ public class KubernetesEngine {
         }
     }
 
-    public KubernetesCluster findOrCreate(final String clusterName, final String runName, final List<PipelineInput> pipelineInputs,
+    public KubernetesCluster findOrCreate(final String clusterName, final String runName, final Map<String, Future<PipelineInput>> pipelineInputs,
             final JsonKey jsonKey, final String outputBucketName, final String serviceAccountEmail) {
         try {
             GcpConfiguration gcpConfiguration = configuration.gcp();
@@ -159,7 +161,8 @@ public class KubernetesEngine {
             return new KubernetesCluster(runName,
                     jobScheduler,
                     new PipelineServiceAccountSecretVolume(jsonKey, kubernetesClientProxy, "service-account-key"),
-                    new PipelineConfigMaps(pipelineInputs, new PipelineConfigMapVolumeBuilder(kubernetesClientProxy), runName),
+                    pipelineInputs,
+                    new PipelineConfigMapBuilder(new PipelineConfigMapVolumeBuilder(kubernetesClientProxy), runName),
                     outputBucketName,
                     serviceAccountEmail,
                     configuration,

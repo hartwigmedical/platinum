@@ -3,6 +3,9 @@ package com.hartwig.platinum.pdl;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -27,33 +30,33 @@ public class ConvertFromGCSPathsTest {
     }
 
     @Test
-    public void decomposesMultiNormalSamplesIntoPairs() {
-        List<PipelineInput> pipelineInputs = new ConvertFromGCSPaths().apply(createConfiguration(List.of(SampleConfiguration.builder()
+    public void decomposesMultiNormalSamplesIntoPairs() throws InterruptedException, ExecutionException {
+        Map<String, Future<PipelineInput>> pipelineInputs = new ConvertFromGCSPaths().apply(createConfiguration(List.of(SampleConfiguration.builder()
                 .name("sample")
                 .tumors(List.of(data("first_tumor"), data("second_tumor")))
                 .normal(data("normal"))
                 .build())));
         assertThat(pipelineInputs).hasSize(2);
-        PipelineInput firstPair = pipelineInputs.get(0);
+        PipelineInput firstPair = pipelineInputs.get("sample-t1").get();
         assertThat(firstPair.setName()).isEqualTo("sample-t1");
         assertThat(firstPair.tumor().orElseThrow().name()).isEqualTo("first_tumor");
         assertThat(firstPair.reference().orElseThrow().name()).isEqualTo("normal");
-        PipelineInput secondPair = pipelineInputs.get(1);
+        PipelineInput secondPair = pipelineInputs.get("sample-t2").get();
         assertThat(secondPair.setName()).isEqualTo("sample-t2");
         assertThat(secondPair.tumor().orElseThrow().name()).isEqualTo("second_tumor");
         assertThat(secondPair.reference().orElseThrow().name()).isEqualTo("normal");
     }
 
     @Test
-    public void populatesTumorAndNormalLanes() {
-        List<PipelineInput> pairs = new ConvertFromGCSPaths().apply(createConfiguration(List.of(SampleConfiguration.builder()
+    public void populatesTumorAndNormalLanes() throws InterruptedException, ExecutionException {
+        Map<String, Future<PipelineInput>> pairs = new ConvertFromGCSPaths().apply(createConfiguration(List.of(SampleConfiguration.builder()
                 .name("sample")
                 .tumors(List.of(data("first_tumor",
                         ImmutableFastqConfiguration.builder().read1("first_tumor_read1.fastq").read2("first_tumor_read2.fastq").build())))
                 .normal(data("normal",
                         ImmutableFastqConfiguration.builder().read1("normal_read1.fastq").read2("normal_read2.fastq").build()))
                 .build())));
-        PipelineInput pair = pairs.get(0);
+        PipelineInput pair = pairs.get("sample").get();
         assertThat(pair.tumor().orElseThrow().lanes()).containsOnly(LaneInput.builder()
                 .laneNumber("1")
                 .firstOfPairPath("first_tumor_read1.fastq")

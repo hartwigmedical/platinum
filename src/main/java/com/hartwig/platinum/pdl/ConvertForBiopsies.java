@@ -1,15 +1,21 @@
 package com.hartwig.platinum.pdl;
 
+import static java.lang.String.format;
+
 import java.util.Comparator;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import com.hartwig.api.RunApi;
 import com.hartwig.api.SampleApi;
 import com.hartwig.api.SetApi;
 import com.hartwig.api.model.Ini;
 import com.hartwig.api.model.Run;
+import com.hartwig.api.model.SampleSet;
 import com.hartwig.api.model.SampleType;
 import com.hartwig.api.model.Status;
 import com.hartwig.pdl.ImmutablePipelineInput;
@@ -32,18 +38,26 @@ public class ConvertForBiopsies implements PDLConversion {
     }
 
     @Override
-    public List<PipelineInput> apply(final PlatinumConfiguration configuration) {
-        return configuration.sampleIds()
-                .stream()
-                .flatMap(biopsy -> sampleApi.list(null, null, null, null, SampleType.TUMOR, biopsy, null).stream())
-                .flatMap(sample -> setApi.list(null, sample.getId(), true).stream())
-                .flatMap(set -> runApi.list(Status.VALIDATED, Ini.SOMATIC_INI, set.getId(), null, null, null, null, "RESEARCH")
+    public Map<String, Future<PipelineInput>> apply(final PlatinumConfiguration configuration) {
+        ExecutorService executorService = Executors.newSingleThreadExecutor();
+        Map<String, Future<PipelineInput>> futures = new HashMap<>();
+        for (String biopsy: configuration.sampleIds()) {
+            futures.put(biopsy, executorService.submit(() -> {
+                SampleSet set = sampleApi.list(null, null, null, null, SampleType.TUMOR, biopsy, null)
+                        .stream()
+                        .flatMap(sample -> setApi.list(null, sample.getId(), true).stream())
+                        .findFirst()
+                        .orElseThrow(() -> new IllegalArgumentException(format("No set for biopsy [%s]", biopsy)));
+                Run researchRun = runApi.list(Status.VALIDATED, Ini.SOMATIC_INI, set.getId(), null, null, null, null, "RESEARCH")
                         .stream()
                         .filter(run -> run.getEndTime() != null)
                         .max(Comparator.comparing(Run::getEndTime))
-                        .map(run -> pdlGenerator.generate(run.getId()))
-                        .map(pdl -> ImmutablePipelineInput.copyOf(pdl).withOperationalReferences(Optional.empty()))
-                        .stream())
-                .collect(Collectors.toList());
+                        .stream()
+                        .findFirst()
+                        .orElseThrow(() -> new IllegalArgumentException(format("No research run for set [%s]", set.getId())));
+                return ImmutablePipelineInput.copyOf(pdlGenerator.generate(researchRun.getId())).withOperationalReferences(Optional.empty());
+            }));
+        }
+        return futures;
     }
 }

@@ -7,16 +7,17 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.util.Arrays;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
+import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
+import com.hartwig.pdl.PipelineInput;
 import com.hartwig.platinum.config.GcpConfiguration;
 import com.hartwig.platinum.config.ImmutableGcpConfiguration;
 import com.hartwig.platinum.config.PlatinumConfiguration;
 import com.hartwig.platinum.kubernetes.pipeline.ImmutableSampleArgument;
-import com.hartwig.platinum.kubernetes.pipeline.PipelineConfigMaps;
+import com.hartwig.platinum.kubernetes.pipeline.PipelineConfigMapBuilder;
 import com.hartwig.platinum.kubernetes.pipeline.PipelineJob;
 import com.hartwig.platinum.kubernetes.pipeline.SampleArgument;
 import com.hartwig.platinum.scheduling.JobScheduler;
@@ -34,24 +35,29 @@ public class KubernetesClusterTest {
     private static final String SECRET = "secret";
     private static final String CONFIG = "config";
     private static final List<SampleArgument> SAMPLES = List.of(sample());
+    private Map<String, Future<PipelineInput>> pipelineInputs;
     private KubernetesCluster victim;
     private JobScheduler scheduler;
     private Volume secret;
-    private PipelineConfigMaps configMaps;
+    private PipelineConfigMapBuilder configMaps;
 
     @Before
-    public void setUp() {
+    @SuppressWarnings("unchecked")
+    public void setUp() throws Exception {
         secret = new VolumeBuilder().withName(SECRET).build();
         scheduler = mock(JobScheduler.class);
-        configMaps = mock(PipelineConfigMaps.class);
-        when(configMaps.forSample(any())).thenReturn(new VolumeBuilder().withName(CONFIG).build());
+        configMaps = mock(PipelineConfigMapBuilder.class);
+        Future<PipelineInput> future1 = mock(Future.class);
+        PipelineInput input1 = PipelineInput.builder().setName("setName").build();
+        pipelineInputs = Map.of("sample1", future1);
+        when(future1.get()).thenReturn(input1);
+        when(configMaps.forSample(any(), any())).thenReturn(new VolumeBuilder().withName(CONFIG).build());
     }
 
     @Test
     public void addsJksVolumeAndContainerIfPasswordSpecified() {
         ArgumentCaptor<PipelineJob> job = ArgumentCaptor.forClass(PipelineJob.class);
         victim = victimise(PlatinumConfiguration.builder().keystorePassword("changeit").gcp(GCP).build());
-        mockConfigmapContents("sample");
         victim.submit();
         verify(scheduler).submit(job.capture());
         PipelineJob result = job.getValue();
@@ -65,7 +71,6 @@ public class KubernetesClusterTest {
     @Test
     public void submitsJobsToTheScheduler() {
         ArgumentCaptor<PipelineJob> job = ArgumentCaptor.forClass(PipelineJob.class);
-        mockConfigmapContents("sample");
         victimise(PlatinumConfiguration.builder().keystorePassword("changeit").gcp(GCP).build()).submit();
         verify(scheduler).submit(job.capture());
         assertThat(job.getAllValues().size()).isEqualTo(SAMPLES.size());
@@ -75,17 +80,24 @@ public class KubernetesClusterTest {
     public void addsConfigMapAndSecretVolumes() {
         ArgumentCaptor<PipelineJob> job = ArgumentCaptor.forClass(PipelineJob.class);
         victim = victimise(PlatinumConfiguration.builder().gcp(GCP).build());
-        mockConfigmapContents("sample");
         victim.submit();
         verify(scheduler).submit(job.capture());
         assertThat(job.getValue().getVolumes()).extracting(Volume::getName).containsExactly(CONFIG, SECRET);
     }
 
     @Test
-    public void addsConfigMapForSampleToEachJob() {
-        when(configMaps.getSampleKeys()).thenReturn(Set.of("sample-a", "sample-b"));
-        when(configMaps.forSample("sample-a")).thenReturn(new VolumeBuilder().withName("config-a").build());
-        when(configMaps.forSample("sample-b")).thenReturn(new VolumeBuilder().withName("config-b").build());
+    @SuppressWarnings("unchecked")
+    public void addsConfigMapForSampleToEachJob() throws Exception {
+        Future<PipelineInput> futureA = mock(Future.class);
+        Future<PipelineInput> futureB = mock(Future.class);
+        PipelineInput inputA = PipelineInput.builder().setName("set a").build();
+        PipelineInput inputB = PipelineInput.builder().setName("set b").build();
+        pipelineInputs = Map.of("sample-a", futureA, "sample-b", futureB);
+
+        when(futureA.get()).thenReturn(inputA);
+        when(futureB.get()).thenReturn(inputB);
+        when(configMaps.forSample("sample-a", inputA)).thenReturn(new VolumeBuilder().withName("config-a").build());
+        when(configMaps.forSample("sample-b", inputB)).thenReturn(new VolumeBuilder().withName("config-b").build());
         ArgumentCaptor<PipelineJob> job = ArgumentCaptor.forClass(PipelineJob.class);
         victimise(PlatinumConfiguration.builder().gcp(GCP).build()).submit();
         verify(scheduler, times(2)).submit(job.capture());
@@ -98,10 +110,6 @@ public class KubernetesClusterTest {
         assertThat(jobsB.get(0).getVolumes().stream().filter(v -> v.getName().equals("config-b")).collect(Collectors.toList())).hasSize(1);
     }
 
-    private void mockConfigmapContents(String... keys) {
-        when(configMaps.getSampleKeys()).thenReturn(Arrays.stream(keys).collect(Collectors.toSet()));
-    }
-
     private static ImmutableSampleArgument sample() {
         return ImmutableSampleArgument.builder().id("sample").build();
     }
@@ -110,6 +118,7 @@ public class KubernetesClusterTest {
         return new KubernetesCluster("test",
                 scheduler,
                 () -> secret,
+                pipelineInputs,
                 configMaps,
                 "output",
                 "sa@gcloud.com",
