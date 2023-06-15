@@ -3,6 +3,7 @@ package com.hartwig.platinum.pdl;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import com.hartwig.api.RunApi;
@@ -32,7 +33,7 @@ public class ConvertForBiopsies implements PDLConversion {
     }
 
     @Override
-    public List<PipelineInput> apply(final PlatinumConfiguration configuration) {
+    public List<Supplier<PipelineInput>> apply(final PlatinumConfiguration configuration) {
         return configuration.sampleIds()
                 .stream()
                 .flatMap(biopsy -> sampleApi.list(null, null, null, null, SampleType.TUMOR, biopsy, null).stream())
@@ -41,8 +42,8 @@ public class ConvertForBiopsies implements PDLConversion {
                         .stream()
                         .filter(run -> run.getEndTime() != null)
                         .max(Comparator.comparing(Run::getEndTime))
-                        .map(run -> pdlGenerator.generate(run.getId()))
-                        .map(pdl -> ImmutablePipelineInput.copyOf(pdl).withOperationalReferences(Optional.empty()))
+                        .map(run -> (Supplier<PipelineInput>) () -> ImmutablePipelineInput.copyOf(pdlGenerator.generate(run.getId()))
+                                .withOperationalReferences(Optional.empty()))
                         .stream())
                 .collect(Collectors.toList());
     }

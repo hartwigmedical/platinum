@@ -2,6 +2,8 @@ package com.hartwig.platinum.kubernetes;
 
 import static com.hartwig.platinum.kubernetes.KubernetesCluster.NAMESPACE;
 
+import com.hartwig.platinum.kubernetes.pipeline.PipelineJob;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,7 +55,7 @@ public class JobSubmitter {
             LOGGER.info("Submitted [{}]", job.getName());
             return true;
         } catch (KubernetesClientException e) {
-            kubernetesClientProxy.reAuthorise();
+            kubernetesClientProxy.authorise();
             return submit(job, spec);
         }
     }

@@ -8,7 +8,7 @@ import static org.mockito.Mockito.when;
 
 import com.hartwig.platinum.kubernetes.JobSubmitter;
 import com.hartwig.platinum.kubernetes.KubernetesClientProxy;
-import com.hartwig.platinum.kubernetes.PipelineJob;
+import com.hartwig.platinum.kubernetes.pipeline.PipelineJob;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -108,7 +108,7 @@ public class ConstantJobCountSchedulerTest {
         victim.submit(job2);
         victim.submit(job3);
 
-        verify(kubernetesClientProxy).reAuthorise();
+        verify(kubernetesClientProxy).authorise();
     }
 
     @Test

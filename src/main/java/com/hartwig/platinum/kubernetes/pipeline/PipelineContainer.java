@@ -1,10 +1,11 @@
-package com.hartwig.platinum.kubernetes;
+package com.hartwig.platinum.kubernetes.pipeline;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import com.hartwig.platinum.config.PlatinumConfiguration;
+import com.hartwig.platinum.kubernetes.KubernetesComponent;
 
 import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.Quantity;

@@ -3,7 +3,7 @@ package com.hartwig.platinum.scheduling;
 import com.hartwig.platinum.config.PlatinumConfiguration;
 import com.hartwig.platinum.kubernetes.JobSubmitter;
 import com.hartwig.platinum.kubernetes.KubernetesClientProxy;
-import com.hartwig.platinum.kubernetes.PipelineJob;
+import com.hartwig.platinum.kubernetes.pipeline.PipelineJob;
 
 public interface JobScheduler {
     Delay DELAY_BETWEEN_SUBMISSIONS = Delay.forSeconds(1);

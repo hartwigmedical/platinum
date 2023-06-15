@@ -1,9 +1,11 @@
-package com.hartwig.platinum.kubernetes;
+package com.hartwig.platinum.kubernetes.pipeline;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.Duration;
 import java.util.Collections;
+
+import com.hartwig.platinum.kubernetes.TargetNodePool;
 
 import org.junit.Test;
 

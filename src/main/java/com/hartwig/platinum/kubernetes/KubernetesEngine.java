@@ -2,11 +2,11 @@ package com.hartwig.platinum.kubernetes;
 
 import static java.time.Duration.ofMinutes;
 import static java.time.Duration.ofSeconds;
-import static java.util.List.of;
 
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Supplier;
 
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.services.container.v1beta1.Container;
@@ -25,7 +25,9 @@ import com.hartwig.platinum.config.BatchConfiguration;
 import com.hartwig.platinum.config.GcpConfiguration;
 import com.hartwig.platinum.config.PlatinumConfiguration;
 import com.hartwig.platinum.iam.JsonKey;
-import com.hartwig.platinum.kubernetes.PipelineConfigMapVolume.PipelineConfigMapVolumeBuilder;
+import com.hartwig.platinum.kubernetes.pipeline.PipelineConfigMapBuilder;
+import com.hartwig.platinum.kubernetes.pipeline.PipelineConfigMapVolume.PipelineConfigMapVolumeBuilder;
+import com.hartwig.platinum.kubernetes.pipeline.PipelineServiceAccountSecretVolume;
 import com.hartwig.platinum.scheduling.JobScheduler;
 
 import org.slf4j.Logger;
@@ -127,8 +129,9 @@ public class KubernetesEngine {
         }
     }
 
-    public KubernetesCluster findOrCreate(final String clusterName, final String runName, final List<PipelineInput> pipelineInputs,
-            final JsonKey jsonKey, final String outputBucketName, final String serviceAccountEmail) {
+    public KubernetesCluster findOrCreate(final String clusterName, final String runName,
+            final List<Supplier<PipelineInput>> pipelineInputs, final JsonKey jsonKey, final String outputBucketName,
+            final String serviceAccountEmail) {
         try {
             GcpConfiguration gcpConfiguration = configuration.gcp();
             String parent = String.format("projects/%s/locations/%s", gcpConfiguration.projectOrThrow(), gcpConfiguration.regionOrThrow());
@@ -136,20 +139,7 @@ public class KubernetesEngine {
                 create(containerApi, parent, clusterName, gcpConfiguration);
             }
             if (!configuration.inCluster()) {
-                if (!processRunner.execute(of("gcloud",
-                        "container",
-                        "clusters",
-                        "get-credentials",
-                        clusterName,
-                        "--region",
-                        gcpConfiguration.regionOrThrow(),
-                        "--project",
-                        gcpConfiguration.projectOrThrow()))) {
-                    throw new RuntimeException("Failed to get credentials for cluster");
-                }
-                if (!processRunner.execute(of("kubectl", "get", "configmaps"))) {
-                    throw new RuntimeException("Failed to run kubectl command against cluster");
-                }
+                kubernetesClientProxy.authorise();
                 LOGGER.info("Connection to cluster {} configured via gcloud and kubectl", Console.bold(clusterName));
             }
 
@@ -171,7 +161,8 @@ public class KubernetesEngine {
             return new KubernetesCluster(runName,
                     jobScheduler,
                     new PipelineServiceAccountSecretVolume(jsonKey, kubernetesClientProxy, "service-account-key"),
-                    new PipelineConfigMaps(pipelineInputs, new PipelineConfigMapVolumeBuilder(kubernetesClientProxy), runName),
+                    pipelineInputs,
+                    new PipelineConfigMapBuilder(new PipelineConfigMapVolumeBuilder(kubernetesClientProxy), runName),
                     outputBucketName,
                     serviceAccountEmail,
                     configuration,

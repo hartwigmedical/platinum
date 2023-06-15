@@ -1,6 +1,7 @@
 package com.hartwig.platinum;
 
 import java.util.List;
+import java.util.function.Supplier;
 
 import com.google.api.services.cloudresourcemanager.CloudResourceManager;
 import com.google.api.services.iam.v1.Iam;
@@ -8,14 +9,10 @@ import com.google.cloud.storage.Storage;
 import com.hartwig.pdl.PipelineInput;
 import com.hartwig.platinum.config.GcpConfiguration;
 import com.hartwig.platinum.config.PlatinumConfiguration;
-import com.hartwig.platinum.iam.IamProvider;
 import com.hartwig.platinum.iam.JsonKey;
 import com.hartwig.platinum.iam.PipelineServiceAccount;
-import com.hartwig.platinum.iam.ResourceManagerProvider;
 import com.hartwig.platinum.iam.ServiceAccountPrivateKey;
-import com.hartwig.platinum.kubernetes.ContainerProvider;
 import com.hartwig.platinum.kubernetes.KubernetesEngine;
-import com.hartwig.platinum.kubernetes.ProcessRunner;
 import com.hartwig.platinum.pdl.PDLConversion;
 import com.hartwig.platinum.storage.OutputBucket;
 
@@ -58,7 +55,7 @@ public class Platinum {
         ServiceAccountPrivateKey privateKey = ServiceAccountPrivateKey.from(configuration, iam);
         JsonKey jsonKey = privateKey.create(gcpConfiguration.projectOrThrow(), serviceAccountEmail);
 
-        List<PipelineInput> pipelineInputs = pdlConversion.apply(configuration);
+        List<Supplier<PipelineInput>> pipelineInputs = pdlConversion.apply(configuration);
         int submitted = kubernetesEngine.findOrCreate(clusterName, runName,
                         pipelineInputs,
                         jsonKey,

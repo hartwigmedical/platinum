@@ -1,7 +1,8 @@
 package com.hartwig.platinum.pdl;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 import com.hartwig.pdl.PipelineInput;
 import com.hartwig.pdl.generator.PdlGenerator;
@@ -16,23 +17,16 @@ public class ConvertForRerun implements PDLConversion {
     private final PdlGenerator generator;
     private final ApiRerun apiRerun;
 
-    private final Logger LOGGER = LoggerFactory.getLogger(ConvertForRerun.class);
-
     public ConvertForRerun(final PdlGenerator generator, final ApiRerun apiRerun) {
         this.generator = generator;
         this.apiRerun = apiRerun;
     }
 
     @Override
-    public List<PipelineInput> apply(final PlatinumConfiguration configuration) {
-        List<PipelineInput> inputs = new ArrayList<>();
-        configuration.sampleIds().parallelStream().forEach(sample -> {
-            try {
-                inputs.add(generator.generate(apiRerun.create(sample)));
-            } catch (Exception e) {
-                LOGGER.error("Failed to generate PDL for [{}]", sample, e);
-            }
-        });
-        return inputs;
+    public List<Supplier<PipelineInput>> apply(final PlatinumConfiguration configuration) {
+        return configuration.sampleIds()
+                .stream()
+                .map(sampleId -> (Supplier<PipelineInput>) () -> generator.generate(apiRerun.create(sampleId)))
+                .collect(Collectors.toList());
     }
 }

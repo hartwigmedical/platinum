@@ -5,7 +5,7 @@ import java.util.List;
 
 import com.hartwig.platinum.kubernetes.JobSubmitter;
 import com.hartwig.platinum.kubernetes.KubernetesClientProxy;
-import com.hartwig.platinum.kubernetes.PipelineJob;
+import com.hartwig.platinum.kubernetes.pipeline.PipelineJob;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,8 +36,8 @@ public class ConstantJobCountScheduler implements JobScheduler {
         activeJobs = new ArrayList<>(jobCount);
     }
 
-    private static boolean jobIs(Integer status) {
-        return status != null && status == 1;
+    private static boolean jobIsNot(Integer status) {
+        return status != null && status != 1;
     }
 
     @Override
@@ -62,15 +62,15 @@ public class ConstantJobCountScheduler implements JobScheduler {
                 for (PipelineJob activeJob : activeJobs) {
                     Failsafe.with(new RetryPolicy<>().handle(KubernetesClientException.class)
                             .withMaxRetries(2)
-                            .onRetry(e -> kubernetesClientProxy.reAuthorise())).run(() -> {
+                            .onRetry(e -> kubernetesClientProxy.authorise())).run(() -> {
                         Job job = kubernetesClientProxy.jobs().withName(activeJob.getName()).get();
                         if (job == null) {
                             LOGGER.warn("Previously-created k8 job [{}] not found, will not schedule another in its place!",
                                     activeJob.getName());
                             removedJobs.add(activeJob);
                         } else {
-                            if (!jobIs(job.getStatus().getActive())) {
-                                if (!jobIs(job.getStatus().getFailed())) {
+                            if (jobIsNot(job.getStatus().getActive())) {
+                                if (jobIsNot(job.getStatus().getFailed())) {
                                     removedJobs.add(activeJob);
                                 } else {
                                     kubernetesClientProxy.jobs().delete(job);
