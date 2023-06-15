@@ -5,12 +5,11 @@ import static java.util.stream.Stream.concat;
 import static java.util.stream.Stream.of;
 
 import java.time.Duration;
-import java.util.Map;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.List;
+import java.util.function.Supplier;
 
 import com.hartwig.pdl.PipelineInput;
+import com.hartwig.pdl.SampleInput;
 import com.hartwig.platinum.config.PlatinumConfiguration;
 import com.hartwig.platinum.kubernetes.pipeline.PipelineArguments;
 import com.hartwig.platinum.kubernetes.pipeline.PipelineConfigMapBuilder;
@@ -30,7 +29,7 @@ public class KubernetesCluster {
     private final String runName;
     private final JobScheduler scheduler;
     private final KubernetesComponent<Volume> serviceAccountSecret;
-    private final Map<String, Future<PipelineInput>> pipelineInputs;
+    private final List<Supplier<PipelineInput>> pipelineInputs;
     private final PipelineConfigMapBuilder configMaps;
     private final String outputBucketName;
     private final String serviceAccountEmail;
@@ -38,7 +37,7 @@ public class KubernetesCluster {
     private final TargetNodePool targetNodePool;
 
     KubernetesCluster(final String runName, final JobScheduler scheduler, final KubernetesComponent<Volume> serviceAccountSecret,
-            final Map<String, Future<PipelineInput>> pipelineInputs, final PipelineConfigMapBuilder configMaps, final String outputBucketName,
+            final List<Supplier<PipelineInput>> pipelineInputs, final PipelineConfigMapBuilder configMaps, final String outputBucketName,
             final String serviceAccountEmail, final PlatinumConfiguration configuration, final TargetNodePool targetNodePool) {
         this.runName = runName.toLowerCase();
         this.scheduler = scheduler;
@@ -54,29 +53,28 @@ public class KubernetesCluster {
     public int submit() {
         Volume secretVolume = serviceAccountSecret.asKubernetes();
         Volume maybeJksVolume = new JksSecret().asKubernetes();
-        AtomicInteger numSubmitted = new AtomicInteger();
-        pipelineInputs.keySet().stream().sorted().forEach(sampleName -> {
+        int numSubmitted = 0;
+        for (Supplier<PipelineInput> inputSupplier : pipelineInputs) {
+            PipelineInput pipelineInput = inputSupplier.get();
+            String sampleName = pipelineInput.tumor().map(SampleInput::name).orElseThrow();
             SampleArgument sample = SampleArgument.sampleJson(sampleName, runName);
-            try {
-                Volume configMapVolume = configMaps.forSample(sampleName, pipelineInputs.get(sampleName).get());
-                PipelineContainer pipelineContainer = new PipelineContainer(sample,
-                        new PipelineArguments(configuration.argumentOverrides(), outputBucketName, serviceAccountEmail, configuration),
-                        secretVolume.getName(),
-                        configMapVolume.getName(),
-                        configuration.image(),
-                        configuration);
-                scheduler.submit(new PipelineJob(sample.id(),
-                        configuration.keystorePassword()
-                                .map(p -> new JksEnabledContainer(pipelineContainer.asKubernetes(), maybeJksVolume, p).asKubernetes())
-                                .orElse(pipelineContainer.asKubernetes()),
-                        concat(of(configMapVolume, secretVolume), configuration.keystorePassword().map(p -> maybeJksVolume).stream()).collect(toList()),
-                        targetNodePool,
-                        configuration.gcp().jobTtl().orElse(Duration.ZERO)));
-                numSubmitted.incrementAndGet();
-            } catch (InterruptedException | ExecutionException e) {
-                LOGGER.warn("Interrupted while waiting for future for [{}], ignoring", sampleName);
-            }
-        });
-        return numSubmitted.get();
+            Volume configMapVolume = configMaps.forSample(sampleName, pipelineInput);
+            PipelineContainer pipelineContainer = new PipelineContainer(sample,
+                    new PipelineArguments(configuration.argumentOverrides(), outputBucketName, serviceAccountEmail, configuration),
+                    secretVolume.getName(),
+                    configMapVolume.getName(),
+                    configuration.image(),
+                    configuration);
+            scheduler.submit(new PipelineJob(sample.id(),
+                    configuration.keystorePassword()
+                            .map(p -> new JksEnabledContainer(pipelineContainer.asKubernetes(), maybeJksVolume, p).asKubernetes())
+                            .orElse(pipelineContainer.asKubernetes()),
+                    concat(of(configMapVolume, secretVolume), configuration.keystorePassword().map(p -> maybeJksVolume).stream()).collect(
+                            toList()),
+                    targetNodePool,
+                    configuration.gcp().jobTtl().orElse(Duration.ZERO)));
+            numSubmitted++;
+        }
+        return numSubmitted;
     }
 }

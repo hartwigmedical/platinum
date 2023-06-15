@@ -1,12 +1,10 @@
 package com.hartwig.platinum.pdl;
 
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -22,9 +20,8 @@ public class ConvertFromGCSPaths implements PDLConversion {
 
     public static final int GCP_VM_LIMIT = 55;
 
-    public Map<String, Future<PipelineInput>> apply(final PlatinumConfiguration configuration) {
-        Map<String, Future<PipelineInput>> futures = new HashMap<>();
-        ExecutorService executorService = Executors.newSingleThreadExecutor();
+    public List<Supplier<PipelineInput>> apply(final PlatinumConfiguration configuration) {
+        List<Supplier<PipelineInput>> pairs = new ArrayList<>();
         for (SampleConfiguration sample : configuration.samples()) {
             if (sample.name().length() >= GCP_VM_LIMIT) {
                 throw new IllegalArgumentException(
@@ -32,42 +29,39 @@ public class ConvertFromGCSPaths implements PDLConversion {
                                 + "name (this name will not be used for file naming or in any headers)");
             }
             boolean indexTumors = sample.tumors().size() > 1;
-            AtomicInteger tumorIndex = new AtomicInteger(1);
+            final AtomicInteger tumorIndex = new AtomicInteger();
             if (!sample.tumors().isEmpty()) {
                 for (RawDataConfiguration tumor : sample.tumors()) {
                     if (tumor.bam().isPresent()) {
-                        String name = indexTumors ? sample.name() + "-t" + tumorIndex.get() : sample.name();
-                        futures.put(name, executorService.submit(() -> PipelineInput.builder()
+                        pairs.add(() -> PipelineInput.builder()
                                 .reference(sample.normal().map(n -> SampleInput.builder().name(n.name()).bam(n.bam()).build()))
                                 .tumor(SampleInput.builder()
                                         .name(tumor.name())
                                         .bam(tumor.bam())
                                         .primaryTumorDoids(sample.primaryTumorDoids())
                                         .build())
-                                .setName(name)
-                                .build()));
+                                .setName(indexTumors ? sample.name() + "-t" + tumorIndex.getAndIncrement() : sample.name())
+                                .build());
                     } else {
-                        String name = indexTumors ? sample.name() + "-t" + tumorIndex : sample.name();
-                        futures.put(name, executorService.submit(() -> PipelineInput.builder()
+                        pairs.add(() -> PipelineInput.builder()
                                 .reference(sample.normal().map(n -> SampleInput.builder().name(n.name()).lanes(toLanes(n.fastq())).build()))
                                 .tumor(SampleInput.builder()
                                         .name(tumor.name())
                                         .lanes(toLanes(tumor.fastq()))
                                         .primaryTumorDoids(sample.primaryTumorDoids())
                                         .build())
-                                .setName(name)
-                                .build()));
+                                .setName(indexTumors ? sample.name() + "-t" + tumorIndex : sample.name())
+                                .build());
                     }
-                    tumorIndex.incrementAndGet();
                 }
             } else if (sample.normal().isPresent()) {
-                futures.put(sample.name(), executorService.submit(() ->PipelineInput.builder()
+                pairs.add(() -> PipelineInput.builder()
                         .reference(sample.normal().map(n -> SampleInput.builder().name(n.name()).lanes(toLanes(n.fastq())).build()))
                         .setName(sample.name())
-                        .build()));
+                        .build());
             }
         }
-        return futures;
+        return pairs;
     }
 
     private static List<LaneInput> toLanes(final List<FastqConfiguration> referenceFastq) {
