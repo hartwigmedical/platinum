@@ -3,7 +3,6 @@ package com.hartwig.platinum.pdl;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -29,9 +28,10 @@ public class ConvertFromGCSPaths implements PDLConversion {
                                 + "name (this name will not be used for file naming or in any headers)");
             }
             boolean indexTumors = sample.tumors().size() > 1;
-            final AtomicInteger tumorIndex = new AtomicInteger();
+            int tumorIndex = 1;
             if (!sample.tumors().isEmpty()) {
                 for (RawDataConfiguration tumor : sample.tumors()) {
+                    final int tumorIndexReadOnly = tumorIndex;
                     if (tumor.bam().isPresent()) {
                         pairs.add(() -> PipelineInput.builder()
                                 .reference(sample.normal().map(n -> SampleInput.builder().name(n.name()).bam(n.bam()).build()))
@@ -40,9 +40,10 @@ public class ConvertFromGCSPaths implements PDLConversion {
                                         .bam(tumor.bam())
                                         .primaryTumorDoids(sample.primaryTumorDoids())
                                         .build())
-                                .setName(indexTumors ? sample.name() + "-t" + tumorIndex.getAndIncrement() : sample.name())
+                                .setName(indexTumors ? sample.name() + "-t" + tumorIndexReadOnly : sample.name())
                                 .build());
                     } else {
+
                         pairs.add(() -> PipelineInput.builder()
                                 .reference(sample.normal().map(n -> SampleInput.builder().name(n.name()).lanes(toLanes(n.fastq())).build()))
                                 .tumor(SampleInput.builder()
@@ -50,9 +51,10 @@ public class ConvertFromGCSPaths implements PDLConversion {
                                         .lanes(toLanes(tumor.fastq()))
                                         .primaryTumorDoids(sample.primaryTumorDoids())
                                         .build())
-                                .setName(indexTumors ? sample.name() + "-t" + tumorIndex : sample.name())
+                                .setName(indexTumors ? sample.name() + "-t" + tumorIndexReadOnly : sample.name())
                                 .build());
                     }
+                    tumorIndex++;
                 }
             } else if (sample.normal().isPresent()) {
                 pairs.add(() -> PipelineInput.builder()

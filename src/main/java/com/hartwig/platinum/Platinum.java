@@ -1,7 +1,7 @@
 package com.hartwig.platinum;
 
-import java.util.Map;
-import java.util.concurrent.Future;
+import java.util.List;
+import java.util.function.Supplier;
 
 import com.google.api.services.cloudresourcemanager.CloudResourceManager;
 import com.google.api.services.iam.v1.Iam;
@@ -55,7 +55,7 @@ public class Platinum {
         ServiceAccountPrivateKey privateKey = ServiceAccountPrivateKey.from(configuration, iam);
         JsonKey jsonKey = privateKey.create(gcpConfiguration.projectOrThrow(), serviceAccountEmail);
 
-        Map<String, Future<PipelineInput>> pipelineInputs = pdlConversion.apply(configuration);
+        List<Supplier<PipelineInput>> pipelineInputs = pdlConversion.apply(configuration);
         int submitted = kubernetesEngine.findOrCreate(clusterName, runName,
                         pipelineInputs,
                         jsonKey,

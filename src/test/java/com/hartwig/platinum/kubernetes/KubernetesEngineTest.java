@@ -77,7 +77,7 @@ public class KubernetesEngineTest {
     @Test
     public void shouldReturnExistingInstanceIfFound() throws IOException {
         mocksForClusterExists();
-        victim.findOrCreate(CLUSTER_NAME, RUN_NAME, Collections.emptyMap(), JSON_KEY, BUCKET, SERVICE_ACCOUNT);
+        victim.findOrCreate(CLUSTER_NAME, RUN_NAME, Collections.emptyList(), JSON_KEY, BUCKET, SERVICE_ACCOUNT);
         verify(clusters).get(anyString());
         verify(clusters, never()).create(any(), any());
     }
@@ -96,7 +96,7 @@ public class KubernetesEngineTest {
 
         mockForClusterCreation();
 
-        victim.findOrCreate(CLUSTER_NAME, RUN_NAME, Collections.emptyMap(), JSON_KEY, BUCKET, SERVICE_ACCOUNT);
+        victim.findOrCreate(CLUSTER_NAME, RUN_NAME, Collections.emptyList(), JSON_KEY, BUCKET, SERVICE_ACCOUNT);
         verify(created).execute();
     }
 
@@ -120,7 +120,7 @@ public class KubernetesEngineTest {
         when(operationsGet.execute()).thenReturn(executedOperationsGet);
         when(executedOperationsGet.getStatus()).thenReturn(null).thenReturn("RUNNING").thenReturn("DONE");
 
-        victim.findOrCreate(CLUSTER_NAME, RUN_NAME, Collections.emptyMap(), JSON_KEY, BUCKET, SERVICE_ACCOUNT);
+        victim.findOrCreate(CLUSTER_NAME, RUN_NAME, Collections.emptyList(), JSON_KEY, BUCKET, SERVICE_ACCOUNT);
         verify(executedOperationsGet, times(3)).getStatus();
     }
 
@@ -129,7 +129,7 @@ public class KubernetesEngineTest {
         mocksForClusterExists();
         doThrow(RuntimeException.class).when(kubernetesClientProxy).authorise();
         when(processRunner.execute(argThat(startsWithGcloud()))).thenReturn(false);
-        victim.findOrCreate(CLUSTER_NAME, RUN_NAME, Collections.emptyMap(), JSON_KEY, BUCKET, SERVICE_ACCOUNT);
+        victim.findOrCreate(CLUSTER_NAME, RUN_NAME, Collections.emptyList(), JSON_KEY, BUCKET, SERVICE_ACCOUNT);
     }
 
     @Test
@@ -153,7 +153,7 @@ public class KubernetesEngineTest {
         when(executedCreate.getName()).thenReturn("created");
         mockForClusterCreation();
         victim.findOrCreate(CLUSTER_NAME, RUN_NAME,
-                Collections.emptyMap(),
+                Collections.emptyList(),
                 JSON_KEY,
                 BUCKET,
                 SERVICE_ACCOUNT);
