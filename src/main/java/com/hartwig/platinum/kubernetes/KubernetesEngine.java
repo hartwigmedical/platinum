@@ -5,9 +5,8 @@ import static java.time.Duration.ofSeconds;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.Future;
+import java.util.function.Supplier;
 
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.services.container.v1beta1.Container;
@@ -130,8 +129,9 @@ public class KubernetesEngine {
         }
     }
 
-    public KubernetesCluster findOrCreate(final String clusterName, final String runName, final Map<String, Future<PipelineInput>> pipelineInputs,
-            final JsonKey jsonKey, final String outputBucketName, final String serviceAccountEmail) {
+    public KubernetesCluster findOrCreate(final String clusterName, final String runName,
+            final List<Supplier<PipelineInput>> pipelineInputs, final JsonKey jsonKey, final String outputBucketName,
+            final String serviceAccountEmail) {
         try {
             GcpConfiguration gcpConfiguration = configuration.gcp();
             String parent = String.format("projects/%s/locations/%s", gcpConfiguration.projectOrThrow(), gcpConfiguration.regionOrThrow());

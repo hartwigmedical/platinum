@@ -1,7 +1,7 @@
 package com.hartwig.platinum.pdl;
 
-import java.util.Map;
-import java.util.concurrent.Future;
+import java.util.List;
+import java.util.function.Supplier;
 
 import com.hartwig.api.HmfApi;
 import com.hartwig.pdl.PipelineInput;
@@ -11,7 +11,7 @@ import com.hartwig.platinum.config.PlatinumConfiguration;
 
 public interface PDLConversion {
 
-    Map<String, Future<PipelineInput>> apply(final PlatinumConfiguration configuration);
+    List<Supplier<PipelineInput>> apply(final PlatinumConfiguration configuration);
 
     static PDLConversion create(final PlatinumConfiguration configuration) {
         return configuration.hmfConfiguration().map(hmfConfiguration -> {
