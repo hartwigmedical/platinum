@@ -2,6 +2,8 @@ package com.hartwig.platinum.kubernetes.pipeline;
 
 import static java.lang.String.format;
 
+import static com.hartwig.platinum.kubernetes.KubernetesUtil.toValidRFC1123Label;
+
 import java.util.Map;
 
 import com.hartwig.platinum.kubernetes.KubernetesClientProxy;
@@ -21,7 +23,7 @@ public class PipelineConfigMapVolume implements KubernetesComponent<Volume> {
 
     private PipelineConfigMapVolume(final KubernetesClientProxy kubernetesClientProxy, final String runName, final String sample, final String content) {
         this.kubernetesClientProxy = kubernetesClientProxy;
-        this.volumeName = format("%s-%s", runName, sample);
+        this.volumeName = toValidRFC1123Label(format("%s-%s", runName, sample));
         this.sample = sample;
         this.content = content;
     }

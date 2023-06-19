@@ -6,6 +6,7 @@ import java.util.Map;
 
 import com.hartwig.platinum.config.PlatinumConfiguration;
 import com.hartwig.platinum.kubernetes.KubernetesComponent;
+import com.hartwig.platinum.kubernetes.KubernetesUtil;
 
 import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.Quantity;
@@ -37,7 +38,7 @@ public class PipelineContainer implements KubernetesComponent<Container> {
     public Container asKubernetes() {
         Container container = new Container();
         container.setImage(imageName);
-        container.setName(sample.id());
+        container.setName(KubernetesUtil.toValidRFC1123Label(sample.id()));
         List<String> command = arguments.asCommand(sample, SECRETS_PATH, serviceAccountKeySecretName);
         container.setCommand(command);
         container.setVolumeMounts(List.of(new VolumeMountBuilder().withMountPath(SAMPLES_PATH).withName(configMapName).build(),

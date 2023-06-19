@@ -47,7 +47,7 @@ public class JobSubmitter {
         try {
             kubernetesClientProxy.jobs()
                     .create(new JobBuilder().withNewMetadata()
-                            .withName(job.getName())
+                            .withName(KubernetesUtil.toValidRFC1123Label(job.getName()))
                             .withNamespace(NAMESPACE)
                             .endMetadata()
                             .withSpec(spec)
