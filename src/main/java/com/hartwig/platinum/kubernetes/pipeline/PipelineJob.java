@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.hartwig.platinum.kubernetes.KubernetesComponent;
+import com.hartwig.platinum.kubernetes.KubernetesUtil;
 import com.hartwig.platinum.kubernetes.TargetNodePool;
 
 import io.fabric8.kubernetes.api.model.Container;
@@ -33,7 +34,7 @@ public class PipelineJob implements KubernetesComponent<JobSpec> {
         this.volumes = volumes;
         this.nodePool = nodePool;
         this.ttl = ttl;
-        this.name = name;
+        this.name = KubernetesUtil.toValidRFC1123Label(name);
     }
 
     public String getName() {
