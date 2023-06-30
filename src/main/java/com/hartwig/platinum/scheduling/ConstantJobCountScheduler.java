@@ -37,7 +37,7 @@ public class ConstantJobCountScheduler implements JobScheduler {
     }
 
     private static boolean jobIsNot(Integer status) {
-        return status != null && status != 1;
+        return status == null || status != 1;
     }
 
     @Override

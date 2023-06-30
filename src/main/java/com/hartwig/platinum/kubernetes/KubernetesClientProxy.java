@@ -13,6 +13,7 @@ import io.fabric8.kubernetes.api.model.Secret;
 import io.fabric8.kubernetes.api.model.SecretList;
 import io.fabric8.kubernetes.api.model.batch.Job;
 import io.fabric8.kubernetes.api.model.batch.JobList;
+import io.fabric8.kubernetes.client.DefaultKubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.dsl.MixedOperation;
 import io.fabric8.kubernetes.client.dsl.NonNamespaceOperation;
@@ -24,7 +25,7 @@ public class KubernetesClientProxy {
     private final String clusterName;
     private final String region;
     private final String project;
-    private final KubernetesClient kubernetesClient;
+    private KubernetesClient kubernetesClient;
 
     public KubernetesClientProxy(String clusterName, GcpConfiguration gcpConfiguration,
             KubernetesClient kubernetesClient) {
@@ -63,5 +64,6 @@ public class KubernetesClientProxy {
         if (!processRunner.execute(of("kubectl", "get", "nodes"))) {
             throw new RuntimeException("Failed to run kubectl command against cluster");
         }
+        kubernetesClient = new DefaultKubernetesClient();
     }
 }
