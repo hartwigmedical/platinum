@@ -36,10 +36,6 @@ public class ConstantJobCountScheduler implements JobScheduler {
         activeJobs = new ArrayList<>(jobCount);
     }
 
-    private static boolean jobIsNot(Integer status) {
-        return status == null || status != 1;
-    }
-
     @Override
     public void submit(final PipelineJob job) {
         while (activeJobs.size() >= jobCount) {
@@ -52,6 +48,14 @@ public class ConstantJobCountScheduler implements JobScheduler {
             activeJobs.add(job);
             delayBetweenSubmissions.threadSleep();
         }
+    }
+
+    private boolean jobCompleted(Job job) {
+        return job.getStatus().getConditions().stream().anyMatch(c -> "Complete".equals(c.getType()) && "True".equals(c.getStatus()));
+    }
+
+    private boolean jobFailed(Job job) {
+        return job.getStatus().getConditions().stream().anyMatch(c -> "Failed".equals(c.getType()) && "True".equals(c.getStatus()));
     }
 
     private List<PipelineJob> waitForCapacity() {
@@ -69,17 +73,15 @@ public class ConstantJobCountScheduler implements JobScheduler {
                                     activeJob.getName());
                             removedJobs.add(activeJob);
                         } else {
-                            if (jobIsNot(job.getStatus().getActive())) {
-                                if (jobIsNot(job.getStatus().getFailed())) {
-                                    removedJobs.add(activeJob);
+                            if (jobFailed(job)) {
+                                kubernetesClientProxy.jobs().delete(job);
+                                if (jobSubmitter.submit(activeJob)) {
+                                    LOGGER.info("Resubmitted failed job [{}]", activeJob.getName());
                                 } else {
-                                    kubernetesClientProxy.jobs().delete(job);
-                                    if (jobSubmitter.submit(activeJob)) {
-                                        LOGGER.info("Resubmitted failed job [{}]", activeJob.getName());
-                                    } else {
-                                        removedJobs.add(activeJob);
-                                    }
+                                    removedJobs.add(activeJob);
                                 }
+                            } else if (jobCompleted(job)) {
+                                removedJobs.add(activeJob);
                             }
                         }
                     });
