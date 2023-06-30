@@ -24,6 +24,11 @@ public class ConstantJobCountScheduler implements JobScheduler {
     private final KubernetesClientProxy kubernetesClientProxy;
     private final Delay delayBetweenSubmissions;
     private final Delay pollingInterval;
+    private enum JobState {
+        COMPLETE,
+        FAILED
+    }
+
 
     public ConstantJobCountScheduler(final JobSubmitter jobSubmitter, final KubernetesClientProxy kubernetesClientProxy, final int jobCount,
             final Delay delayBetweenSubmissions, final Delay pollingInterval) {
@@ -50,12 +55,8 @@ public class ConstantJobCountScheduler implements JobScheduler {
         }
     }
 
-    private boolean jobCompleted(Job job) {
-        return job.getStatus().getConditions().stream().anyMatch(c -> "Complete".equals(c.getType()) && "True".equals(c.getStatus()));
-    }
-
-    private boolean jobFailed(Job job) {
-        return job.getStatus().getConditions().stream().anyMatch(c -> "Failed".equals(c.getType()) && "True".equals(c.getStatus()));
+    private boolean jobIs(Job job, JobState state) {
+        return job.getStatus().getConditions().stream().anyMatch(c -> state.name().equalsIgnoreCase(c.getType()) && "True".equals(c.getStatus()));
     }
 
     private List<PipelineJob> waitForCapacity() {
@@ -73,14 +74,14 @@ public class ConstantJobCountScheduler implements JobScheduler {
                                     activeJob.getName());
                             removedJobs.add(activeJob);
                         } else {
-                            if (jobFailed(job)) {
+                            if (jobIs(job, JobState.FAILED)) {
                                 kubernetesClientProxy.jobs().delete(job);
                                 if (jobSubmitter.submit(activeJob)) {
                                     LOGGER.info("Resubmitted failed job [{}]", activeJob.getName());
                                 } else {
                                     removedJobs.add(activeJob);
                                 }
-                            } else if (jobCompleted(job)) {
+                            } else if (jobIs(job, JobState.COMPLETE)) {
                                 removedJobs.add(activeJob);
                             }
                         }
