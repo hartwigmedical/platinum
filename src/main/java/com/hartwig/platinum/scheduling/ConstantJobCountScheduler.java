@@ -24,6 +24,11 @@ public class ConstantJobCountScheduler implements JobScheduler {
     private final KubernetesClientProxy kubernetesClientProxy;
     private final Delay delayBetweenSubmissions;
     private final Delay pollingInterval;
+    private enum JobState {
+        COMPLETE,
+        FAILED
+    }
+
 
     public ConstantJobCountScheduler(final JobSubmitter jobSubmitter, final KubernetesClientProxy kubernetesClientProxy, final int jobCount,
             final Delay delayBetweenSubmissions, final Delay pollingInterval) {
@@ -34,10 +39,6 @@ public class ConstantJobCountScheduler implements JobScheduler {
         this.pollingInterval = pollingInterval;
 
         activeJobs = new ArrayList<>(jobCount);
-    }
-
-    private static boolean jobIsNot(Integer status) {
-        return status != null && status != 1;
     }
 
     @Override
@@ -52,6 +53,10 @@ public class ConstantJobCountScheduler implements JobScheduler {
             activeJobs.add(job);
             delayBetweenSubmissions.threadSleep();
         }
+    }
+
+    private boolean jobIs(Job job, JobState state) {
+        return job.getStatus().getConditions().stream().anyMatch(c -> state.name().equalsIgnoreCase(c.getType()) && "True".equals(c.getStatus()));
     }
 
     private List<PipelineJob> waitForCapacity() {
@@ -69,17 +74,15 @@ public class ConstantJobCountScheduler implements JobScheduler {
                                     activeJob.getName());
                             removedJobs.add(activeJob);
                         } else {
-                            if (jobIsNot(job.getStatus().getActive())) {
-                                if (jobIsNot(job.getStatus().getFailed())) {
-                                    removedJobs.add(activeJob);
+                            if (jobIs(job, JobState.FAILED)) {
+                                kubernetesClientProxy.jobs().delete(job);
+                                if (jobSubmitter.submit(activeJob)) {
+                                    LOGGER.info("Resubmitted failed job [{}]", activeJob.getName());
                                 } else {
-                                    kubernetesClientProxy.jobs().delete(job);
-                                    if (jobSubmitter.submit(activeJob)) {
-                                        LOGGER.info("Resubmitted failed job [{}]", activeJob.getName());
-                                    } else {
-                                        removedJobs.add(activeJob);
-                                    }
+                                    removedJobs.add(activeJob);
                                 }
+                            } else if (jobIs(job, JobState.COMPLETE)) {
+                                removedJobs.add(activeJob);
                             }
                         }
                     });
