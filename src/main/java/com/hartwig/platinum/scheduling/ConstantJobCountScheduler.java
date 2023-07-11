@@ -1,19 +1,17 @@
 package com.hartwig.platinum.scheduling;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.hartwig.platinum.kubernetes.JobSubmitter;
 import com.hartwig.platinum.kubernetes.KubernetesClientProxy;
 import com.hartwig.platinum.kubernetes.pipeline.PipelineJob;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import io.fabric8.kubernetes.api.model.batch.Job;
 import io.fabric8.kubernetes.client.KubernetesClientException;
 import net.jodah.failsafe.Failsafe;
 import net.jodah.failsafe.RetryPolicy;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class ConstantJobCountScheduler implements JobScheduler {
     private static final Logger LOGGER = LoggerFactory.getLogger(ConstantJobCountScheduler.class);
@@ -56,7 +54,7 @@ public class ConstantJobCountScheduler implements JobScheduler {
     }
 
     private boolean jobIs(Job job, JobState state) {
-        return job.getStatus().getConditions().stream().anyMatch(c -> state.name().equalsIgnoreCase(c.getType()) && "True".equals(c.getStatus()));
+        return JobSubmitter.jobIs(job, state.name());
     }
 
     private List<PipelineJob> waitForCapacity() {
