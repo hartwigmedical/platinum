@@ -86,7 +86,7 @@ public class KubernetesClusterTest {
 
     @Test
     @SuppressWarnings("unchecked")
-    public void addsConfigMapForSampleToEachJob() throws Exception {
+    public void addsConfigMapForSampleToEachJob() {
         PipelineInput inputA = PipelineInput.builder().setName("set-a").tumor(SampleInput.builder().name("tumor-a").build()).build();
         PipelineInput inputB = PipelineInput.builder().setName("set-b").tumor(SampleInput.builder().name("tumor-b").build()).build();
         pipelineInputs = List.of(() -> inputA, () -> inputB);
@@ -97,10 +97,10 @@ public class KubernetesClusterTest {
         victimise(PlatinumConfiguration.builder().gcp(GCP).build()).submit();
         verify(scheduler, times(2)).submit(job.capture());
         List<PipelineJob> allJobs = job.getAllValues();
-        List<PipelineJob> jobsA = allJobs.stream().filter(j -> j.getName().equals("tumor-a")).collect(Collectors.toList());
+        List<PipelineJob> jobsA = allJobs.stream().filter(j -> j.getName().equals("tumor-a-test")).collect(Collectors.toList());
         assertThat(jobsA.size()).isEqualTo(1);
         assertThat(jobsA.get(0).getVolumes().stream().filter(v -> v.getName().equals("config-a")).collect(Collectors.toList())).hasSize(1);
-        List<PipelineJob> jobsB = allJobs.stream().filter(j -> j.getName().equals("tumor-b")).collect(Collectors.toList());
+        List<PipelineJob> jobsB = allJobs.stream().filter(j -> j.getName().equals("tumor-b-test")).collect(Collectors.toList());
         assertThat(jobsB.size()).isEqualTo(1);
         assertThat(jobsB.get(0).getVolumes().stream().filter(v -> v.getName().equals("config-b")).collect(Collectors.toList())).hasSize(1);
     }
