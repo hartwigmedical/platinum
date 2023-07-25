@@ -53,7 +53,7 @@ public class PipelineArguments {
         if (!gcpConfiguration.networkTags().isEmpty()) {
             builder.put("-network_tags", String.join(",", gcpConfiguration.networkTags()));
         }
-        if (platinumConfiguration.hmfConfiguration().isPresent()) {
+        if (platinumConfiguration.hmfConfiguration().isPresent() && platinumConfiguration.hmfConfiguration().get().isRerun()) {
             builder.put("-profile", "production");
             builder.put("-context", "RESEARCH");
         } else {

@@ -65,7 +65,7 @@ public class KubernetesCluster {
                     configMapVolume.getName(),
                     configuration.image(),
                     configuration);
-            scheduler.submit(new PipelineJob(sample.id(),
+            scheduler.submit(new PipelineJob(sampleName + "-" + runName,
                     configuration.keystorePassword()
                             .map(p -> new JksEnabledContainer(pipelineContainer.asKubernetes(), maybeJksVolume, p).asKubernetes())
                             .orElse(pipelineContainer.asKubernetes()),
