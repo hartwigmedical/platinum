@@ -88,7 +88,7 @@ public class ConstantJobCountScheduler implements JobScheduler {
                 pollingInterval.threadSleep();
                 millisecondsWaitedSoFar += pollingInterval.toMillis();
                 if (millisecondsWaitedSoFar >= INITIAL_LOGGING_INTERVAL_MILLISECONDS) {
-                    LOGGER.info("Continuing to wait for capacity");
+                    LOGGER.info("Maximum number of pipelines [{}] already running, waiting to submit more", jobCount);
                     millisecondsWaitedSoFar = 0;
                 }
             }
