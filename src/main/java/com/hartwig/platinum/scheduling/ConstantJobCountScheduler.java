@@ -36,7 +36,7 @@ public class ConstantJobCountScheduler implements JobScheduler {
         this.delayBetweenSubmissions = delayBetweenSubmissions;
         this.pollingInterval = pollingInterval;
 
-        activeJobs = new ArrayList<>(jobCount);
+        activeJobs = new ArrayList<>();
     }
 
     @Override
