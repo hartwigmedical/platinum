@@ -1,14 +1,13 @@
 package com.hartwig.platinum.kubernetes.pipeline;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import com.hartwig.platinum.config.GcpConfiguration;
+import com.hartwig.platinum.config.PlatinumConfiguration;
+import org.junit.Test;
 
 import java.util.List;
 import java.util.Map;
 
-import com.hartwig.platinum.config.GcpConfiguration;
-import com.hartwig.platinum.config.PlatinumConfiguration;
-
-import org.junit.Test;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class PipelineArgumentsTest {
 
@@ -37,7 +36,7 @@ public class PipelineArgumentsTest {
     }
 
     private List<String> asCommand(final PipelineArguments victim) {
-        return victim.asCommand(SampleArgument.sampleJson("tumor-run", "run"), "/secrets", "key.json");
+        return victim.asCommand(SampleArgument.sampleJson("tumor-run", "run"));
     }
 
     private PipelineArguments createVictimWithOverrides(final String s, final String value) {

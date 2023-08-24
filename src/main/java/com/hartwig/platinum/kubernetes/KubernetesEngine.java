@@ -1,40 +1,30 @@
 package com.hartwig.platinum.kubernetes;
 
-import static java.time.Duration.ofMinutes;
-import static java.time.Duration.ofSeconds;
+import com.google.api.client.googleapis.json.GoogleJsonResponseException;
+import com.google.api.services.container.v1beta1.Container;
+import com.google.api.services.container.v1beta1.Container.Projects.Locations.Clusters.Create;
+import com.google.api.services.container.v1beta1.Container.Projects.Locations.Clusters.Get;
+import com.google.api.services.container.v1beta1.model.*;
+import com.hartwig.pdl.PipelineInput;
+import com.hartwig.platinum.Console;
+import com.hartwig.platinum.config.BatchConfiguration;
+import com.hartwig.platinum.config.GcpConfiguration;
+import com.hartwig.platinum.config.PlatinumConfiguration;
+import com.hartwig.platinum.kubernetes.pipeline.PipelineConfigMapBuilder;
+import com.hartwig.platinum.kubernetes.pipeline.PipelineConfigMapVolume.PipelineConfigMapVolumeBuilder;
+import com.hartwig.platinum.scheduling.JobScheduler;
+import net.jodah.failsafe.Failsafe;
+import net.jodah.failsafe.RetryPolicy;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
 
-import com.google.api.client.googleapis.json.GoogleJsonResponseException;
-import com.google.api.services.container.v1beta1.Container;
-import com.google.api.services.container.v1beta1.Container.Projects.Locations.Clusters.Create;
-import com.google.api.services.container.v1beta1.Container.Projects.Locations.Clusters.Get;
-import com.google.api.services.container.v1beta1.model.Cluster;
-import com.google.api.services.container.v1beta1.model.CreateClusterRequest;
-import com.google.api.services.container.v1beta1.model.IPAllocationPolicy;
-import com.google.api.services.container.v1beta1.model.NodeConfig;
-import com.google.api.services.container.v1beta1.model.NodePool;
-import com.google.api.services.container.v1beta1.model.Operation;
-import com.google.api.services.container.v1beta1.model.PrivateClusterConfig;
-import com.hartwig.pdl.PipelineInput;
-import com.hartwig.platinum.Console;
-import com.hartwig.platinum.config.BatchConfiguration;
-import com.hartwig.platinum.config.GcpConfiguration;
-import com.hartwig.platinum.config.PlatinumConfiguration;
-import com.hartwig.platinum.iam.JsonKey;
-import com.hartwig.platinum.kubernetes.pipeline.PipelineConfigMapBuilder;
-import com.hartwig.platinum.kubernetes.pipeline.PipelineConfigMapVolume.PipelineConfigMapVolumeBuilder;
-import com.hartwig.platinum.kubernetes.pipeline.PipelineServiceAccountSecretVolume;
-import com.hartwig.platinum.scheduling.JobScheduler;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import net.jodah.failsafe.Failsafe;
-import net.jodah.failsafe.RetryPolicy;
+import static java.time.Duration.ofMinutes;
+import static java.time.Duration.ofSeconds;
 
 public class KubernetesEngine {
     private static final Logger LOGGER = LoggerFactory.getLogger(KubernetesEngine.class);
@@ -130,8 +120,8 @@ public class KubernetesEngine {
     }
 
     public KubernetesCluster findOrCreate(final String clusterName, final String runName,
-            final List<Supplier<PipelineInput>> pipelineInputs, final JsonKey jsonKey, final String outputBucketName,
-            final String serviceAccountEmail) {
+            final List<Supplier<PipelineInput>> pipelineInputs, final String outputBucketName,
+                                          final String serviceAccountEmail) {
         try {
             GcpConfiguration gcpConfiguration = configuration.gcp();
             String parent = String.format("projects/%s/locations/%s", gcpConfiguration.projectOrThrow(), gcpConfiguration.regionOrThrow());
@@ -160,7 +150,7 @@ public class KubernetesEngine {
             }
             return new KubernetesCluster(runName,
                     jobScheduler,
-                    new PipelineServiceAccountSecretVolume(jsonKey, kubernetesClientProxy, "service-account-key"),
+                    configuration.serviceAccount().get().kubernetesServiceAccount().get(),
                     pipelineInputs,
                     new PipelineConfigMapBuilder(new PipelineConfigMapVolumeBuilder(kubernetesClientProxy), runName),
                     outputBucketName,
