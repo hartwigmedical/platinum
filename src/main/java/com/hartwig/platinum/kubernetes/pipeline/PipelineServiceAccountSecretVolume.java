@@ -4,11 +4,9 @@ import com.hartwig.platinum.iam.JsonKey;
 import com.hartwig.platinum.kubernetes.KubernetesClientProxy;
 import com.hartwig.platinum.kubernetes.KubernetesCluster;
 import com.hartwig.platinum.kubernetes.KubernetesComponent;
-
 import io.fabric8.kubernetes.api.model.SecretBuilder;
 import io.fabric8.kubernetes.api.model.Volume;
 import io.fabric8.kubernetes.api.model.VolumeBuilder;
-import io.fabric8.kubernetes.client.KubernetesClientException;
 
 public class PipelineServiceAccountSecretVolume implements KubernetesComponent<Volume> {
     private final JsonKey jsonKey;
@@ -23,20 +21,15 @@ public class PipelineServiceAccountSecretVolume implements KubernetesComponent<V
 
     public Volume asKubernetes() {
         if (!jsonKey.secretExists()) {
-            try {
-                kubernetesClientProxy.secrets()
-                        .inNamespace(KubernetesCluster.NAMESPACE)
-                        .withName(name)
-                        .createOrReplace(new SecretBuilder().addToData(name, jsonKey.jsonBase64())
-                                .withNewMetadata()
-                                .withName(name)
-                                .withNamespace(KubernetesCluster.NAMESPACE)
-                                .endMetadata()
-                                .build());
-            } catch (KubernetesClientException e) {
-                kubernetesClientProxy.authorise();
-                return asKubernetes();
-            }
+            kubernetesClientProxy.secrets()
+                    .inNamespace(KubernetesCluster.NAMESPACE)
+                    .withName(name)
+                    .createOrReplace(new SecretBuilder().addToData(name, jsonKey.jsonBase64())
+                            .withNewMetadata()
+                            .withName(name)
+                            .withNamespace(KubernetesCluster.NAMESPACE)
+                            .endMetadata()
+                            .build());
         }
         return new VolumeBuilder().withName(name).editOrNewSecret().withSecretName(name).endSecret().build();
     }

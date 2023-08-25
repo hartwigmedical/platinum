@@ -4,7 +4,6 @@ import com.hartwig.platinum.kubernetes.pipeline.PipelineJob;
 import io.fabric8.kubernetes.api.model.batch.Job;
 import io.fabric8.kubernetes.api.model.batch.JobBuilder;
 import io.fabric8.kubernetes.api.model.batch.JobSpec;
-import io.fabric8.kubernetes.client.KubernetesClientException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,20 +47,15 @@ public class JobSubmitter {
     }
 
     private boolean submit(final PipelineJob job, final JobSpec spec) {
-        try {
-            kubernetesClientProxy.jobs()
-                    .create(new JobBuilder().withNewMetadata()
-                            .withName(job.getName())
-                            .withNamespace(NAMESPACE)
-                            .endMetadata()
-                            .withSpec(spec)
-                            .build());
-            LOGGER.info("Submitted [{}]", job.getName());
-            return true;
-        } catch (KubernetesClientException e) {
-            kubernetesClientProxy.authorise();
-            return submit(job, spec);
-        }
+        kubernetesClientProxy.jobs()
+                .create(new JobBuilder().withNewMetadata()
+                        .withName(job.getName())
+                        .withNamespace(NAMESPACE)
+                        .endMetadata()
+                        .withSpec(spec)
+                        .build());
+        LOGGER.info("Submitted [{}]", job.getName());
+        return true;
     }
 
     public static boolean jobIs(Job job, String stateName) {
