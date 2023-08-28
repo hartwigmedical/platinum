@@ -27,7 +27,8 @@ public class JobSubmitter {
         JobSpec spec = job.asKubernetes();
         Job existing = kubernetesClientProxy.jobs().withName(job.getName()).get();
         if (existing == null) {
-            return submit(job, spec);
+            submit(job, spec);
+            return true;
         } else if (jobIs(existing, JOB_COMPLETE_STATUS)) {
             LOGGER.info("Job [{}] existed and completed successfully, skipping", job.getName());
             return false;
@@ -35,7 +36,8 @@ public class JobSubmitter {
             if (retryFailed) {
                 LOGGER.info("Job [{}] existed but failed, restarting", job.getName());
                 kubernetesClientProxy.jobs().delete(existing);
-                return submit(job, spec);
+                submit(job, spec);
+                return true;
             } else {
                 LOGGER.info("Job [{}] existed but failed, skipping", job.getName());
                 return false;
@@ -46,7 +48,7 @@ public class JobSubmitter {
         }
     }
 
-    private boolean submit(final PipelineJob job, final JobSpec spec) {
+    private void submit(final PipelineJob job, final JobSpec spec) {
         kubernetesClientProxy.jobs()
                 .create(new JobBuilder().withNewMetadata()
                         .withName(job.getName())
@@ -55,7 +57,6 @@ public class JobSubmitter {
                         .withSpec(spec)
                         .build());
         LOGGER.info("Submitted [{}]", job.getName());
-        return true;
     }
 
     public static boolean jobIs(Job job, String stateName) {
