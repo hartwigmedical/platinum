@@ -1,24 +1,5 @@
 package com.hartwig.platinum.kubernetes;
 
-import static java.lang.String.format;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.argThat;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-import java.io.IOException;
-import java.util.Collections;
-import java.util.List;
-
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.services.container.v1beta1.Container;
 import com.google.api.services.container.v1beta1.Container.Projects;
@@ -33,24 +14,33 @@ import com.google.api.services.container.v1beta1.model.Operation;
 import com.hartwig.platinum.config.GcpConfiguration;
 import com.hartwig.platinum.config.ImmutablePlatinumConfiguration;
 import com.hartwig.platinum.config.PlatinumConfiguration;
-import com.hartwig.platinum.iam.JsonKey;
+import com.hartwig.platinum.config.ServiceAccountConfiguration;
 import com.hartwig.platinum.scheduling.JobScheduler;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatcher;
 
+import java.io.IOException;
+import java.util.Collections;
+import java.util.List;
+
+import static java.lang.String.format;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
+
 public class KubernetesEngineTest {
     private static final String PROJECT = "project";
     private static final String REGION = "region";
     private static final ImmutablePlatinumConfiguration CONFIGURATION =
-            PlatinumConfiguration.builder().gcp(GcpConfiguration.builder().project(PROJECT).region(REGION).build()).build();
+            PlatinumConfiguration.builder().gcp(GcpConfiguration.builder().project(PROJECT).region(REGION).build())
+                    .serviceAccount(ServiceAccountConfiguration.builder().gcpEmailAddress("platinum@example.com").kubernetesServiceAccount("platinum-sa").build())
+                    .build();
     public static final String CLUSTER_NAME = "clusterName";
     public static final String RUN_NAME = "runName";
     public static final String BUCKET = "bucket";
     public static final String SERVICE_ACCOUNT = "service_account";
-    public static final JsonKey JSON_KEY = JsonKey.of("json");
     private Locations locations;
     private Clusters clusters;
     private ProcessRunner processRunner;
@@ -77,7 +67,7 @@ public class KubernetesEngineTest {
     @Test
     public void shouldReturnExistingInstanceIfFound() throws IOException {
         mocksForClusterExists();
-        victim.findOrCreate(CLUSTER_NAME, RUN_NAME, Collections.emptyList(), JSON_KEY, BUCKET, SERVICE_ACCOUNT);
+        victim.findOrCreate(CLUSTER_NAME, RUN_NAME, Collections.emptyList(), BUCKET);
         verify(clusters).get(anyString());
         verify(clusters, never()).create(any(), any());
     }
@@ -96,7 +86,7 @@ public class KubernetesEngineTest {
 
         mockForClusterCreation();
 
-        victim.findOrCreate(CLUSTER_NAME, RUN_NAME, Collections.emptyList(), JSON_KEY, BUCKET, SERVICE_ACCOUNT);
+        victim.findOrCreate(CLUSTER_NAME, RUN_NAME, Collections.emptyList(), BUCKET);
         verify(created).execute();
     }
 
@@ -120,7 +110,7 @@ public class KubernetesEngineTest {
         when(operationsGet.execute()).thenReturn(executedOperationsGet);
         when(executedOperationsGet.getStatus()).thenReturn(null).thenReturn("RUNNING").thenReturn("DONE");
 
-        victim.findOrCreate(CLUSTER_NAME, RUN_NAME, Collections.emptyList(), JSON_KEY, BUCKET, SERVICE_ACCOUNT);
+        victim.findOrCreate(CLUSTER_NAME, RUN_NAME, Collections.emptyList(), BUCKET);
         verify(executedOperationsGet, times(3)).getStatus();
     }
 
@@ -129,7 +119,7 @@ public class KubernetesEngineTest {
         mocksForClusterExists();
         doThrow(RuntimeException.class).when(kubernetesClientProxy).authorise();
         when(processRunner.execute(argThat(startsWithGcloud()))).thenReturn(false);
-        victim.findOrCreate(CLUSTER_NAME, RUN_NAME, Collections.emptyList(), JSON_KEY, BUCKET, SERVICE_ACCOUNT);
+        victim.findOrCreate(CLUSTER_NAME, RUN_NAME, Collections.emptyList(), BUCKET);
     }
 
     @Test
@@ -152,11 +142,7 @@ public class KubernetesEngineTest {
         when(created.execute()).thenReturn(executedCreate);
         when(executedCreate.getName()).thenReturn("created");
         mockForClusterCreation();
-        victim.findOrCreate(CLUSTER_NAME, RUN_NAME,
-                Collections.emptyList(),
-                JSON_KEY,
-                BUCKET,
-                SERVICE_ACCOUNT);
+        victim.findOrCreate(CLUSTER_NAME, RUN_NAME, Collections.emptyList(), BUCKET);
 
         assertThat(createRequest.getValue().getCluster().getName()).isEqualTo(CLUSTER_NAME);
     }

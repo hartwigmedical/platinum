@@ -26,8 +26,7 @@ public class OutputBucket {
         return new OutputBucket(storage);
     }
 
-    public String findOrCreate(final String runName, final String region, final String serviceAccount,
-            final PlatinumConfiguration configuration) {
+    public String findOrCreate(final String runName, final String region, final PlatinumConfiguration configuration) {
         String bucketName = configuration.outputBucket().orElse(BucketName.from(runName));
         Bucket outputBucket = storage.get(bucketName);
         if (outputBucket != null) {
@@ -41,7 +40,9 @@ public class OutputBucket {
                     .build());
             Policy bucketPolicy = storage.getIamPolicy(bucketName);
             storage.setIamPolicy(bucketName,
-                    bucketPolicy.toBuilder().addIdentity(StorageRoles.admin(), Identity.serviceAccount(serviceAccount)).build());
+                    bucketPolicy.toBuilder()
+                            .addIdentity(StorageRoles.admin(), Identity.serviceAccount(configuration.serviceAccount().gcpEmailAddress()))
+                            .build());
         }
         return outputBucket.getName();
     }

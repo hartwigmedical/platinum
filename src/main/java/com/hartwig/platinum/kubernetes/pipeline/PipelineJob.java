@@ -1,13 +1,8 @@
 package com.hartwig.platinum.kubernetes.pipeline;
 
-import java.time.Duration;
-import java.util.List;
-import java.util.Map;
-
 import com.hartwig.platinum.kubernetes.KubernetesComponent;
 import com.hartwig.platinum.kubernetes.KubernetesUtil;
 import com.hartwig.platinum.kubernetes.TargetNodePool;
-
 import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.PodTemplateSpecFluent;
 import io.fabric8.kubernetes.api.model.Toleration;
@@ -16,25 +11,30 @@ import io.fabric8.kubernetes.api.model.batch.JobSpec;
 import io.fabric8.kubernetes.api.model.batch.JobSpecBuilder;
 import io.fabric8.kubernetes.api.model.batch.JobSpecFluent;
 
-public class PipelineJob implements KubernetesComponent<JobSpec> {
+import java.time.Duration;
+import java.util.List;
+import java.util.Map;
 
-    public Container getContainer() {
-        return container;
-    }
+public class PipelineJob implements KubernetesComponent<JobSpec> {
 
     private final Container container;
     private final List<Volume> volumes;
     private final String name;
+    private final String serviceAccountName;
     private final TargetNodePool nodePool;
     private final Duration ttl;
-
     public PipelineJob(final String name, final Container container, final List<Volume> volumes,
-            final TargetNodePool nodePool, final Duration ttl) {
+                       final String serviceAccountName, final TargetNodePool nodePool, final Duration ttl) {
         this.container = container;
         this.volumes = volumes;
+        this.serviceAccountName = serviceAccountName;
         this.nodePool = nodePool;
         this.ttl = ttl;
         this.name = KubernetesUtil.toValidRFC1123Label(name);
+    }
+
+    public Container getContainer() {
+        return container;
     }
 
     public String getName() {
@@ -49,7 +49,9 @@ public class PipelineJob implements KubernetesComponent<JobSpec> {
     public JobSpec asKubernetes() {
         JobSpecBuilder jobSpecBuilder = new JobSpecBuilder();
         final PodTemplateSpecFluent.SpecNested<JobSpecFluent.TemplateNested<JobSpecBuilder>> dsl =
-                jobSpecBuilder.withNewTemplate().withNewSpec().withContainers(container).withRestartPolicy("Never").withVolumes(volumes);
+                jobSpecBuilder.withNewTemplate().withNewSpec().withContainers(container)
+                        .withRestartPolicy("Never").withVolumes(volumes).withServiceAccountName(serviceAccountName)
+                        .withNodeSelector(Map.of("iam.gke.io/gke-metadata-server-enabled", "true"));
         if (!nodePool.isDefault()) {
             dsl.withNodeSelector(Map.of("pool", nodePool.name()))
                     .withTolerations(List.of(new Toleration("NoSchedule", "reserved-pool", "Equal", null, "true")));

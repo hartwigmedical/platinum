@@ -46,7 +46,7 @@ public interface PlatinumConfiguration {
 
     Optional<String> cmek();
 
-    Optional<ServiceAccountConfiguration> serviceAccount();
+    ServiceAccountConfiguration serviceAccount();
 
     Optional<String> cluster();
 

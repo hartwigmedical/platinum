@@ -24,10 +24,8 @@ import com.hartwig.platinum.Console;
 import com.hartwig.platinum.config.BatchConfiguration;
 import com.hartwig.platinum.config.GcpConfiguration;
 import com.hartwig.platinum.config.PlatinumConfiguration;
-import com.hartwig.platinum.iam.JsonKey;
 import com.hartwig.platinum.kubernetes.pipeline.PipelineConfigMapBuilder;
 import com.hartwig.platinum.kubernetes.pipeline.PipelineConfigMapVolume.PipelineConfigMapVolumeBuilder;
-import com.hartwig.platinum.kubernetes.pipeline.PipelineServiceAccountSecretVolume;
 import com.hartwig.platinum.scheduling.JobScheduler;
 
 import org.slf4j.Logger;
@@ -130,8 +128,7 @@ public class KubernetesEngine {
     }
 
     public KubernetesCluster findOrCreate(final String clusterName, final String runName,
-            final List<Supplier<PipelineInput>> pipelineInputs, final JsonKey jsonKey, final String outputBucketName,
-            final String serviceAccountEmail) {
+            final List<Supplier<PipelineInput>> pipelineInputs, final String outputBucketName) {
         try {
             GcpConfiguration gcpConfiguration = configuration.gcp();
             String parent = String.format("projects/%s/locations/%s", gcpConfiguration.projectOrThrow(), gcpConfiguration.regionOrThrow());
@@ -154,17 +151,15 @@ public class KubernetesEngine {
                     .orElse(TargetNodePool.defaultPool());
             if (!targetNodePool.isDefault()) {
                 new GcloudNodePool(processRunner).create(targetNodePool,
-                        serviceAccountEmail,
+                        configuration.serviceAccount().gcpEmailAddress(),
                         clusterName,
                         gcpConfiguration.projectOrThrow());
             }
             return new KubernetesCluster(runName,
                     jobScheduler,
-                    new PipelineServiceAccountSecretVolume(jsonKey, kubernetesClientProxy, "service-account-key"),
                     pipelineInputs,
                     new PipelineConfigMapBuilder(new PipelineConfigMapVolumeBuilder(kubernetesClientProxy), runName),
                     outputBucketName,
-                    serviceAccountEmail,
                     configuration,
                     targetNodePool);
         } catch (Exception e) {

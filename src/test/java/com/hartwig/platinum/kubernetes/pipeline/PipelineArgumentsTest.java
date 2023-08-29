@@ -7,6 +7,7 @@ import java.util.Map;
 
 import com.hartwig.platinum.config.GcpConfiguration;
 import com.hartwig.platinum.config.PlatinumConfiguration;
+import com.hartwig.platinum.config.ServiceAccountConfiguration;
 
 import org.junit.Test;
 
@@ -37,7 +38,7 @@ public class PipelineArgumentsTest {
     }
 
     private List<String> asCommand(final PipelineArguments victim) {
-        return victim.asCommand(SampleArgument.sampleJson("tumor-run", "run"), "/secrets", "key.json");
+        return victim.asCommand(SampleArgument.sampleJson("tumor-run", "run"));
     }
 
     private PipelineArguments createVictimWithOverrides(final String s, final String value) {
@@ -46,6 +47,7 @@ public class PipelineArgumentsTest {
                 "email",
                 PlatinumConfiguration.builder()
                         .gcp(GcpConfiguration.builder().region("region").project("project").privateCluster(false).build())
+                        .serviceAccount(ServiceAccountConfiguration.builder().kubernetesServiceAccount("ksa").gcpEmailAddress("email").build())
                         .build());
     }
 }

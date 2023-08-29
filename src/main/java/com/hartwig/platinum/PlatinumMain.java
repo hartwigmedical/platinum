@@ -5,8 +5,6 @@ import java.util.concurrent.Callable;
 import com.google.cloud.storage.StorageOptions;
 import com.hartwig.platinum.config.PlatinumConfiguration;
 import com.hartwig.platinum.config.Validation;
-import com.hartwig.platinum.iam.IamProvider;
-import com.hartwig.platinum.iam.ResourceManagerProvider;
 import com.hartwig.platinum.kubernetes.ContainerProvider;
 import com.hartwig.platinum.kubernetes.JobSubmitter;
 import com.hartwig.platinum.kubernetes.KubernetesClientProxy;
@@ -50,16 +48,14 @@ public class PlatinumMain implements Callable<Integer> {
             Validation.apply(runName, configuration);
 
             String clusterName = configuration.cluster().orElse(runName);
-            KubernetesClientProxy kubernetesClientProxy = new KubernetesClientProxy(clusterName,
-                    configuration.gcp(), new DefaultKubernetesClient());
+            KubernetesClientProxy kubernetesClientProxy =
+                    new KubernetesClientProxy(clusterName, configuration.gcp(), new DefaultKubernetesClient());
             JobSubmitter jobSubmitter = new JobSubmitter(kubernetesClientProxy, configuration.retryFailed());
             JobScheduler jobScheduler = JobScheduler.fromConfiguration(configuration, jobSubmitter, kubernetesClientProxy);
 
             new Platinum(runName,
                     inputJson,
                     StorageOptions.newBuilder().setProjectId(configuration.gcp().projectOrThrow()).build().getService(),
-                    IamProvider.get(),
-                    ResourceManagerProvider.get(),
                     new KubernetesEngine(ContainerProvider.get(), new ProcessRunner(), configuration, jobScheduler, kubernetesClientProxy),
                     configuration,
                     PDLConversion.create(configuration)).run();

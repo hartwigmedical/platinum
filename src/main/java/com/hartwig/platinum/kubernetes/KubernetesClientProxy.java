@@ -5,6 +5,8 @@ import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.ConfigMapList;
 import io.fabric8.kubernetes.api.model.Secret;
 import io.fabric8.kubernetes.api.model.SecretList;
+import io.fabric8.kubernetes.api.model.ServiceAccount;
+import io.fabric8.kubernetes.api.model.ServiceAccountList;
 import io.fabric8.kubernetes.api.model.batch.Job;
 import io.fabric8.kubernetes.api.model.batch.JobList;
 import io.fabric8.kubernetes.client.DefaultKubernetesClient;
@@ -60,6 +62,10 @@ public class KubernetesClientProxy {
             authorise();
             return executeWithRetries(operationProvider);
         }
+    }
+
+    public MixedOperation<ServiceAccount, ServiceAccountList, Resource<ServiceAccount>> serviceAccounts() {
+        return kubernetesClient.serviceAccounts();
     }
 
     public void authorise() {

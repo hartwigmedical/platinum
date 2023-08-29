@@ -1,16 +1,14 @@
 package com.hartwig.platinum.kubernetes.pipeline;
 
-import static java.lang.String.format;
-
-import static com.hartwig.platinum.config.OverrideableArguments.of;
+import com.google.common.collect.ImmutableMap;
+import com.hartwig.platinum.config.GcpConfiguration;
+import com.hartwig.platinum.config.PlatinumConfiguration;
 
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import com.google.common.collect.ImmutableMap;
-import com.hartwig.platinum.config.GcpConfiguration;
-import com.hartwig.platinum.config.PlatinumConfiguration;
+import static com.hartwig.platinum.config.OverrideableArguments.of;
 
 public class PipelineArguments {
 
@@ -27,10 +25,10 @@ public class PipelineArguments {
         this.platinumConfiguration = platinumConfiguration;
     }
 
-    public List<String> asCommand(final SampleArgument sampleArgument, final String secretsPath, final String serviceAccountKeySecretName) {
+    public List<String> asCommand(final SampleArgument sampleArgument) {
         return of(Map.of("-profile", "public", "-output_cram", "false")).override(of(addDashesIfNeeded()))
-                .override(of(fixed(secretsPath, serviceAccountKeySecretName)))
                 .override(of(sampleArgument.arguments()))
+                .override(of(fixed()))
                 .asCommand("/pipeline5.sh");
     }
 
@@ -40,11 +38,10 @@ public class PipelineArguments {
                 .collect(Collectors.toMap(e -> e.getKey().startsWith("-") ? e.getKey() : "-" + e.getKey(), Map.Entry::getValue));
     }
 
-    private Map<String, String> fixed(final String secretsPath, final String serviceAccountKeySecretName) {
+    private Map<String, String> fixed() {
         GcpConfiguration gcpConfiguration = platinumConfiguration.gcp();
         ImmutableMap.Builder<String, String> builder = ImmutableMap.<String, String>builder()
                 .put("-output_bucket", outputBucket)
-                .put("-private_key_path", format("%s/%s", secretsPath, serviceAccountKeySecretName))
                 .put("-project", gcpConfiguration.projectOrThrow())
                 .put("-region", gcpConfiguration.regionOrThrow())
                 .put("-network", gcpConfiguration.networkUrl())

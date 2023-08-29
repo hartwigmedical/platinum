@@ -15,7 +15,9 @@ import com.hartwig.pdl.PipelineInput;
 import com.hartwig.pdl.SampleInput;
 import com.hartwig.platinum.config.GcpConfiguration;
 import com.hartwig.platinum.config.ImmutableGcpConfiguration;
+import com.hartwig.platinum.config.ImmutablePlatinumConfiguration;
 import com.hartwig.platinum.config.PlatinumConfiguration;
+import com.hartwig.platinum.config.ServiceAccountConfiguration;
 import com.hartwig.platinum.kubernetes.pipeline.ImmutableSampleArgument;
 import com.hartwig.platinum.kubernetes.pipeline.PipelineConfigMapBuilder;
 import com.hartwig.platinum.kubernetes.pipeline.PipelineJob;
@@ -31,32 +33,34 @@ import io.fabric8.kubernetes.api.model.Volume;
 import io.fabric8.kubernetes.api.model.VolumeBuilder;
 
 public class KubernetesClusterTest {
-    private static final ImmutableGcpConfiguration GCP = GcpConfiguration.builder().project("project").region("region").build();
-    private static final String SECRET = "secret";
     private static final String CONFIG = "config";
     private static final List<SampleArgument> SAMPLES = List.of(sample());
     private List<Supplier<PipelineInput>> pipelineInputs;
     private KubernetesCluster victim;
     private JobScheduler scheduler;
-    private Volume secret;
     private PipelineConfigMapBuilder configMaps;
+    private ImmutablePlatinumConfiguration.Builder configBuilder;
 
     @Before
-    @SuppressWarnings("unchecked")
     public void setUp() {
-        secret = new VolumeBuilder().withName(SECRET).build();
         scheduler = mock(JobScheduler.class);
         configMaps = mock(PipelineConfigMapBuilder.class);
         SampleInput tumor = SampleInput.builder().name("tumor-a").build();
         PipelineInput input1 = PipelineInput.builder().setName("setName").tumor(tumor).build();
         pipelineInputs = List.of(() -> input1);
         when(configMaps.forSample(any(), any())).thenReturn(new VolumeBuilder().withName(CONFIG).build());
+        ServiceAccountConfiguration serviceAccountConfiguration = ServiceAccountConfiguration.builder()
+                .kubernetesServiceAccount("platinum-sa")
+                .gcpEmailAddress("e@mail.com")
+                .build();
+        ImmutableGcpConfiguration gcpConfiguration = GcpConfiguration.builder().project("project").region("region").build();
+        configBuilder = PlatinumConfiguration.builder().gcp(gcpConfiguration).serviceAccount(serviceAccountConfiguration);
     }
 
     @Test
     public void addsJksVolumeAndContainerIfPasswordSpecified() {
         ArgumentCaptor<PipelineJob> job = ArgumentCaptor.forClass(PipelineJob.class);
-        victim = victimise(PlatinumConfiguration.builder().keystorePassword("changeit").gcp(GCP).build());
+        victim = victimise(configBuilder.keystorePassword("changeit").build());
         victim.submit();
         verify(scheduler).submit(job.capture());
         PipelineJob result = job.getValue();
@@ -70,7 +74,7 @@ public class KubernetesClusterTest {
     @Test
     public void submitsJobsToTheScheduler() {
         ArgumentCaptor<PipelineJob> job = ArgumentCaptor.forClass(PipelineJob.class);
-        victimise(PlatinumConfiguration.builder().keystorePassword("changeit").gcp(GCP).build()).submit();
+        victimise(configBuilder.keystorePassword("changeit").build()).submit();
         verify(scheduler).submit(job.capture());
         assertThat(job.getAllValues().size()).isEqualTo(SAMPLES.size());
     }
@@ -78,14 +82,13 @@ public class KubernetesClusterTest {
     @Test
     public void addsConfigMapAndSecretVolumes() {
         ArgumentCaptor<PipelineJob> job = ArgumentCaptor.forClass(PipelineJob.class);
-        victim = victimise(PlatinumConfiguration.builder().gcp(GCP).build());
+        victim = victimise(configBuilder.build());
         victim.submit();
         verify(scheduler).submit(job.capture());
-        assertThat(job.getValue().getVolumes()).extracting(Volume::getName).containsExactly(CONFIG, SECRET);
+        assertThat(job.getValue().getVolumes()).extracting(Volume::getName).containsExactly(CONFIG);
     }
 
     @Test
-    @SuppressWarnings("unchecked")
     public void addsConfigMapForSampleToEachJob() {
         PipelineInput inputA = PipelineInput.builder().setName("set-a").tumor(SampleInput.builder().name("tumor-a").build()).build();
         PipelineInput inputB = PipelineInput.builder().setName("set-b").tumor(SampleInput.builder().name("tumor-b").build()).build();
@@ -94,7 +97,7 @@ public class KubernetesClusterTest {
         when(configMaps.forSample("tumor-a", inputA)).thenReturn(new VolumeBuilder().withName("config-a").build());
         when(configMaps.forSample("tumor-b", inputB)).thenReturn(new VolumeBuilder().withName("config-b").build());
         ArgumentCaptor<PipelineJob> job = ArgumentCaptor.forClass(PipelineJob.class);
-        victimise(PlatinumConfiguration.builder().gcp(GCP).build()).submit();
+        victimise(configBuilder.build()).submit();
         verify(scheduler, times(2)).submit(job.capture());
         List<PipelineJob> allJobs = job.getAllValues();
         List<PipelineJob> jobsA = allJobs.stream().filter(j -> j.getName().equals("tumor-a-test")).collect(Collectors.toList());
@@ -112,11 +115,9 @@ public class KubernetesClusterTest {
     private KubernetesCluster victimise(PlatinumConfiguration configuration) {
         return new KubernetesCluster("test",
                 scheduler,
-                () -> secret,
                 pipelineInputs,
                 configMaps,
-                "output",
-                "sa@gcloud.com",
+                "output-bucket",
                 configuration,
                 TargetNodePool.defaultPool());
     }
