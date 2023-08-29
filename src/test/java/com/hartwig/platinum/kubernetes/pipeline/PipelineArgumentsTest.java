@@ -47,7 +47,10 @@ public class PipelineArgumentsTest {
                 "email",
                 PlatinumConfiguration.builder()
                         .gcp(GcpConfiguration.builder().region("region").project("project").privateCluster(false).build())
-                        .serviceAccount(ServiceAccountConfiguration.builder().kubernetesServiceAccount("ksa").gcpEmailAddress("email").build())
+                        .serviceAccount(ServiceAccountConfiguration.builder()
+                                .kubernetesServiceAccount("ksa")
+                                .gcpEmailAddress("email")
+                                .build())
                         .build());
     }
 }

@@ -1,13 +1,15 @@
 package com.hartwig.platinum.kubernetes;
 
+import static com.hartwig.platinum.kubernetes.KubernetesCluster.NAMESPACE;
+
 import com.hartwig.platinum.kubernetes.pipeline.PipelineJob;
-import io.fabric8.kubernetes.api.model.batch.Job;
-import io.fabric8.kubernetes.api.model.batch.JobBuilder;
-import io.fabric8.kubernetes.api.model.batch.JobSpec;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static com.hartwig.platinum.kubernetes.KubernetesCluster.NAMESPACE;
+import io.fabric8.kubernetes.api.model.batch.Job;
+import io.fabric8.kubernetes.api.model.batch.JobBuilder;
+import io.fabric8.kubernetes.api.model.batch.JobSpec;
 
 public class JobSubmitter {
 
@@ -60,6 +62,9 @@ public class JobSubmitter {
     }
 
     public static boolean jobIs(Job job, String stateName) {
-        return job.getStatus().getConditions().stream().anyMatch(c -> stateName.equalsIgnoreCase(c.getType()) && "True".equals(c.getStatus()));
+        return job.getStatus()
+                .getConditions()
+                .stream()
+                .anyMatch(c -> stateName.equalsIgnoreCase(c.getType()) && "True".equals(c.getStatus()));
     }
 }

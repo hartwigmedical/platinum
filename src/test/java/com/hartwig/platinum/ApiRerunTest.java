@@ -62,10 +62,7 @@ public class ApiRerunTest {
     @Test
     public void shouldThrowIllegalArgumentExceptionIfNoCanonicalSetExistsForSample() {
         when(sets.canonical(any(), any())).thenThrow(new ApiException());
-        assertThatThrownBy(() -> new ApiRerun(runs,
-                sets,
-                bucket,
-                version).create(biopsy)).isInstanceOf(IllegalArgumentException.class);
+        assertThatThrownBy(() -> new ApiRerun(runs, sets, bucket, version).create(biopsy)).isInstanceOf(IllegalArgumentException.class);
         verify(runs, never()).create(any());
     }
 

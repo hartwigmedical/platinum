@@ -30,11 +30,12 @@ public class ConvertFromGCSPathsTest {
 
     @Test
     public void decomposesMultiNormalSamplesIntoPairs() {
-        List<Supplier<PipelineInput>> pipelineInputs = new ConvertFromGCSPaths().apply(createConfiguration(List.of(SampleConfiguration.builder()
-                .name("sample")
-                .tumors(List.of(data("first_tumor"), data("second_tumor")))
-                .normal(data("normal"))
-                .build())));
+        List<Supplier<PipelineInput>> pipelineInputs =
+                new ConvertFromGCSPaths().apply(createConfiguration(List.of(SampleConfiguration.builder()
+                        .name("sample")
+                        .tumors(List.of(data("first_tumor"), data("second_tumor")))
+                        .normal(data("normal"))
+                        .build())));
         assertThat(pipelineInputs).hasSize(2);
         PipelineInput firstPair = pipelineInputs.get(0).get();
         assertThat(firstPair.setName()).isEqualTo("sample-t1");
@@ -77,7 +78,8 @@ public class ConvertFromGCSPathsTest {
     }
 
     private PlatinumConfiguration createConfiguration(List<SampleConfiguration> sampleConfigurations) {
-        return PlatinumConfiguration.builder().samples(sampleConfigurations)
+        return PlatinumConfiguration.builder()
+                .samples(sampleConfigurations)
                 .serviceAccount(ServiceAccountConfiguration.builder().kubernetesServiceAccount("ksa").gcpEmailAddress("email").build())
                 .build();
     }

@@ -6,8 +6,6 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import com.google.common.collect.ImmutableCollection;
-
 import org.immutables.value.Value;
 
 @Value.Immutable

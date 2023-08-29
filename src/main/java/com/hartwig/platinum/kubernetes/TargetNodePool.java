@@ -1,7 +1,6 @@
 package com.hartwig.platinum.kubernetes;
 
 import com.hartwig.platinum.config.NodePoolConfiguration;
-import com.hartwig.platinum.config.SampleConfiguration;
 
 public interface TargetNodePool {
 

@@ -17,7 +17,8 @@ import org.junit.Test;
 public class JobSchedulerTest {
     private final JobSubmitter jobSubmitter = mock(JobSubmitter.class);
     private final KubernetesClientProxy kubernetesClientProxy = mock(KubernetesClientProxy.class);
-    private static final ServiceAccountConfiguration SA = ServiceAccountConfiguration.builder().kubernetesServiceAccount("ksa").gcpEmailAddress("email").build();
+    private static final ServiceAccountConfiguration SA =
+            ServiceAccountConfiguration.builder().kubernetesServiceAccount("ksa").gcpEmailAddress("email").build();
 
     @Test
     public void shouldConstructTimedBatchSchedulerInstanceIfDelaySpecified() {
@@ -31,11 +32,9 @@ public class JobSchedulerTest {
 
     @Test
     public void shouldConstructConstantJobCountSchedulerOfSizeOneIfBatchConfigurationUnspecified() {
-        PlatinumConfiguration configuration = PlatinumConfiguration.builder()
-                .serviceAccount(SA)
-                .build();
-        assertThat(JobScheduler.fromConfiguration(configuration, jobSubmitter, kubernetesClientProxy))
-                .isInstanceOf(ConstantJobCountScheduler.class);
+        PlatinumConfiguration configuration = PlatinumConfiguration.builder().serviceAccount(SA).build();
+        assertThat(JobScheduler.fromConfiguration(configuration, jobSubmitter, kubernetesClientProxy)).isInstanceOf(
+                ConstantJobCountScheduler.class);
     }
 
     private JobScheduler createFromConfiguration(Integer delay) {

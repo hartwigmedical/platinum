@@ -1,16 +1,22 @@
 package com.hartwig.platinum.kubernetes.pipeline;
 
-import com.hartwig.platinum.kubernetes.TargetNodePool;
-import io.fabric8.kubernetes.api.model.*;
-import io.fabric8.kubernetes.api.model.batch.JobSpec;
-import org.junit.Before;
-import org.junit.Test;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import com.hartwig.platinum.kubernetes.TargetNodePool;
+
+import org.junit.Before;
+import org.junit.Test;
+
+import io.fabric8.kubernetes.api.model.ConfigMapVolumeSource;
+import io.fabric8.kubernetes.api.model.Container;
+import io.fabric8.kubernetes.api.model.PodSpec;
+import io.fabric8.kubernetes.api.model.Volume;
+import io.fabric8.kubernetes.api.model.VolumeBuilder;
+import io.fabric8.kubernetes.api.model.batch.JobSpec;
 
 public class PipelineJobTest {
     private PipelineJob victim;
@@ -21,6 +27,7 @@ public class PipelineJobTest {
         List<Volume> volumes = List.of(new VolumeBuilder().withName(name).editOrNewConfigMap().withName(name).endConfigMap().build());
         victim = new PipelineJob("sample-run", new Container(), volumes, "platinum-sa", TargetNodePool.defaultPool(), Duration.ZERO);
     }
+
     @Test
     public void namesJobWithRunAndSample() {
         assertThat(victim.getName()).isEqualTo("sample-run");

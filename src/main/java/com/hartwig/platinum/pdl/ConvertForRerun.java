@@ -9,9 +9,6 @@ import com.hartwig.pdl.generator.PdlGenerator;
 import com.hartwig.platinum.ApiRerun;
 import com.hartwig.platinum.config.PlatinumConfiguration;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 public class ConvertForRerun implements PDLConversion {
 
     private final PdlGenerator generator;

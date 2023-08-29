@@ -24,9 +24,7 @@ public class TimedBatchScheduler implements JobScheduler {
         if (jobSubmitter.submit(job)) {
             numSubmitted++;
             if (numSubmitted % batchSize == 0) {
-                LOGGER.info("Batch [{}] scheduled, waiting [{}]",
-                        (numSubmitted / batchSize),
-                        delay.toString());
+                LOGGER.info("Batch [{}] scheduled, waiting [{}]", (numSubmitted / batchSize), delay.toString());
                 delay.threadSleep();
             }
         }

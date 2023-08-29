@@ -1,6 +1,14 @@
 package com.hartwig.platinum.kubernetes;
 
+import static java.util.List.of;
+
+import javax.inject.Provider;
+
 import com.hartwig.platinum.config.GcpConfiguration;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.ConfigMapList;
 import io.fabric8.kubernetes.api.model.Secret;
@@ -16,12 +24,6 @@ import io.fabric8.kubernetes.client.dsl.MixedOperation;
 import io.fabric8.kubernetes.client.dsl.NonNamespaceOperation;
 import io.fabric8.kubernetes.client.dsl.Resource;
 import io.fabric8.kubernetes.client.dsl.ScalableResource;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.inject.Provider;
-
-import static java.util.List.of;
 
 public class KubernetesClientProxy {
     private static final Logger LOGGER = LoggerFactory.getLogger(KubernetesClientProxy.class);
@@ -30,8 +32,7 @@ public class KubernetesClientProxy {
     private final String project;
     private KubernetesClient kubernetesClient;
 
-    public KubernetesClientProxy(String clusterName, GcpConfiguration gcpConfiguration,
-            KubernetesClient kubernetesClient) {
+    public KubernetesClientProxy(String clusterName, GcpConfiguration gcpConfiguration, KubernetesClient kubernetesClient) {
         this.clusterName = clusterName;
         this.region = gcpConfiguration.regionOrThrow();
         this.project = gcpConfiguration.projectOrThrow();

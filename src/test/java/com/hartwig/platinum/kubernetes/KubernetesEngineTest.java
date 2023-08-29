@@ -1,5 +1,24 @@
 package com.hartwig.platinum.kubernetes;
 
+import static java.lang.String.format;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.io.IOException;
+import java.util.Collections;
+import java.util.List;
+
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.services.container.v1beta1.Container;
 import com.google.api.services.container.v1beta1.Container.Projects;
@@ -16,27 +35,22 @@ import com.hartwig.platinum.config.ImmutablePlatinumConfiguration;
 import com.hartwig.platinum.config.PlatinumConfiguration;
 import com.hartwig.platinum.config.ServiceAccountConfiguration;
 import com.hartwig.platinum.scheduling.JobScheduler;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatcher;
 
-import java.io.IOException;
-import java.util.Collections;
-import java.util.List;
-
-import static java.lang.String.format;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
-
 public class KubernetesEngineTest {
     private static final String PROJECT = "project";
     private static final String REGION = "region";
-    private static final ImmutablePlatinumConfiguration CONFIGURATION =
-            PlatinumConfiguration.builder().gcp(GcpConfiguration.builder().project(PROJECT).region(REGION).build())
-                    .serviceAccount(ServiceAccountConfiguration.builder().gcpEmailAddress("platinum@example.com").kubernetesServiceAccount("platinum-sa").build())
-                    .build();
+    private static final ImmutablePlatinumConfiguration CONFIGURATION = PlatinumConfiguration.builder()
+            .gcp(GcpConfiguration.builder().project(PROJECT).region(REGION).build())
+            .serviceAccount(ServiceAccountConfiguration.builder()
+                    .gcpEmailAddress("platinum@example.com")
+                    .kubernetesServiceAccount("platinum-sa")
+                    .build())
+            .build();
     public static final String CLUSTER_NAME = "clusterName";
     public static final String RUN_NAME = "runName";
     public static final String BUCKET = "bucket";
@@ -137,8 +151,7 @@ public class KubernetesEngineTest {
         when(clusters.get(anyString())).thenReturn(foundOperation);
         when(foundOperation.execute()).thenThrow(GoogleJsonResponseException.class);
         ArgumentCaptor<CreateClusterRequest> createRequest = ArgumentCaptor.forClass(CreateClusterRequest.class);
-        when(clusters.create(eq(format("projects/%s/locations/%s", PROJECT, REGION)),
-                createRequest.capture())).thenReturn(created);
+        when(clusters.create(eq(format("projects/%s/locations/%s", PROJECT, REGION)), createRequest.capture())).thenReturn(created);
         when(created.execute()).thenReturn(executedCreate);
         when(executedCreate.getName()).thenReturn("created");
         mockForClusterCreation();

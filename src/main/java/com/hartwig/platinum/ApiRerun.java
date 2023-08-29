@@ -1,14 +1,20 @@
 package com.hartwig.platinum;
 
+import static java.lang.String.format;
+
 import com.hartwig.ApiException;
 import com.hartwig.api.RunApi;
 import com.hartwig.api.SetApi;
 import com.hartwig.api.helpers.OnlyOne;
-import com.hartwig.api.model.*;
+import com.hartwig.api.model.CreateRun;
+import com.hartwig.api.model.Ini;
+import com.hartwig.api.model.Run;
+import com.hartwig.api.model.SampleSet;
+import com.hartwig.api.model.SampleType;
+import com.hartwig.api.model.Status;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import static java.lang.String.format;
 
 public class ApiRerun {
 

@@ -15,6 +15,7 @@ public class Delay {
         MILLISECONDS(1);
 
         final long millisecondsPer;
+
         Unit(long millisecondsPer) {
             this.millisecondsPer = millisecondsPer;
         }

@@ -1,14 +1,14 @@
 package com.hartwig.platinum.kubernetes.pipeline;
 
-import com.google.common.collect.ImmutableMap;
-import com.hartwig.platinum.config.GcpConfiguration;
-import com.hartwig.platinum.config.PlatinumConfiguration;
+import static com.hartwig.platinum.config.OverrideableArguments.of;
 
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static com.hartwig.platinum.config.OverrideableArguments.of;
+import com.google.common.collect.ImmutableMap;
+import com.hartwig.platinum.config.GcpConfiguration;
+import com.hartwig.platinum.config.PlatinumConfiguration;
 
 public class PipelineArguments {
 

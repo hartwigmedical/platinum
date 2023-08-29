@@ -49,10 +49,8 @@ public class KubernetesClusterTest {
         PipelineInput input1 = PipelineInput.builder().setName("setName").tumor(tumor).build();
         pipelineInputs = List.of(() -> input1);
         when(configMaps.forSample(any(), any())).thenReturn(new VolumeBuilder().withName(CONFIG).build());
-        ServiceAccountConfiguration serviceAccountConfiguration = ServiceAccountConfiguration.builder()
-                .kubernetesServiceAccount("platinum-sa")
-                .gcpEmailAddress("e@mail.com")
-                .build();
+        ServiceAccountConfiguration serviceAccountConfiguration =
+                ServiceAccountConfiguration.builder().kubernetesServiceAccount("platinum-sa").gcpEmailAddress("e@mail.com").build();
         ImmutableGcpConfiguration gcpConfiguration = GcpConfiguration.builder().project("project").region("region").build();
         configBuilder = PlatinumConfiguration.builder().gcp(gcpConfiguration).serviceAccount(serviceAccountConfiguration);
     }

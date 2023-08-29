@@ -36,7 +36,7 @@ public class ConstantJobCountSchedulerTest {
     private final ScalableResource<Job> scalableJob2 = mock(ScalableResource.class);
     @SuppressWarnings("unchecked")
     private final ScalableResource<Job> scalableJob3 = mock(ScalableResource.class);
-    @SuppressWarnings("rawtypes" )
+    @SuppressWarnings("rawtypes")
     private final NonNamespaceOperation jobs = mock(NonNamespaceOperation.class);
     private final Job kubeJob1 = mock(Job.class);
     private final Job kubeJob2 = mock(Job.class);
@@ -52,6 +52,7 @@ public class ConstantJobCountSchedulerTest {
         FAILED("Failed");
 
         private final String type;
+
         Condition(String type) {
             this.type = type;
         }
@@ -141,7 +142,6 @@ public class ConstantJobCountSchedulerTest {
         verify(jobs).delete(kubeJob1);
         verify(jobSubmitter, times(2)).submit(job1);
     }
-
 
     private static JobCondition mockCondition(String condition) {
         JobCondition jobCondition = mock(JobCondition.class);

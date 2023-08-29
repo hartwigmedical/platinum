@@ -1,18 +1,29 @@
 package com.hartwig.platinum.kubernetes;
 
-import com.hartwig.platinum.kubernetes.pipeline.PipelineJob;
-import io.fabric8.kubernetes.api.model.batch.*;
-import io.fabric8.kubernetes.client.dsl.NonNamespaceOperation;
-import io.fabric8.kubernetes.client.dsl.ScalableResource;
-import org.junit.Before;
-import org.junit.Test;
+import static com.hartwig.platinum.kubernetes.KubernetesCluster.NAMESPACE;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static com.hartwig.platinum.kubernetes.KubernetesCluster.NAMESPACE;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.*;
+import com.hartwig.platinum.kubernetes.pipeline.PipelineJob;
+
+import org.junit.Before;
+import org.junit.Test;
+
+import io.fabric8.kubernetes.api.model.batch.Job;
+import io.fabric8.kubernetes.api.model.batch.JobBuilder;
+import io.fabric8.kubernetes.api.model.batch.JobCondition;
+import io.fabric8.kubernetes.api.model.batch.JobSpec;
+import io.fabric8.kubernetes.api.model.batch.JobStatus;
+import io.fabric8.kubernetes.client.dsl.NonNamespaceOperation;
+import io.fabric8.kubernetes.client.dsl.ScalableResource;
 
 public class JobSubmitterTest {
     private static final String JOB_NAME = "job1";
@@ -74,9 +85,10 @@ public class JobSubmitterTest {
         Job existingJob = mock(Job.class);
         JobStatus jobStatus = mock(JobStatus.class);
         when(existingJob.getStatus()).thenReturn(jobStatus);
-        when(jobStatus.getConditions()).thenReturn(statuses.keySet().stream().map(status ->
-                new JobCondition(null, null, null, null, statuses.get(status), status)
-        ).collect(Collectors.toList()));
+        when(jobStatus.getConditions()).thenReturn(statuses.keySet()
+                .stream()
+                .map(status -> new JobCondition(null, null, null, null, statuses.get(status), status))
+                .collect(Collectors.toList()));
         when(scalableJob.get()).thenReturn(existingJob);
     }
 

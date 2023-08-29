@@ -11,8 +11,7 @@ public class PipelineConfigMapBuilder {
     private final PipelineConfigMapVolumeBuilder pipelineConfigMapVolumeBuilder;
     private final String runName;
 
-    public PipelineConfigMapBuilder(final PipelineConfigMapVolumeBuilder pipelineConfigMapVolumeBuilder,
-            final String runName) {
+    public PipelineConfigMapBuilder(final PipelineConfigMapVolumeBuilder pipelineConfigMapVolumeBuilder, final String runName) {
         this.pipelineConfigMapVolumeBuilder = pipelineConfigMapVolumeBuilder;
         this.runName = runName;
     }

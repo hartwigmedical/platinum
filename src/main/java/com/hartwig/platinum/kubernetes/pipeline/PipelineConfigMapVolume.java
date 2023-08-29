@@ -1,16 +1,18 @@
 package com.hartwig.platinum.kubernetes.pipeline;
 
-import com.hartwig.platinum.kubernetes.KubernetesClientProxy;
-import com.hartwig.platinum.kubernetes.KubernetesCluster;
-import com.hartwig.platinum.kubernetes.KubernetesComponent;
-import io.fabric8.kubernetes.api.model.ConfigMapBuilder;
-import io.fabric8.kubernetes.api.model.Volume;
-import io.fabric8.kubernetes.api.model.VolumeBuilder;
+import static java.lang.String.format;
+
+import static com.hartwig.platinum.kubernetes.KubernetesUtil.toValidRFC1123Label;
 
 import java.util.Map;
 
-import static com.hartwig.platinum.kubernetes.KubernetesUtil.toValidRFC1123Label;
-import static java.lang.String.format;
+import com.hartwig.platinum.kubernetes.KubernetesClientProxy;
+import com.hartwig.platinum.kubernetes.KubernetesCluster;
+import com.hartwig.platinum.kubernetes.KubernetesComponent;
+
+import io.fabric8.kubernetes.api.model.ConfigMapBuilder;
+import io.fabric8.kubernetes.api.model.Volume;
+import io.fabric8.kubernetes.api.model.VolumeBuilder;
 
 public class PipelineConfigMapVolume implements KubernetesComponent<Volume> {
     private final KubernetesClientProxy kubernetesClientProxy;
@@ -18,7 +20,8 @@ public class PipelineConfigMapVolume implements KubernetesComponent<Volume> {
     private final String sample;
     private final String content;
 
-    private PipelineConfigMapVolume(final KubernetesClientProxy kubernetesClientProxy, final String runName, final String sample, final String content) {
+    private PipelineConfigMapVolume(final KubernetesClientProxy kubernetesClientProxy, final String runName, final String sample,
+            final String content) {
         this.kubernetesClientProxy = kubernetesClientProxy;
         this.volumeName = toValidRFC1123Label(format("%s-%s", runName, sample));
         this.sample = sample;

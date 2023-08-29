@@ -1,16 +1,17 @@
 package com.hartwig.platinum.kubernetes.pipeline;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import com.hartwig.platinum.config.PlatinumConfiguration;
 import com.hartwig.platinum.kubernetes.KubernetesComponent;
 import com.hartwig.platinum.kubernetes.KubernetesUtil;
+
 import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.Quantity;
 import io.fabric8.kubernetes.api.model.ResourceRequirements;
 import io.fabric8.kubernetes.api.model.VolumeMountBuilder;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 public class PipelineContainer implements KubernetesComponent<Container> {
     private final static String SAMPLES_PATH = "/samples";
@@ -21,7 +22,7 @@ public class PipelineContainer implements KubernetesComponent<Container> {
     private final PlatinumConfiguration configuration;
 
     public PipelineContainer(final SampleArgument sample, final PipelineArguments arguments, final String configMapName,
-                             final String imageName, final PlatinumConfiguration configuration) {
+            final String imageName, final PlatinumConfiguration configuration) {
         this.sample = sample;
         this.arguments = arguments;
         this.configMapName = configMapName;

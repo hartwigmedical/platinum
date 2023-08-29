@@ -4,8 +4,6 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
-import junit.framework.TestCase;
-
 public class KubernetesUtilTest {
     @Test
     public void testValidInput() {

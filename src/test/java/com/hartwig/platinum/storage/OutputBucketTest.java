@@ -24,10 +24,10 @@ public class OutputBucketTest {
     private static final String RUN_NAME = "test";
     private static final String BUCKET_NAME = "platinum-output-test";
     public static final String REGION = "europe-west4";
-    private static final PlatinumConfiguration CONFIGURATION =
-            PlatinumConfiguration.builder().gcp(GcpConfiguration.builder().build())
-                    .serviceAccount(ServiceAccountConfiguration.builder().kubernetesServiceAccount("ksa").gcpEmailAddress("gcp").build())
-                    .build();
+    private static final PlatinumConfiguration CONFIGURATION = PlatinumConfiguration.builder()
+            .gcp(GcpConfiguration.builder().build())
+            .serviceAccount(ServiceAccountConfiguration.builder().kubernetesServiceAccount("ksa").gcpEmailAddress("gcp").build())
+            .build();
     private static final String CMEK_KEY = "/location/of/key";
     private Storage storage;
     private Bucket bucket;
