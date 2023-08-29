@@ -1,38 +1,45 @@
 package com.hartwig.platinum.kubernetes;
 
-import com.hartwig.pdl.PipelineInput;
-import com.hartwig.pdl.SampleInput;
-import com.hartwig.platinum.config.GcpConfiguration;
-import com.hartwig.platinum.config.ImmutableGcpConfiguration;
-import com.hartwig.platinum.config.PlatinumConfiguration;
-import com.hartwig.platinum.kubernetes.pipeline.ImmutableSampleArgument;
-import com.hartwig.platinum.kubernetes.pipeline.PipelineConfigMapBuilder;
-import com.hartwig.platinum.kubernetes.pipeline.PipelineJob;
-import com.hartwig.platinum.kubernetes.pipeline.SampleArgument;
-import com.hartwig.platinum.scheduling.JobScheduler;
-import io.fabric8.kubernetes.api.model.EnvVar;
-import io.fabric8.kubernetes.api.model.Volume;
-import io.fabric8.kubernetes.api.model.VolumeBuilder;
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.ArgumentCaptor;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.util.List;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import com.hartwig.pdl.PipelineInput;
+import com.hartwig.pdl.SampleInput;
+import com.hartwig.platinum.config.GcpConfiguration;
+import com.hartwig.platinum.config.ImmutableGcpConfiguration;
+import com.hartwig.platinum.config.ImmutablePlatinumConfiguration;
+import com.hartwig.platinum.config.PlatinumConfiguration;
+import com.hartwig.platinum.config.ServiceAccountConfiguration;
+import com.hartwig.platinum.kubernetes.pipeline.ImmutableSampleArgument;
+import com.hartwig.platinum.kubernetes.pipeline.PipelineConfigMapBuilder;
+import com.hartwig.platinum.kubernetes.pipeline.PipelineJob;
+import com.hartwig.platinum.kubernetes.pipeline.SampleArgument;
+import com.hartwig.platinum.scheduling.JobScheduler;
+
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.ArgumentCaptor;
+
+import io.fabric8.kubernetes.api.model.EnvVar;
+import io.fabric8.kubernetes.api.model.Volume;
+import io.fabric8.kubernetes.api.model.VolumeBuilder;
 
 public class KubernetesClusterTest {
-    private static final ImmutableGcpConfiguration GCP = GcpConfiguration.builder().project("project").region("region").build();
     private static final String CONFIG = "config";
     private static final List<SampleArgument> SAMPLES = List.of(sample());
     private List<Supplier<PipelineInput>> pipelineInputs;
     private KubernetesCluster victim;
     private JobScheduler scheduler;
     private PipelineConfigMapBuilder configMaps;
+    private ImmutablePlatinumConfiguration.Builder configBuilder;
 
     @Before
     public void setUp() {
@@ -42,12 +49,18 @@ public class KubernetesClusterTest {
         PipelineInput input1 = PipelineInput.builder().setName("setName").tumor(tumor).build();
         pipelineInputs = List.of(() -> input1);
         when(configMaps.forSample(any(), any())).thenReturn(new VolumeBuilder().withName(CONFIG).build());
+        ServiceAccountConfiguration serviceAccountConfiguration = ServiceAccountConfiguration.builder()
+                .kubernetesServiceAccount("platinum-sa")
+                .gcpEmailAddress("e@mail.com")
+                .build();
+        ImmutableGcpConfiguration gcpConfiguration = GcpConfiguration.builder().project("project").region("region").build();
+        configBuilder = PlatinumConfiguration.builder().gcp(gcpConfiguration).serviceAccount(serviceAccountConfiguration);
     }
 
     @Test
     public void addsJksVolumeAndContainerIfPasswordSpecified() {
         ArgumentCaptor<PipelineJob> job = ArgumentCaptor.forClass(PipelineJob.class);
-        victim = victimise(PlatinumConfiguration.builder().keystorePassword("changeit").gcp(GCP).build());
+        victim = victimise(configBuilder.keystorePassword("changeit").build());
         victim.submit();
         verify(scheduler).submit(job.capture());
         PipelineJob result = job.getValue();
@@ -61,7 +74,7 @@ public class KubernetesClusterTest {
     @Test
     public void submitsJobsToTheScheduler() {
         ArgumentCaptor<PipelineJob> job = ArgumentCaptor.forClass(PipelineJob.class);
-        victimise(PlatinumConfiguration.builder().keystorePassword("changeit").gcp(GCP).build()).submit();
+        victimise(configBuilder.keystorePassword("changeit").build()).submit();
         verify(scheduler).submit(job.capture());
         assertThat(job.getAllValues().size()).isEqualTo(SAMPLES.size());
     }
@@ -69,7 +82,7 @@ public class KubernetesClusterTest {
     @Test
     public void addsConfigMapAndSecretVolumes() {
         ArgumentCaptor<PipelineJob> job = ArgumentCaptor.forClass(PipelineJob.class);
-        victim = victimise(PlatinumConfiguration.builder().gcp(GCP).build());
+        victim = victimise(configBuilder.build());
         victim.submit();
         verify(scheduler).submit(job.capture());
         assertThat(job.getValue().getVolumes()).extracting(Volume::getName).containsExactly(CONFIG);
@@ -84,7 +97,7 @@ public class KubernetesClusterTest {
         when(configMaps.forSample("tumor-a", inputA)).thenReturn(new VolumeBuilder().withName("config-a").build());
         when(configMaps.forSample("tumor-b", inputB)).thenReturn(new VolumeBuilder().withName("config-b").build());
         ArgumentCaptor<PipelineJob> job = ArgumentCaptor.forClass(PipelineJob.class);
-        victimise(PlatinumConfiguration.builder().gcp(GCP).build()).submit();
+        victimise(configBuilder.build()).submit();
         verify(scheduler, times(2)).submit(job.capture());
         List<PipelineJob> allJobs = job.getAllValues();
         List<PipelineJob> jobsA = allJobs.stream().filter(j -> j.getName().equals("tumor-a-test")).collect(Collectors.toList());
@@ -105,7 +118,6 @@ public class KubernetesClusterTest {
                 pipelineInputs,
                 configMaps,
                 "output-bucket",
-                "sa@gcloud.com",
                 configuration,
                 TargetNodePool.defaultPool());
     }

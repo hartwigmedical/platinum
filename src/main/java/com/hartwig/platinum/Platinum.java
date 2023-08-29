@@ -3,13 +3,9 @@ package com.hartwig.platinum;
 import java.util.List;
 import java.util.function.Supplier;
 
-import com.google.api.services.cloudresourcemanager.CloudResourceManager;
-import com.google.api.services.iam.v1.Iam;
 import com.google.cloud.storage.Storage;
 import com.hartwig.pdl.PipelineInput;
-import com.hartwig.platinum.config.GcpConfiguration;
 import com.hartwig.platinum.config.PlatinumConfiguration;
-import com.hartwig.platinum.config.ServiceAccountConfiguration;
 import com.hartwig.platinum.kubernetes.KubernetesEngine;
 import com.hartwig.platinum.pdl.PDLConversion;
 import com.hartwig.platinum.storage.OutputBucket;
@@ -28,14 +24,11 @@ public class Platinum {
     private final PlatinumConfiguration configuration;
     private final PDLConversion pdlConversion;
 
-    public Platinum(final String runName, final String input, final Storage storage, final Iam iam,
-            final CloudResourceManager resourceManager, final KubernetesEngine clusterProvider, final PlatinumConfiguration configuration,
-            final PDLConversion pdlConversion) {
+    public Platinum(final String runName, final String input, final Storage storage, final KubernetesEngine clusterProvider,
+            final PlatinumConfiguration configuration, final PDLConversion pdlConversion) {
         this.runName = runName;
         this.input = input;
         this.storage = storage;
-//        this.iam = iam;
-//        this.resourceManager = resourceManager;
         this.kubernetesEngine = clusterProvider;
         this.configuration = configuration;
         this.pdlConversion = pdlConversion;
@@ -43,15 +36,16 @@ public class Platinum {
 
     public void run() {
         LOGGER.info("Starting Platinum run with name {} and input {}", Console.bold(runName), Console.bold(input));
-        GcpConfiguration gcpConfiguration = configuration.gcp();
         String clusterName = configuration.cluster().orElse(runName);
-        String email = configuration.serviceAccount().flatMap(ServiceAccountConfiguration::gcpEmailAddress).orElse("");
 
         List<Supplier<PipelineInput>> pipelineInputs = pdlConversion.apply(configuration);
         int submitted = kubernetesEngine.findOrCreate(clusterName,
                 runName,
                 pipelineInputs,
-                OutputBucket.from(storage).findOrCreate(runName, gcpConfiguration.regionOrThrow(), email, configuration)).submit();
+                OutputBucket.from(storage)
+                        .findOrCreate(runName,
+                                configuration.gcp().regionOrThrow(),
+                                configuration)).submit();
         LOGGER.info("Platinum started {} pipelines on GCP", Console.bold(String.valueOf(submitted)));
         LOGGER.info("You can monitor their progress with: {}", Console.bold("./platinum status"));
     }

@@ -14,6 +14,7 @@ import com.hartwig.platinum.config.ImmutableFastqConfiguration;
 import com.hartwig.platinum.config.PlatinumConfiguration;
 import com.hartwig.platinum.config.RawDataConfiguration;
 import com.hartwig.platinum.config.SampleConfiguration;
+import com.hartwig.platinum.config.ServiceAccountConfiguration;
 
 import org.junit.Test;
 
@@ -76,6 +77,8 @@ public class ConvertFromGCSPathsTest {
     }
 
     private PlatinumConfiguration createConfiguration(List<SampleConfiguration> sampleConfigurations) {
-        return PlatinumConfiguration.builder().samples(sampleConfigurations).build();
+        return PlatinumConfiguration.builder().samples(sampleConfigurations)
+                .serviceAccount(ServiceAccountConfiguration.builder().kubernetesServiceAccount("ksa").gcpEmailAddress("email").build())
+                .build();
     }
 }

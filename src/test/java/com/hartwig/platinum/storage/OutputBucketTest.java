@@ -12,6 +12,7 @@ import com.google.cloud.storage.BucketInfo;
 import com.google.cloud.storage.Storage;
 import com.hartwig.platinum.config.GcpConfiguration;
 import com.hartwig.platinum.config.PlatinumConfiguration;
+import com.hartwig.platinum.config.ServiceAccountConfiguration;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -23,9 +24,10 @@ public class OutputBucketTest {
     private static final String RUN_NAME = "test";
     private static final String BUCKET_NAME = "platinum-output-test";
     public static final String REGION = "europe-west4";
-    private static final String SERVICE_ACCOUNT = "sa@sa.com";
     private static final PlatinumConfiguration CONFIGURATION =
-            PlatinumConfiguration.builder().gcp(GcpConfiguration.builder().build()).build();
+            PlatinumConfiguration.builder().gcp(GcpConfiguration.builder().build())
+                    .serviceAccount(ServiceAccountConfiguration.builder().kubernetesServiceAccount("ksa").gcpEmailAddress("gcp").build())
+                    .build();
     private static final String CMEK_KEY = "/location/of/key";
     private Storage storage;
     private Bucket bucket;
@@ -45,7 +47,7 @@ public class OutputBucketTest {
     public void createsNewBucketInSpecifiedLocation() {
         ArgumentCaptor<BucketInfo> bucketInfoArgumentCaptor = ArgumentCaptor.forClass(BucketInfo.class);
         when(storage.create(bucketInfoArgumentCaptor.capture())).thenReturn(bucket);
-        String bucketName = victim.findOrCreate(RUN_NAME, REGION, SERVICE_ACCOUNT, CONFIGURATION);
+        String bucketName = victim.findOrCreate(RUN_NAME, REGION, CONFIGURATION);
         assertThat(bucketName).isEqualTo(BUCKET_NAME);
         BucketInfo bucketInfo = bucketInfoArgumentCaptor.getValue();
         assertThat(bucketInfo.getLocation()).isEqualTo(REGION);
@@ -56,7 +58,7 @@ public class OutputBucketTest {
         ArgumentCaptor<BucketInfo> bucketInfoArgumentCaptor = ArgumentCaptor.forClass(BucketInfo.class);
         when(storage.create(bucketInfoArgumentCaptor.capture())).thenReturn(bucket);
         when(storage.get(BUCKET_NAME)).thenReturn(bucket);
-        String bucketName = victim.findOrCreate(RUN_NAME, REGION, SERVICE_ACCOUNT, CONFIGURATION);
+        String bucketName = victim.findOrCreate(RUN_NAME, REGION, CONFIGURATION);
         verify(storage, never()).create(Mockito.<BucketInfo>any());
         assertThat(bucketName).isEqualTo(BUCKET_NAME);
     }
@@ -69,7 +71,6 @@ public class OutputBucketTest {
         when(storage.getIamPolicy(configuredBucket)).thenReturn(Policy.newBuilder().build());
         String bucketName = victim.findOrCreate(RUN_NAME,
                 REGION,
-                SERVICE_ACCOUNT,
                 PlatinumConfiguration.builder().from(CONFIGURATION).outputBucket(configuredBucket).build());
         assertThat(bucketName).isEqualTo(BUCKET_NAME);
         BucketInfo bucketInfo = bucketInfoArgumentCaptor.getValue();
@@ -80,7 +81,7 @@ public class OutputBucketTest {
     public void appliesCmekIfSpecifiedInConfig() {
         ArgumentCaptor<BucketInfo> bucketInfoArgumentCaptor = ArgumentCaptor.forClass(BucketInfo.class);
         when(storage.create(bucketInfoArgumentCaptor.capture())).thenReturn(bucket);
-        victim.findOrCreate(RUN_NAME, REGION, SERVICE_ACCOUNT, PlatinumConfiguration.builder().cmek(CMEK_KEY).build());
+        victim.findOrCreate(RUN_NAME, REGION, PlatinumConfiguration.builder().from(CONFIGURATION).cmek(CMEK_KEY).build());
         assertThat(bucketInfoArgumentCaptor.getValue().getDefaultKmsKeyName()).isEqualTo(CMEK_KEY);
     }
 }

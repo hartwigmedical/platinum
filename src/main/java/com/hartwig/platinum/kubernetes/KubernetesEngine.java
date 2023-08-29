@@ -1,32 +1,38 @@
 package com.hartwig.platinum.kubernetes;
 
-import com.google.api.client.googleapis.json.GoogleJsonResponseException;
-import com.google.api.services.container.v1beta1.Container;
-import com.google.api.services.container.v1beta1.Container.Projects.Locations.Clusters.Create;
-import com.google.api.services.container.v1beta1.Container.Projects.Locations.Clusters.Get;
-import com.google.api.services.container.v1beta1.model.*;
-import com.hartwig.pdl.PipelineInput;
-import com.hartwig.platinum.Console;
-import com.hartwig.platinum.config.BatchConfiguration;
-import com.hartwig.platinum.config.GcpConfiguration;
-import com.hartwig.platinum.config.PlatinumConfiguration;
-import com.hartwig.platinum.config.ServiceAccountConfiguration;
-import com.hartwig.platinum.kubernetes.pipeline.PipelineConfigMapBuilder;
-import com.hartwig.platinum.kubernetes.pipeline.PipelineConfigMapVolume.PipelineConfigMapVolumeBuilder;
-import com.hartwig.platinum.scheduling.JobScheduler;
-import joptsimple.internal.Strings;
-import net.jodah.failsafe.Failsafe;
-import net.jodah.failsafe.RetryPolicy;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static java.time.Duration.ofMinutes;
+import static java.time.Duration.ofSeconds;
 
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
 
-import static java.time.Duration.ofMinutes;
-import static java.time.Duration.ofSeconds;
+import com.google.api.client.googleapis.json.GoogleJsonResponseException;
+import com.google.api.services.container.v1beta1.Container;
+import com.google.api.services.container.v1beta1.Container.Projects.Locations.Clusters.Create;
+import com.google.api.services.container.v1beta1.Container.Projects.Locations.Clusters.Get;
+import com.google.api.services.container.v1beta1.model.Cluster;
+import com.google.api.services.container.v1beta1.model.CreateClusterRequest;
+import com.google.api.services.container.v1beta1.model.IPAllocationPolicy;
+import com.google.api.services.container.v1beta1.model.NodeConfig;
+import com.google.api.services.container.v1beta1.model.NodePool;
+import com.google.api.services.container.v1beta1.model.Operation;
+import com.google.api.services.container.v1beta1.model.PrivateClusterConfig;
+import com.hartwig.pdl.PipelineInput;
+import com.hartwig.platinum.Console;
+import com.hartwig.platinum.config.BatchConfiguration;
+import com.hartwig.platinum.config.GcpConfiguration;
+import com.hartwig.platinum.config.PlatinumConfiguration;
+import com.hartwig.platinum.kubernetes.pipeline.PipelineConfigMapBuilder;
+import com.hartwig.platinum.kubernetes.pipeline.PipelineConfigMapVolume.PipelineConfigMapVolumeBuilder;
+import com.hartwig.platinum.scheduling.JobScheduler;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import net.jodah.failsafe.Failsafe;
+import net.jodah.failsafe.RetryPolicy;
 
 public class KubernetesEngine {
     private static final Logger LOGGER = LoggerFactory.getLogger(KubernetesEngine.class);
@@ -143,10 +149,9 @@ public class KubernetesEngine {
                                             ? configuration.sampleIds().size()
                                             : configuration.samples().size())))
                     .orElse(TargetNodePool.defaultPool());
-            String serviceAccountEmail = configuration.serviceAccount().flatMap(ServiceAccountConfiguration::gcpEmailAddress).orElse(Strings.EMPTY);
             if (!targetNodePool.isDefault()) {
                 new GcloudNodePool(processRunner).create(targetNodePool,
-                        serviceAccountEmail,
+                        configuration.serviceAccount().gcpEmailAddress(),
                         clusterName,
                         gcpConfiguration.projectOrThrow());
             }
@@ -155,7 +160,6 @@ public class KubernetesEngine {
                     pipelineInputs,
                     new PipelineConfigMapBuilder(new PipelineConfigMapVolumeBuilder(kubernetesClientProxy), runName),
                     outputBucketName,
-                    serviceAccountEmail,
                     configuration,
                     targetNodePool);
         } catch (Exception e) {

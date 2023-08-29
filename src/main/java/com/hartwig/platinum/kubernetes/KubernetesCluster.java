@@ -1,23 +1,27 @@
 package com.hartwig.platinum.kubernetes;
 
-import com.hartwig.pdl.PipelineInput;
-import com.hartwig.pdl.SampleInput;
-import com.hartwig.platinum.config.PlatinumConfiguration;
-import com.hartwig.platinum.config.ServiceAccountConfiguration;
-import com.hartwig.platinum.kubernetes.pipeline.*;
-import com.hartwig.platinum.scheduling.JobScheduler;
-import io.fabric8.kubernetes.api.model.Volume;
-import joptsimple.internal.Strings;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Stream.concat;
+import static java.util.stream.Stream.of;
 
 import java.time.Duration;
 import java.util.List;
 import java.util.function.Supplier;
 
-import static java.util.stream.Collectors.toList;
-import static java.util.stream.Stream.concat;
-import static java.util.stream.Stream.of;
+import com.hartwig.pdl.PipelineInput;
+import com.hartwig.pdl.SampleInput;
+import com.hartwig.platinum.config.PlatinumConfiguration;
+import com.hartwig.platinum.kubernetes.pipeline.PipelineArguments;
+import com.hartwig.platinum.kubernetes.pipeline.PipelineConfigMapBuilder;
+import com.hartwig.platinum.kubernetes.pipeline.PipelineContainer;
+import com.hartwig.platinum.kubernetes.pipeline.PipelineJob;
+import com.hartwig.platinum.kubernetes.pipeline.SampleArgument;
+import com.hartwig.platinum.scheduling.JobScheduler;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import io.fabric8.kubernetes.api.model.Volume;
 
 public class KubernetesCluster {
     public final static String NAMESPACE = "default";
@@ -27,19 +31,17 @@ public class KubernetesCluster {
     private final List<Supplier<PipelineInput>> pipelineInputs;
     private final PipelineConfigMapBuilder configMaps;
     private final String outputBucketName;
-    private final String serviceAccountEmail;
     private final PlatinumConfiguration configuration;
     private final TargetNodePool targetNodePool;
 
     KubernetesCluster(final String runName, final JobScheduler scheduler,
             final List<Supplier<PipelineInput>> pipelineInputs, final PipelineConfigMapBuilder configMaps, final String outputBucketName,
-            final String serviceAccountEmail, final PlatinumConfiguration configuration, final TargetNodePool targetNodePool) {
+            final PlatinumConfiguration configuration, final TargetNodePool targetNodePool) {
         this.runName = runName.toLowerCase();
         this.scheduler = scheduler;
         this.pipelineInputs = pipelineInputs;
         this.configMaps = configMaps;
         this.outputBucketName = outputBucketName;
-        this.serviceAccountEmail = serviceAccountEmail;
         this.configuration = configuration;
         this.targetNodePool = targetNodePool;
     }
@@ -53,12 +55,10 @@ public class KubernetesCluster {
             SampleArgument sample = SampleArgument.sampleJson(sampleName, runName);
             Volume configMapVolume = configMaps.forSample(sampleName, pipelineInput);
             PipelineContainer pipelineContainer = new PipelineContainer(sample,
-                    new PipelineArguments(configuration.argumentOverrides(), outputBucketName, serviceAccountEmail, configuration),
+                    new PipelineArguments(configuration.argumentOverrides(), outputBucketName, configuration.serviceAccount().gcpEmailAddress(), configuration),
                     configMapVolume.getName(),
                     configuration.image(),
                     configuration);
-            String serviceAccountName = configuration.serviceAccount().flatMap(ServiceAccountConfiguration::kubernetesServiceAccount)
-                            .orElse(Strings.EMPTY);
 
             scheduler.submit(new PipelineJob(sampleName + "-" + runName,
                     configuration.keystorePassword()
@@ -66,7 +66,7 @@ public class KubernetesCluster {
                             .orElse(pipelineContainer.asKubernetes()),
                     concat(of(configMapVolume), configuration.keystorePassword().map(p -> maybeJksVolume).stream()).collect(
                             toList()),
-                    serviceAccountName,
+                    configuration.serviceAccount().kubernetesServiceAccount(),
                     targetNodePool,
                     configuration.gcp().jobTtl().orElse(Duration.ZERO)));
             numSubmitted++;
