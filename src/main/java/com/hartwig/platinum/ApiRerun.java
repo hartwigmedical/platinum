@@ -1,20 +1,14 @@
 package com.hartwig.platinum;
 
-import static java.lang.String.format;
-
 import com.hartwig.ApiException;
 import com.hartwig.api.RunApi;
 import com.hartwig.api.SetApi;
 import com.hartwig.api.helpers.OnlyOne;
-import com.hartwig.api.model.CreateRun;
-import com.hartwig.api.model.Ini;
-import com.hartwig.api.model.Run;
-import com.hartwig.api.model.SampleSet;
-import com.hartwig.api.model.SampleType;
-import com.hartwig.api.model.Status;
-
+import com.hartwig.api.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static java.lang.String.format;
 
 public class ApiRerun {
 
@@ -38,6 +32,9 @@ public class ApiRerun {
             return getOrCreateRun(tumorSampleName, set);
         } catch (ApiException e) {
             throw new IllegalArgumentException(format("No sets with consent for the database could be found for [%s]", tumorSampleName));
+        } catch (IllegalStateException e) {
+            LOGGER.error("Failed to get or create run for [{}]", tumorSampleName);
+            throw e;
         }
     }
 

@@ -4,7 +4,6 @@ import com.hartwig.platinum.kubernetes.pipeline.PipelineJob;
 import io.fabric8.kubernetes.api.model.batch.Job;
 import io.fabric8.kubernetes.api.model.batch.JobBuilder;
 import io.fabric8.kubernetes.api.model.batch.JobSpec;
-import io.fabric8.kubernetes.client.KubernetesClientException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,7 +27,8 @@ public class JobSubmitter {
         JobSpec spec = job.asKubernetes();
         Job existing = kubernetesClientProxy.jobs().withName(job.getName()).get();
         if (existing == null) {
-            return submit(job, spec);
+            submit(job, spec);
+            return true;
         } else if (jobIs(existing, JOB_COMPLETE_STATUS)) {
             LOGGER.info("Job [{}] existed and completed successfully, skipping", job.getName());
             return false;
@@ -36,7 +36,8 @@ public class JobSubmitter {
             if (retryFailed) {
                 LOGGER.info("Job [{}] existed but failed, restarting", job.getName());
                 kubernetesClientProxy.jobs().delete(existing);
-                return submit(job, spec);
+                submit(job, spec);
+                return true;
             } else {
                 LOGGER.info("Job [{}] existed but failed, skipping", job.getName());
                 return false;
@@ -47,21 +48,15 @@ public class JobSubmitter {
         }
     }
 
-    private boolean submit(final PipelineJob job, final JobSpec spec) {
-        try {
-            kubernetesClientProxy.jobs()
-                    .create(new JobBuilder().withNewMetadata()
-                            .withName(job.getName())
-                            .withNamespace(NAMESPACE)
-                            .endMetadata()
-                            .withSpec(spec)
-                            .build());
-            LOGGER.info("Submitted [{}]", job.getName());
-            return true;
-        } catch (KubernetesClientException e) {
-            kubernetesClientProxy.authorise();
-            return submit(job, spec);
-        }
+    private void submit(final PipelineJob job, final JobSpec spec) {
+        kubernetesClientProxy.jobs()
+                .create(new JobBuilder().withNewMetadata()
+                        .withName(job.getName())
+                        .withNamespace(NAMESPACE)
+                        .endMetadata()
+                        .withSpec(spec)
+                        .build());
+        LOGGER.info("Submitted [{}]", job.getName());
     }
 
     public static boolean jobIs(Job job, String stateName) {
