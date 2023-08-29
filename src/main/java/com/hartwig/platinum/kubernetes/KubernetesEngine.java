@@ -10,9 +10,11 @@ import com.hartwig.platinum.Console;
 import com.hartwig.platinum.config.BatchConfiguration;
 import com.hartwig.platinum.config.GcpConfiguration;
 import com.hartwig.platinum.config.PlatinumConfiguration;
+import com.hartwig.platinum.config.ServiceAccountConfiguration;
 import com.hartwig.platinum.kubernetes.pipeline.PipelineConfigMapBuilder;
 import com.hartwig.platinum.kubernetes.pipeline.PipelineConfigMapVolume.PipelineConfigMapVolumeBuilder;
 import com.hartwig.platinum.scheduling.JobScheduler;
+import joptsimple.internal.Strings;
 import net.jodah.failsafe.Failsafe;
 import net.jodah.failsafe.RetryPolicy;
 import org.slf4j.Logger;
@@ -120,8 +122,7 @@ public class KubernetesEngine {
     }
 
     public KubernetesCluster findOrCreate(final String clusterName, final String runName,
-            final List<Supplier<PipelineInput>> pipelineInputs, final String outputBucketName,
-                                          final String serviceAccountEmail) {
+            final List<Supplier<PipelineInput>> pipelineInputs, final String outputBucketName) {
         try {
             GcpConfiguration gcpConfiguration = configuration.gcp();
             String parent = String.format("projects/%s/locations/%s", gcpConfiguration.projectOrThrow(), gcpConfiguration.regionOrThrow());
@@ -142,6 +143,7 @@ public class KubernetesEngine {
                                             ? configuration.sampleIds().size()
                                             : configuration.samples().size())))
                     .orElse(TargetNodePool.defaultPool());
+            String serviceAccountEmail = configuration.serviceAccount().flatMap(ServiceAccountConfiguration::gcpEmailAddress).orElse(Strings.EMPTY);
             if (!targetNodePool.isDefault()) {
                 new GcloudNodePool(processRunner).create(targetNodePool,
                         serviceAccountEmail,
@@ -150,7 +152,6 @@ public class KubernetesEngine {
             }
             return new KubernetesCluster(runName,
                     jobScheduler,
-                    configuration.serviceAccount().get().kubernetesServiceAccount().get(),
                     pipelineInputs,
                     new PipelineConfigMapBuilder(new PipelineConfigMapVolumeBuilder(kubernetesClientProxy), runName),
                     outputBucketName,

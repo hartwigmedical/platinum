@@ -3,9 +3,11 @@ package com.hartwig.platinum.kubernetes;
 import com.hartwig.pdl.PipelineInput;
 import com.hartwig.pdl.SampleInput;
 import com.hartwig.platinum.config.PlatinumConfiguration;
+import com.hartwig.platinum.config.ServiceAccountConfiguration;
 import com.hartwig.platinum.kubernetes.pipeline.*;
 import com.hartwig.platinum.scheduling.JobScheduler;
 import io.fabric8.kubernetes.api.model.Volume;
+import joptsimple.internal.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,7 +24,6 @@ public class KubernetesCluster {
     private final static Logger LOGGER = LoggerFactory.getLogger(KubernetesCluster.class);
     private final String runName;
     private final JobScheduler scheduler;
-    private final String kubernetesServiceAccount;
     private final List<Supplier<PipelineInput>> pipelineInputs;
     private final PipelineConfigMapBuilder configMaps;
     private final String outputBucketName;
@@ -30,12 +31,11 @@ public class KubernetesCluster {
     private final PlatinumConfiguration configuration;
     private final TargetNodePool targetNodePool;
 
-    KubernetesCluster(final String runName, final JobScheduler scheduler, final String kubernetesServiceAccount,
+    KubernetesCluster(final String runName, final JobScheduler scheduler,
             final List<Supplier<PipelineInput>> pipelineInputs, final PipelineConfigMapBuilder configMaps, final String outputBucketName,
             final String serviceAccountEmail, final PlatinumConfiguration configuration, final TargetNodePool targetNodePool) {
         this.runName = runName.toLowerCase();
         this.scheduler = scheduler;
-        this.kubernetesServiceAccount = kubernetesServiceAccount;
         this.pipelineInputs = pipelineInputs;
         this.configMaps = configMaps;
         this.outputBucketName = outputBucketName;
@@ -57,13 +57,16 @@ public class KubernetesCluster {
                     configMapVolume.getName(),
                     configuration.image(),
                     configuration);
+            String serviceAccountName = configuration.serviceAccount().flatMap(ServiceAccountConfiguration::kubernetesServiceAccount)
+                            .orElse(Strings.EMPTY);
+
             scheduler.submit(new PipelineJob(sampleName + "-" + runName,
                     configuration.keystorePassword()
                             .map(p -> new JksEnabledContainer(pipelineContainer.asKubernetes(), maybeJksVolume, p).asKubernetes())
                             .orElse(pipelineContainer.asKubernetes()),
                     concat(of(configMapVolume), configuration.keystorePassword().map(p -> maybeJksVolume).stream()).collect(
                             toList()),
-                    kubernetesServiceAccount,
+                    serviceAccountName,
                     targetNodePool,
                     configuration.gcp().jobTtl().orElse(Duration.ZERO)));
             numSubmitted++;

@@ -102,10 +102,9 @@ public class KubernetesClusterTest {
     private KubernetesCluster victimise(PlatinumConfiguration configuration) {
         return new KubernetesCluster("test",
                 scheduler,
-                "platinum-sa",
                 pipelineInputs,
                 configMaps,
-                "output",
+                "output-bucket",
                 "sa@gcloud.com",
                 configuration,
                 TargetNodePool.defaultPool());

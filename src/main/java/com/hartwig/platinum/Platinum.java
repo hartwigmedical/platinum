@@ -46,15 +46,15 @@ public class Platinum {
     }
 
     public void run() {
-        LOGGER.info("Starting platinum run with name {} and input {}", Console.bold(runName), Console.bold(input));
+        LOGGER.info("Starting Platinum run with name {} and input {}", Console.bold(runName), Console.bold(input));
         GcpConfiguration gcpConfiguration = configuration.gcp();
         String clusterName = configuration.cluster().orElse(runName);
+        String email = configuration.serviceAccount().flatMap(ServiceAccountConfiguration::gcpEmailAddress).orElse("");
 
         List<Supplier<PipelineInput>> pipelineInputs = pdlConversion.apply(configuration);
         int submitted = kubernetesEngine.findOrCreate(clusterName, runName,
                         pipelineInputs,
-                        OutputBucket.from(storage).findOrCreate(runName, gcpConfiguration.regionOrThrow(), serviceAccountConfiguration.gcpEmailAddress(), configuration),
-                        serviceAccountConfiguration.gcpEmailAddress())
+                        OutputBucket.from(storage).findOrCreate(runName, gcpConfiguration.regionOrThrow(), email, configuration))
                 .submit();
         LOGGER.info("Platinum started {} pipelines on GCP", Console.bold(String.valueOf(submitted)));
         LOGGER.info("You can monitor their progress with: {}", Console.bold("./platinum status"));

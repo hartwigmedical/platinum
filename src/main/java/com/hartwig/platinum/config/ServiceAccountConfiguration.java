@@ -10,7 +10,7 @@ import java.util.Optional;
 @Value.Immutable
 public interface ServiceAccountConfiguration {
 
-    String gcpEmailAddress();
+    Optional<String> gcpEmailAddress();
 
     Optional<String> kubernetesServiceAccount();
 
