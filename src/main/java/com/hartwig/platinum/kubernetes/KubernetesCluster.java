@@ -10,6 +10,7 @@ import java.util.function.Supplier;
 
 import com.hartwig.pdl.PipelineInput;
 import com.hartwig.pdl.SampleInput;
+import com.hartwig.platinum.PlatinumResult;
 import com.hartwig.platinum.config.PlatinumConfiguration;
 import com.hartwig.platinum.kubernetes.pipeline.PipelineArguments;
 import com.hartwig.platinum.kubernetes.pipeline.PipelineConfigMapBuilder;
@@ -34,9 +35,9 @@ public class KubernetesCluster {
     private final PlatinumConfiguration configuration;
     private final TargetNodePool targetNodePool;
 
-    KubernetesCluster(final String runName, final JobScheduler scheduler,
-            final List<Supplier<PipelineInput>> pipelineInputs, final PipelineConfigMapBuilder configMaps, final String outputBucketName,
-            final PlatinumConfiguration configuration, final TargetNodePool targetNodePool) {
+    KubernetesCluster(final String runName, final JobScheduler scheduler, final List<Supplier<PipelineInput>> pipelineInputs,
+            final PipelineConfigMapBuilder configMaps, final String outputBucketName, final PlatinumConfiguration configuration,
+            final TargetNodePool targetNodePool) {
         this.runName = runName.toLowerCase();
         this.scheduler = scheduler;
         this.pipelineInputs = pipelineInputs;
@@ -46,31 +47,39 @@ public class KubernetesCluster {
         this.targetNodePool = targetNodePool;
     }
 
-    public int submit() {
+    public PlatinumResult submit() {
         Volume maybeJksVolume = new JksSecret().asKubernetes();
         int numSubmitted = 0;
+        int failures = 0;
         for (Supplier<PipelineInput> inputSupplier : pipelineInputs) {
-            PipelineInput pipelineInput = inputSupplier.get();
-            String sampleName = pipelineInput.tumor().map(SampleInput::name).orElseThrow();
-            SampleArgument sample = SampleArgument.sampleJson(sampleName, runName);
-            Volume configMapVolume = configMaps.forSample(sampleName, pipelineInput);
-            PipelineContainer pipelineContainer = new PipelineContainer(sample,
-                    new PipelineArguments(configuration.argumentOverrides(), outputBucketName, configuration.serviceAccount().gcpEmailAddress(), configuration),
-                    configMapVolume.getName(),
-                    configuration.image(),
-                    configuration);
+            try {
+                PipelineInput pipelineInput = inputSupplier.get();
+                String sampleName = pipelineInput.tumor().map(SampleInput::name).orElseThrow();
+                SampleArgument sample = SampleArgument.sampleJson(sampleName, runName);
+                Volume configMapVolume = configMaps.forSample(sampleName, pipelineInput);
+                PipelineContainer pipelineContainer = new PipelineContainer(sample,
+                        new PipelineArguments(configuration.argumentOverrides(),
+                                outputBucketName,
+                                configuration.serviceAccount().gcpEmailAddress(),
+                                configuration),
+                        configMapVolume.getName(),
+                        configuration.image(),
+                        configuration);
 
-            scheduler.submit(new PipelineJob(sampleName + "-" + runName,
-                    configuration.keystorePassword()
-                            .map(p -> new JksEnabledContainer(pipelineContainer.asKubernetes(), maybeJksVolume, p).asKubernetes())
-                            .orElse(pipelineContainer.asKubernetes()),
-                    concat(of(configMapVolume), configuration.keystorePassword().map(p -> maybeJksVolume).stream()).collect(
-                            toList()),
-                    configuration.serviceAccount().kubernetesServiceAccount(),
-                    targetNodePool,
-                    configuration.gcp().jobTtl().orElse(Duration.ZERO)));
-            numSubmitted++;
+                scheduler.submit(new PipelineJob(sampleName + "-" + runName,
+                        configuration.keystorePassword()
+                                .map(p -> new JksEnabledContainer(pipelineContainer.asKubernetes(), maybeJksVolume, p).asKubernetes())
+                                .orElse(pipelineContainer.asKubernetes()),
+                        concat(of(configMapVolume), configuration.keystorePassword().map(p -> maybeJksVolume).stream()).collect(toList()),
+                        configuration.serviceAccount().kubernetesServiceAccount(),
+                        targetNodePool,
+                        configuration.gcp().jobTtl().orElse(Duration.ZERO)));
+                numSubmitted++;
+            } catch (Exception e) {
+                LOGGER.warn("Unexpected failure, skipping further processing of sample");
+                failures++;
+            }
         }
-        return numSubmitted;
+        return PlatinumResult.of(numSubmitted, failures);
     }
 }

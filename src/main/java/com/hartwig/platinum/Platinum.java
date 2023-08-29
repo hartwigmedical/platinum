@@ -1,5 +1,7 @@
 package com.hartwig.platinum;
 
+import static com.hartwig.platinum.Console.bold;
+
 import java.util.List;
 import java.util.function.Supplier;
 
@@ -35,19 +37,18 @@ public class Platinum {
     }
 
     public void run() {
-        LOGGER.info("Starting Platinum run with name {} and input {}", Console.bold(runName), Console.bold(input));
+        LOGGER.info("Starting Platinum run with name {} and input {}", bold(runName), bold(input));
         String clusterName = configuration.cluster().orElse(runName);
 
         List<Supplier<PipelineInput>> pipelineInputs = pdlConversion.apply(configuration);
-        int submitted = kubernetesEngine.findOrCreate(clusterName,
+        PlatinumResult result = kubernetesEngine.findOrCreate(clusterName,
                 runName,
                 pipelineInputs,
-                OutputBucket.from(storage)
-                        .findOrCreate(runName,
-                                configuration.gcp().regionOrThrow(),
-                                configuration)).submit();
-        LOGGER.info("Platinum started {} pipelines on GCP", Console.bold(String.valueOf(submitted)));
-        LOGGER.info("You can monitor their progress with: {}", Console.bold("./platinum status"));
+                OutputBucket.from(storage).findOrCreate(runName, configuration.gcp().regionOrThrow(), configuration)).submit();
+        LOGGER.info("Platinum started {} pipelines on GCP", bold(String.valueOf(result.numSuccess())));
+        if (result.numFailure() > 0) {
+            LOGGER.info("{} pipelines failed on submission, see previous messages", bold(String.valueOf(result.numFailure())));
+        }
+        LOGGER.info("You can monitor their progress with: {}", bold("./platinum status"));
     }
-
 }
