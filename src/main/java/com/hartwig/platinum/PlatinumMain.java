@@ -1,20 +1,26 @@
 package com.hartwig.platinum;
 
+import java.util.concurrent.Callable;
+
 import com.google.cloud.storage.StorageOptions;
 import com.hartwig.platinum.config.PlatinumConfiguration;
 import com.hartwig.platinum.config.Validation;
 import com.hartwig.platinum.iam.IamProvider;
 import com.hartwig.platinum.iam.ResourceManagerProvider;
-import com.hartwig.platinum.kubernetes.*;
+import com.hartwig.platinum.kubernetes.ContainerProvider;
+import com.hartwig.platinum.kubernetes.JobSubmitter;
+import com.hartwig.platinum.kubernetes.KubernetesClientProxy;
+import com.hartwig.platinum.kubernetes.KubernetesEngine;
+import com.hartwig.platinum.kubernetes.ProcessRunner;
 import com.hartwig.platinum.pdl.PDLConversion;
 import com.hartwig.platinum.scheduling.JobScheduler;
-import io.fabric8.kubernetes.client.DefaultKubernetesClient;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import io.fabric8.kubernetes.client.DefaultKubernetesClient;
 import picocli.CommandLine;
 import picocli.CommandLine.Option;
-
-import java.util.concurrent.Callable;
 
 public class PlatinumMain implements Callable<Integer> {
     private static final Logger LOGGER = LoggerFactory.getLogger(PlatinumMain.class);
@@ -44,15 +50,15 @@ public class PlatinumMain implements Callable<Integer> {
             Validation.apply(runName, configuration);
 
             String clusterName = configuration.cluster().orElse(runName);
-            KubernetesClientProxy kubernetesClientProxy = new KubernetesClientProxy(clusterName,
-                    configuration.gcp(), new DefaultKubernetesClient());
+            KubernetesClientProxy kubernetesClientProxy =
+                    new KubernetesClientProxy(clusterName, configuration.gcp(), new DefaultKubernetesClient());
             JobSubmitter jobSubmitter = new JobSubmitter(kubernetesClientProxy, configuration.retryFailed());
             JobScheduler jobScheduler = JobScheduler.fromConfiguration(configuration, jobSubmitter, kubernetesClientProxy);
 
             new Platinum(runName,
                     inputJson,
                     StorageOptions.newBuilder().setProjectId(configuration.gcp().projectOrThrow()).build().getService(),
-                    IamProvider.get(), configuration.serviceAccount().orElseThrow(),
+                    IamProvider.get(),
                     ResourceManagerProvider.get(),
                     new KubernetesEngine(ContainerProvider.get(), new ProcessRunner(), configuration, jobScheduler, kubernetesClientProxy),
                     configuration,
