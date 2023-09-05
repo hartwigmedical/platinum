@@ -54,7 +54,11 @@ public class KubernetesCluster {
         for (Supplier<PipelineInput> inputSupplier : pipelineInputs) {
             try {
                 PipelineInput pipelineInput = inputSupplier.get();
-                String sampleName = pipelineInput.tumor().map(SampleInput::name).orElseThrow();
+                String sampleName = pipelineInput.tumor()
+                        .map(SampleInput::name)
+                        .orElseGet(() -> pipelineInput.reference()
+                                .map(SampleInput::name)
+                                .orElseThrow(() -> new IllegalArgumentException("At least one tumor or reference sample must be provided")));
                 SampleArgument sample = SampleArgument.sampleJson(sampleName, runName);
                 Volume configMapVolume = configMaps.forSample(sampleName, pipelineInput);
                 PipelineContainer pipelineContainer = new PipelineContainer(sample,
@@ -76,7 +80,7 @@ public class KubernetesCluster {
                         configuration.gcp().jobTtl().orElse(Duration.ZERO)));
                 numSubmitted++;
             } catch (Exception e) {
-                LOGGER.warn("Unexpected failure, skipping further processing of sample");
+                LOGGER.warn("Unexpected failure, skipping further processing of sample", e);
                 failures++;
             }
         }
