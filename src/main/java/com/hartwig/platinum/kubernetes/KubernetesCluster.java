@@ -55,10 +55,9 @@ public class KubernetesCluster {
             try {
                 PipelineInput pipelineInput = inputSupplier.get();
                 String sampleName = pipelineInput.tumor()
+                        .or(pipelineInput::reference)
                         .map(SampleInput::name)
-                        .orElseGet(() -> pipelineInput.reference()
-                                .map(SampleInput::name)
-                                .orElseThrow(() -> new IllegalArgumentException("At least one tumor or reference sample must be provided")));
+                        .orElseThrow(() -> new IllegalArgumentException("At least one tumor or reference sample must be provided"));
                 SampleArgument sample = SampleArgument.sampleJson(sampleName, runName);
                 Volume configMapVolume = configMaps.forSample(sampleName, pipelineInput);
                 PipelineContainer pipelineContainer = new PipelineContainer(sample,

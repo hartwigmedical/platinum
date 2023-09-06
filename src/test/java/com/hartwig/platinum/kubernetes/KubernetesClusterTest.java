@@ -48,7 +48,7 @@ public class KubernetesClusterTest {
         scheduler = mock(JobScheduler.class);
         configMaps = mock(PipelineConfigMapBuilder.class);
         SampleInput tumor = SampleInput.builder().name("tumor-a").build();
-        PipelineInput input1 = PipelineInput.builder().setName("setName").tumor(tumor)/*.reference(reference)*/.build();
+        PipelineInput input1 = PipelineInput.builder().setName("setName").tumor(tumor).build();
         pipelineInputs = List.of(() -> input1);
         when(configMaps.forSample(any(), any())).thenReturn(new VolumeBuilder().withName(CONFIG).build());
         ServiceAccountConfiguration serviceAccountConfiguration =
