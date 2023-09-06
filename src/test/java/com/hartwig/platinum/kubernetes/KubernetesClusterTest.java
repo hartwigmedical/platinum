@@ -3,6 +3,7 @@ package com.hartwig.platinum.kubernetes;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -40,6 +41,7 @@ public class KubernetesClusterTest {
     private JobScheduler scheduler;
     private PipelineConfigMapBuilder configMaps;
     private ImmutablePlatinumConfiguration.Builder configBuilder;
+    private ArgumentCaptor<PipelineJob> jobCaptor;
 
     @Before
     public void setUp() {
@@ -53,15 +55,15 @@ public class KubernetesClusterTest {
                 ServiceAccountConfiguration.builder().kubernetesServiceAccount("platinum-sa").gcpEmailAddress("e@mail.com").build();
         ImmutableGcpConfiguration gcpConfiguration = GcpConfiguration.builder().project("project").region("region").build();
         configBuilder = PlatinumConfiguration.builder().gcp(gcpConfiguration).serviceAccount(serviceAccountConfiguration);
+        jobCaptor = ArgumentCaptor.forClass(PipelineJob.class);
     }
 
     @Test
     public void addsJksVolumeAndContainerIfPasswordSpecified() {
-        ArgumentCaptor<PipelineJob> job = ArgumentCaptor.forClass(PipelineJob.class);
         victim = victimise(configBuilder.keystorePassword("changeit").build());
         victim.submit();
-        verify(scheduler).submit(job.capture());
-        PipelineJob result = job.getValue();
+        verify(scheduler).submit(jobCaptor.capture());
+        PipelineJob result = jobCaptor.getValue();
         assertThat(result.getVolumes()).extracting(Volume::getName).contains("jks");
         assertThat(result.getContainer().getEnv()).hasSize(1);
         EnvVar env = result.getContainer().getEnv().get(0);
@@ -71,19 +73,17 @@ public class KubernetesClusterTest {
 
     @Test
     public void submitsJobsToTheScheduler() {
-        ArgumentCaptor<PipelineJob> job = ArgumentCaptor.forClass(PipelineJob.class);
         victimise(configBuilder.keystorePassword("changeit").build()).submit();
-        verify(scheduler).submit(job.capture());
-        assertThat(job.getAllValues().size()).isEqualTo(SAMPLES.size());
+        verify(scheduler).submit(jobCaptor.capture());
+        assertThat(jobCaptor.getAllValues().size()).isEqualTo(SAMPLES.size());
     }
 
     @Test
     public void addsConfigMapAndSecretVolumes() {
-        ArgumentCaptor<PipelineJob> job = ArgumentCaptor.forClass(PipelineJob.class);
         victim = victimise(configBuilder.build());
         victim.submit();
-        verify(scheduler).submit(job.capture());
-        assertThat(job.getValue().getVolumes()).extracting(Volume::getName).containsExactly(CONFIG);
+        verify(scheduler).submit(jobCaptor.capture());
+        assertThat(jobCaptor.getValue().getVolumes()).extracting(Volume::getName).containsExactly(CONFIG);
     }
 
     @Test
@@ -94,16 +94,49 @@ public class KubernetesClusterTest {
 
         when(configMaps.forSample("tumor-a", inputA)).thenReturn(new VolumeBuilder().withName("config-a").build());
         when(configMaps.forSample("tumor-b", inputB)).thenReturn(new VolumeBuilder().withName("config-b").build());
-        ArgumentCaptor<PipelineJob> job = ArgumentCaptor.forClass(PipelineJob.class);
         victimise(configBuilder.build()).submit();
-        verify(scheduler, times(2)).submit(job.capture());
-        List<PipelineJob> allJobs = job.getAllValues();
+        verify(scheduler, times(2)).submit(jobCaptor.capture());
+        List<PipelineJob> allJobs = jobCaptor.getAllValues();
         List<PipelineJob> jobsA = allJobs.stream().filter(j -> j.getName().equals("tumor-a-test")).collect(Collectors.toList());
         assertThat(jobsA.size()).isEqualTo(1);
         assertThat(jobsA.get(0).getVolumes().stream().filter(v -> v.getName().equals("config-a")).collect(Collectors.toList())).hasSize(1);
         List<PipelineJob> jobsB = allJobs.stream().filter(j -> j.getName().equals("tumor-b-test")).collect(Collectors.toList());
         assertThat(jobsB.size()).isEqualTo(1);
         assertThat(jobsB.get(0).getVolumes().stream().filter(v -> v.getName().equals("config-b")).collect(Collectors.toList())).hasSize(1);
+    }
+
+    @Test
+    public void usesReferenceSampleNameWhenTumorSampleUnspecified() {
+        PipelineInput input = PipelineInput.builder().setName("set").reference(SampleInput.builder().name("reference").build()).build();
+        pipelineInputs = List.of(() -> input);
+
+        victimise(configBuilder.build()).submit();
+        verify(scheduler).submit(jobCaptor.capture());
+        assertThat(jobCaptor.getAllValues().size()).isEqualTo(1);
+        PipelineJob job = jobCaptor.getValue();
+        assertThat(job.getName()).isEqualTo("reference-test");
+    }
+
+    @Test
+    public void usesTumorSampleNameWhenBothSamplesSpecified() {
+        PipelineInput input = PipelineInput.builder().setName("set").reference(SampleInput.builder().name("reference").build())
+                .tumor(SampleInput.builder().name("tumor").build()).build();
+        pipelineInputs = List.of(() -> input);
+
+        victimise(configBuilder.build()).submit();
+        verify(scheduler).submit(jobCaptor.capture());
+        assertThat(jobCaptor.getAllValues().size()).isEqualTo(1);
+        PipelineJob job = jobCaptor.getValue();
+        assertThat(job.getName()).isEqualTo("tumor-test");
+    }
+
+    @Test
+    public void ignoresSampleWhenNeitherTumorNorReferenceSpecified() {
+        PipelineInput input = PipelineInput.builder().setName("set").build();
+        pipelineInputs = List.of(() -> input);
+
+        victimise(configBuilder.build()).submit();
+        verify(scheduler, never()).submit(any());
     }
 
     private static ImmutableSampleArgument sample() {
