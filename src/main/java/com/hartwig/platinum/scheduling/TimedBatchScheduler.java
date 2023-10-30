@@ -6,6 +6,7 @@ import com.hartwig.platinum.kubernetes.pipeline.PipelineJob;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@Deprecated
 public class TimedBatchScheduler implements JobScheduler {
     private static final Logger LOGGER = LoggerFactory.getLogger(TimedBatchScheduler.class);
     private final JobSubmitter jobSubmitter;
