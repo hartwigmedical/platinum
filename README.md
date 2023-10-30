@@ -100,16 +100,17 @@ When evaluating your own performance, a few things to keep in mind:
 
 Platinum runs on the Google Cloud Platform. To start you'll need:
 
-- A GCP account. You can get started with the credit they offer and a
-  credit card (for verification). See Google's [docs](https://cloud.google.com/free/docs/gcp-free-tier).
-- [A GCP project](https://cloud.google.com/resource-manager/docs/creating-managing-projects)
-  and a user within that project with the [Owner role](https://cloud.google.com/iam/docs/understanding-roles).
-- [A region](https://cloud.google.com/compute/docs/regions-zones) where you plan to store your data and run your workload
-  (hint: pick the region closest to where your data currently resides)
+- A GCP account. You can get started with the credit they offer and a  credit card (for verification). See Google's 
+  [docs](https://cloud.google.com/free/docs/gcp-free-tier).
+- [A GCP project](https://cloud.google.com/resource-manager/docs/creating-managing-projects) and a user within that project with the
+  [Owner role](https://cloud.google.com/iam/docs/understanding-roles).
+- [A region](https://cloud.google.com/compute/docs/regions-zones) where you plan to store your data and run your workload (hint: pick the 
+  region closest to where your data currently resides)
 
-You'll also need a machine to checkout this repo and run Platinum with
-these installed:
+You'll also need a machine to checkout this repository and run Platinum. You should have the following installed and some basic familiarity
+with how to use them:
 
+* [git](https://git-scm.com/).
 * [Java 11](https://www.oracle.com/java/technologies/javase-jdk11-downloads.html).
 * [gcloud SDK](https://cloud.google.com/sdk/docs/downloads-interactive)
   (configured to access your new project) and the connector module which you can install with `gcloud components install kubectl`.
@@ -117,8 +118,11 @@ these installed:
 
 ### Quickstart
 
-Run the following from the root of this repo where `examples/quickstart/colomini.json` is your input
-file (make sure to adjust the `export` lines):
+The basic user-facing component of Platinum is a shell script (`platinum`) that attempts to simplify interaction with the cluster and the
+Platinum software itself. In the simplest cases the following should help you get your job running.
+
+Run the following from the root of this repo where `examples/quickstart/colomini.json` is your input file (make sure to adjust the
+`export` lines):
 
 ```shell script
 export PROJECT=$(gcloud projects list | grep 'your project name from above' | awk '{print $1}') 
@@ -134,6 +138,8 @@ export EXPERIMENT_NAME='experiment_name'
 # Results are waiting in Google Cloud Storage
 gsutil ls gs://platinum-output-$EXPERIMENT_NAME
 ```
+
+See below for [advanced usage](#advanced-usage).
 
 ### Configuring your GCP Project
 
@@ -228,6 +234,21 @@ Internally Platinum uses the GRCh37 assembly `Homo_sapiens.GRCh37.GATK.illumina.
 assembly `GCA_000001405.15_GRCh38_no_alt_analysis_set.fna`.
 
 There is no support for use of other assemblies or versions.
+
+## Advanced Usage
+
+Many use cases will be fine interacting with just the `platinum` script but its limitations start to show in some scenarios:
+
+* The `status` subcommand is quite naive and just queries for jobs using the active Kubernetes cluster configuration. If you are interacting
+  with multiple clusters and switching between them, or if your cluster is a multi-tenant arrangement you'll find the output is not really
+  that useful. In that case you can use the `kubectl` command directly to isolate your jobs more effectively.
+* When using `update`, in the background the script just calls out to `git` and attempts to pull the latest changes overtop what you have
+  locally. If you've made any modifications this will be immediately obvious. Also there are multiple branches containing Platinum versions
+  that are compatible with different underlying Pipeline5 releases. To run with different `pipeline5` versions you may have to switch to a
+  different branch, which requires basic knowledge of `git`. This approach allows us to keep shipping updates without worrying about keeping
+  compatability with old versions forever, while also not marooning users without a working Platinum.
+
+Some more advanced usages are detailed below.
 
 ### Running with an existing cluster
 
@@ -380,13 +401,5 @@ argumentOverrides:
   starting_point: "calling_complete"
 ```
 
-The following starting points are supported, in order, as each starting point logically proceeds the others. See
-the [HMF cancer analysis pipeline](https://github.com/hartwigmedical/pipeline5)
-documentation for a complete description of all stages.
-
-| Starting Point     | Description                                                                                                              |
-|--------------------|--------------------------------------------------------------------------------------------------------------------------|
-| alignment_complete | Skip alignment and use persisted BAM files, WGS metrics and flagstats                                                    |
-| calling_complete   | Skip germline, small variant, and structural variant calling, as well as cobalt and amber and use their persisted output |
-| gripss_complete    | Skip gripss, the structural caller filtering and annotation.                                                             |
-| purple_complete    | Skips purple, and only runs the final tertiary steps.                                                                    |
+See [HMF cancer analysis pipeline](https://github.com/hartwigmedical/pipeline5) for a current list of available starting points.
+                  |
