@@ -1,5 +1,6 @@
 package com.hartwig.platinum.config.version;
 
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -13,52 +14,32 @@ public class VersionCompatibilityTest {
     @Before
     public void setup() {
         pipelineVersion = mock(PipelineVersion.class);
-        when(pipelineVersion.pad("1")).thenReturn("1.0.0");
-        when(pipelineVersion.pad("2")).thenReturn("2.0.0");
-        versionCompatibility = new VersionCompatibility("1", "2", pipelineVersion);
+        when(pipelineVersion.pad(anyString())).thenAnswer(i -> i.getArguments()[0]);
+        versionCompatibility = new VersionCompatibility("1.0.0", "2.0.0", pipelineVersion);
     }
 
     @Test
     public void shouldAcceptInRangeVersion() {
-        assertAllows("1.1.0", true);
+        versionCompatibility.check("1.1.0");
     }
 
-    @Test
+    @Test(expected = IllegalArgumentException.class)
     public void shouldRejectTooOldVersion() {
-        assertAllows("0.5.0", false);
+        versionCompatibility.check("0.5.0");
     }
 
-    @Test
+    @Test(expected = IllegalArgumentException.class)
     public void shouldRejectTooNewVersion() {
-        assertAllows("3.0.0", false);
+        versionCompatibility.check("3.0.0");
     }
 
     @Test
     public void shouldAcceptArbitrarilyOldVersionWhenMinSetToSmallest() {
-        when(pipelineVersion.pad(VersionCompatibility.SMALLEST_VERSION)).thenReturn(VersionCompatibility.SMALLEST_VERSION);
-        String version = "0.0.1";
-        when(pipelineVersion.pad(version)).thenReturn(version);
-        new VersionCompatibility(VersionCompatibility.SMALLEST_VERSION, "2", pipelineVersion).check(version);
+        new VersionCompatibility(VersionCompatibility.SMALLEST_VERSION, "2.0.0", pipelineVersion).check("0.0.1");
     }
 
     @Test
     public void shouldAcceptArbitrarilyNewVersionWhenNoMaxIsSetToLargest() {
-        String version = "10000.10000.5324";
-        when(pipelineVersion.pad(version)).thenAnswer(i -> i.getArguments()[0]);
-        new VersionCompatibility("1", VersionCompatibility.UNLIMITED, pipelineVersion).check(version);
-    }
-
-    private void assertAllows(String version, boolean allows) {
-        when(pipelineVersion.pad(version)).thenReturn(version);
-        if (allows) {
-            versionCompatibility.check(version);
-        } else {
-            try {
-                versionCompatibility.check(version);
-            } catch (IllegalArgumentException e) {
-                return;
-            }
-            throw new RuntimeException("Expected an IllegalArgumentException");
-        }
+        new VersionCompatibility("1.0.0", VersionCompatibility.UNLIMITED, pipelineVersion).check("10000.10000.5324");
     }
 }
