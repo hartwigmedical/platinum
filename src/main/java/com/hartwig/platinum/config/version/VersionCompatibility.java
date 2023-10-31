@@ -26,7 +26,7 @@ public class VersionCompatibility {
     }
 
     public void check(final String candidate) {
-        String padded = pipelineVersion.pad(candidate);
+        String padded = pipelineVersion.pad(pipelineVersion.extract(candidate));
         if (!(minimum.isLowerThanOrEqualTo(padded) && maximum.isGreaterThanOrEqualTo(padded))) {
             throw new IllegalArgumentException(format("Pipeline5 version must be between [%s] and [%s] (requested [%s])",
                     minimum, maximumForDisplay, candidate));
