@@ -22,15 +22,16 @@
         <fabric8.version>5.3.2</fabric8.version>
         <jackson.version>2.10.0</jackson.version>
         <failsafe.version>2.0.1</failsafe.version>
-        <junit.version>4.13.1</junit.version>
-        <mockito.version>4.3.1</mockito.version>
-        <assertj-core.version>3.8.0</assertj-core.version>
         <google-api-services-iam.version>v1-rev20200709-1.30.10</google-api-services-iam.version>
         <google-api-services-cloudresourcemanager.version>v1-rev20200720-1.30.10
         </google-api-services-cloudresourcemanager.version>
         <google-api-services-container.version>v1beta1-rev20200724-1.30.10</google-api-services-container.version>
         <java-client.version>1.35.0</java-client.version>
         <pdl.version>1.0.2</pdl.version>
+        <semvar4j.version>3.1.0</semvar4j.version>
+        <junit.version>4.13.1</junit.version>
+        <mockito.version>4.3.1</mockito.version>
+        <assertj-core.version>3.8.0</assertj-core.version>
     </properties>
 
     <distributionManagement>
@@ -143,6 +144,11 @@
             <artifactId>slf4j-log4j12</artifactId>
             <version>${slf4j-log4j12.version}</version>
             <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.vdurmont</groupId>
+            <artifactId>semver4j</artifactId>
+            <version>${semvar4j.version}</version>
         </dependency>
         <dependency>
             <groupId>junit</groupId>
