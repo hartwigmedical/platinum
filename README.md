@@ -248,6 +248,20 @@ Many use cases will be fine interacting with just the `platinum` script but its 
   different branch, which requires basic knowledge of `git`. This approach allows us to keep shipping updates without worrying about keeping
   compatability with old versions forever, while also not marooning users without a working Platinum.
 
+### Really-Quick Kubernetes Refresher
+
+For the purposes of Platinum:
+
+* `kubectl` is used to interface with Kubernetes from the command line
+* Platinum submits "jobs" to the Kubernetes cluster
+* Each job will spawn a pod to run the associated pipeline, and if there is a failure successive pods to finish
+
+Some useful commands:
+
+* `kubectl get jobs`
+* `kubectl get pods`
+* `kubectl logs (pod name)`
+
 Some more advanced usages are detailed below.
 
 ### Running with an existing cluster
@@ -322,7 +336,9 @@ NAME                                READY   STATUS    RESTARTS   AGE
 cpct12345678-5qb2s   1/1     Running   0          172m
 ```
 
-To check the logs of an individual pipeline use the platinum logs command.
+If your cluster is a shared one there may be pods from other jobs listed, in that case use `kubectl get pods | grep ...`.
+
+To check the logs of an individual pipeline use the `platinum logs` command.
 
 ```shell script
 Pauls-MacBook-Pro:platinum pwolfe$ ./platinum logs cpct12345678-5qb2s
