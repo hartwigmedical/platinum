@@ -37,12 +37,17 @@ public class PipelineArgumentsTest {
         assertThat(asCommand(victim)).containsOnlyOnce("-output_cram", "true");
     }
 
+    @Test(expected = IllegalArgumentException.class)
+    public void doesNotAllowOverrideOfApi() {
+        createVictimWithOverrides("hmf_api_url", "whatever");
+    }
+
     private List<String> asCommand(final PipelineArguments victim) {
         return victim.asCommand(SampleArgument.sampleJson("tumor-run", "run"));
     }
 
-    private PipelineArguments createVictimWithOverrides(final String s, final String value) {
-        return new PipelineArguments(Map.of(s, value),
+    private PipelineArguments createVictimWithOverrides(final String key, final String value) {
+        return new PipelineArguments(Map.of(key, value),
                 "output",
                 "email",
                 PlatinumConfiguration.builder()

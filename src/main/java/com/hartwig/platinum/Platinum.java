@@ -8,6 +8,8 @@ import java.util.function.Supplier;
 import com.google.cloud.storage.Storage;
 import com.hartwig.pdl.PipelineInput;
 import com.hartwig.platinum.config.PlatinumConfiguration;
+import com.hartwig.platinum.config.version.PipelineVersion;
+import com.hartwig.platinum.config.version.VersionCompatibility;
 import com.hartwig.platinum.kubernetes.KubernetesEngine;
 import com.hartwig.platinum.pdl.PDLConversion;
 import com.hartwig.platinum.storage.OutputBucket;
@@ -18,7 +20,6 @@ import org.slf4j.LoggerFactory;
 public class Platinum {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Platinum.class);
-
     private final String runName;
     private final String input;
     private final Storage storage;

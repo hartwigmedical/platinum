@@ -3,3 +3,5 @@
 *.iml
 target
 .java-version
+.old_platinum_version
+

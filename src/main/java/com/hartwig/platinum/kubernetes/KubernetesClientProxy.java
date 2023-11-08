@@ -37,6 +37,7 @@ public class KubernetesClientProxy {
         this.region = gcpConfiguration.regionOrThrow();
         this.project = gcpConfiguration.projectOrThrow();
         this.kubernetesClient = kubernetesClient;
+        authorise();
     }
 
     public MixedOperation<ConfigMap, ConfigMapList, Resource<ConfigMap>> configMaps() {

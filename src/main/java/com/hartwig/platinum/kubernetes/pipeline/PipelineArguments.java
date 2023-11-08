@@ -1,5 +1,7 @@
 package com.hartwig.platinum.kubernetes.pipeline;
 
+import static java.lang.String.format;
+
 import static com.hartwig.platinum.config.OverrideableArguments.of;
 
 import java.util.List;
@@ -19,20 +21,29 @@ public class PipelineArguments {
 
     public PipelineArguments(final Map<String, String> overrides, final String outputBucket, final String serviceAccountEmail,
             final PlatinumConfiguration platinumConfiguration) {
-        this.overrides = overrides;
+        this.overrides = addDashesIfNeeded(overrides);
+        checkForForbiddenOverrides(this.overrides);
         this.outputBucket = outputBucket;
         this.serviceAccountEmail = serviceAccountEmail;
         this.platinumConfiguration = platinumConfiguration;
     }
 
     public List<String> asCommand(final SampleArgument sampleArgument) {
-        return of(Map.of("-profile", "public", "-output_cram", "false")).override(of(addDashesIfNeeded()))
+        return of(Map.of("-profile", "public", "-output_cram", "false")).override(of(overrides))
                 .override(of(sampleArgument.arguments()))
                 .override(of(fixed()))
                 .asCommand("/pipeline5.sh");
     }
 
-    private Map<String, String> addDashesIfNeeded() {
+    private void checkForForbiddenOverrides(Map<String, String> proposedOverrides) {
+        List.of("-hmf_api_url").forEach(forbidden -> {
+            if (proposedOverrides.containsKey(forbidden)) {
+                throw new IllegalArgumentException(format("Override of pipeline5 argument [%s] is not allowed from Platinum", forbidden));
+            }
+        });
+    }
+
+    private Map<String, String> addDashesIfNeeded(Map<String, String> overrides) {
         return overrides.entrySet()
                 .stream()
                 .collect(Collectors.toMap(e -> e.getKey().startsWith("-") ? e.getKey() : "-" + e.getKey(), Map.Entry::getValue));
