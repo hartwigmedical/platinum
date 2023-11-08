@@ -14,7 +14,8 @@ public class VersionCompatibilityTest {
     @Before
     public void setup() {
         pipelineVersion = mock(PipelineVersion.class);
-        when(pipelineVersion.pad(anyString())).thenAnswer(i -> i.getArguments()[0]);
+        when(pipelineVersion.padVersionStringToSemanticVersion(anyString())).thenAnswer(i -> i.getArguments()[0]);
+        when(pipelineVersion.extractVersionFromDockerImageName(anyString())).thenAnswer(i -> i.getArguments()[0]);
         versionCompatibility = new VersionCompatibility("1.0.0", "2.0.0", pipelineVersion);
     }
 

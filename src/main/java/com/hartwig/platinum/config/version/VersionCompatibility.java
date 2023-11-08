@@ -15,18 +15,18 @@ public class VersionCompatibility {
 
     public VersionCompatibility(final String minInclusive, final String maxInclusive, final PipelineVersion pipelineVersion) {
         this.pipelineVersion = pipelineVersion;
-        minimum = new Semver(pipelineVersion.pad(minInclusive));
+        minimum = new Semver(pipelineVersion.padVersionStringToSemanticVersion(minInclusive));
         if (maxInclusive.equals(UNLIMITED)) {
             maximumForDisplay = maxInclusive;
             maximum = new Semver(LARGEST_VERSION);
         } else {
-            maximumForDisplay = pipelineVersion.pad(maxInclusive);
+            maximumForDisplay = pipelineVersion.padVersionStringToSemanticVersion(maxInclusive);
             maximum = new Semver(maximumForDisplay);
         }
     }
 
     public void check(final String candidate) {
-        String padded = pipelineVersion.pad(pipelineVersion.extract(candidate));
+        String padded = pipelineVersion.padVersionStringToSemanticVersion(pipelineVersion.extractVersionFromDockerImageName(candidate));
         if (!(minimum.isLowerThanOrEqualTo(padded) && maximum.isGreaterThanOrEqualTo(padded))) {
             throw new IllegalArgumentException(format("Pipeline5 version must be between [%s] and [%s] (requested [%s])",
                     minimum, maximumForDisplay, candidate));
