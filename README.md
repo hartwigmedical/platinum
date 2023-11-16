@@ -50,7 +50,7 @@ In addition to the HMF algorithms, Platinum depends on a number of resources (da
 
 ### Resources used by Platinum
 
-                                                   Resource                                                    | Purpose | References
+|                                      Resource                                                                | Purpose | References
 :-------------------------------------------------------------------------------------------------------------:|---|:-:
  [<img src="logos/grc.png" title="Genome Reference Consortium" height=100>](https://www.ncbi.nlm.nih.gov/grc)  | GRC makes available the human reference genome (GRCh37 or GRCh38) used in nearly every step of the pipeline. | N/A
                     [<img src="logos/ensembl.png" title="Ensembl">](http://www.ensembl.org)                    | The ensembl database is used extensively throughout our algorithms as the source for all gene and transcript annotations. | [disclaimer](http://www.ensembl.org/info/about/legal/disclaimer.html)
