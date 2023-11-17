@@ -35,6 +35,8 @@ import io.fabric8.kubernetes.api.model.VolumeBuilder;
 
 public class KubernetesClusterTest {
     private static final String CONFIG = "config";
+    private static final String TUMOR_NAME = "tumor-name";
+    private static final String REFERENCE_NAME = "reference-name";
     private static final List<SampleArgument> SAMPLES = List.of(sample());
     private List<Supplier<PipelineInput>> pipelineInputs;
     private KubernetesCluster victim;
@@ -47,7 +49,7 @@ public class KubernetesClusterTest {
     public void setUp() {
         scheduler = mock(JobScheduler.class);
         configMaps = mock(PipelineConfigMapBuilder.class);
-        SampleInput tumor = SampleInput.builder().name("tumor-a").build();
+        SampleInput tumor = SampleInput.builder().name(TUMOR_NAME).turquoiseSubject(TUMOR_NAME).build();
         PipelineInput input1 = PipelineInput.builder().setName("setName").tumor(tumor).build();
         pipelineInputs = List.of(() -> input1);
         when(configMaps.forSample(any(), any())).thenReturn(new VolumeBuilder().withName(CONFIG).build());
@@ -88,46 +90,48 @@ public class KubernetesClusterTest {
 
     @Test
     public void addsConfigMapForSampleToEachJob() {
-        PipelineInput inputA = PipelineInput.builder().setName("set-a").tumor(SampleInput.builder().name("tumor-a").build()).build();
-        PipelineInput inputB = PipelineInput.builder().setName("set-b").tumor(SampleInput.builder().name("tumor-b").build()).build();
+        String nameA = TUMOR_NAME + "-a";
+        String nameB = TUMOR_NAME + "-b";
+        PipelineInput inputA = PipelineInput.builder().setName("set-a").tumor(SampleInput.builder().name(nameA).turquoiseSubject(nameA).build()).build();
+        PipelineInput inputB = PipelineInput.builder().setName("set-b").tumor(SampleInput.builder().name(nameB).turquoiseSubject(nameB).build()).build();
         pipelineInputs = List.of(() -> inputA, () -> inputB);
 
-        when(configMaps.forSample("tumor-a", inputA)).thenReturn(new VolumeBuilder().withName("config-a").build());
-        when(configMaps.forSample("tumor-b", inputB)).thenReturn(new VolumeBuilder().withName("config-b").build());
+        when(configMaps.forSample(nameA, inputA)).thenReturn(new VolumeBuilder().withName("config-a").build());
+        when(configMaps.forSample(nameB, inputB)).thenReturn(new VolumeBuilder().withName("config-b").build());
         victimise(configBuilder.build()).submit();
         verify(scheduler, times(2)).submit(jobCaptor.capture());
         List<PipelineJob> allJobs = jobCaptor.getAllValues();
-        List<PipelineJob> jobsA = allJobs.stream().filter(j -> j.getName().equals("tumor-a-test")).collect(Collectors.toList());
+        List<PipelineJob> jobsA = allJobs.stream().filter(j -> j.getName().equals(nameA + "-test")).collect(Collectors.toList());
         assertThat(jobsA.size()).isEqualTo(1);
         assertThat(jobsA.get(0).getVolumes().stream().filter(v -> v.getName().equals("config-a")).collect(Collectors.toList())).hasSize(1);
-        List<PipelineJob> jobsB = allJobs.stream().filter(j -> j.getName().equals("tumor-b-test")).collect(Collectors.toList());
+        List<PipelineJob> jobsB = allJobs.stream().filter(j -> j.getName().equals(nameB + "-test")).collect(Collectors.toList());
         assertThat(jobsB.size()).isEqualTo(1);
         assertThat(jobsB.get(0).getVolumes().stream().filter(v -> v.getName().equals("config-b")).collect(Collectors.toList())).hasSize(1);
     }
 
     @Test
     public void usesReferenceSampleNameWhenTumorSampleUnspecified() {
-        PipelineInput input = PipelineInput.builder().setName("set").reference(SampleInput.builder().name("reference").build()).build();
+        PipelineInput input = PipelineInput.builder().setName("set").reference(SampleInput.builder().name(REFERENCE_NAME).turquoiseSubject(REFERENCE_NAME).build()).build();
         pipelineInputs = List.of(() -> input);
 
         victimise(configBuilder.build()).submit();
         verify(scheduler).submit(jobCaptor.capture());
         assertThat(jobCaptor.getAllValues().size()).isEqualTo(1);
         PipelineJob job = jobCaptor.getValue();
-        assertThat(job.getName()).isEqualTo("reference-test");
+        assertThat(job.getName()).isEqualTo(REFERENCE_NAME + "-test");
     }
 
     @Test
     public void usesTumorSampleNameWhenBothSamplesSpecified() {
-        PipelineInput input = PipelineInput.builder().setName("set").reference(SampleInput.builder().name("reference").build())
-                .tumor(SampleInput.builder().name("tumor").build()).build();
+        PipelineInput input = PipelineInput.builder().setName("set").reference(SampleInput.builder().name(REFERENCE_NAME).turquoiseSubject(REFERENCE_NAME).build())
+                .tumor(SampleInput.builder().name(TUMOR_NAME).turquoiseSubject(TUMOR_NAME).build()).build();
         pipelineInputs = List.of(() -> input);
 
         victimise(configBuilder.build()).submit();
         verify(scheduler).submit(jobCaptor.capture());
         assertThat(jobCaptor.getAllValues().size()).isEqualTo(1);
         PipelineJob job = jobCaptor.getValue();
-        assertThat(job.getName()).isEqualTo("tumor-test");
+        assertThat(job.getName()).isEqualTo(TUMOR_NAME + "-test");
     }
 
     @Test

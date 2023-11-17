@@ -34,9 +34,11 @@ public class ConvertFromGCSPaths implements PDLConversion {
                     final int tumorIndexReadOnly = tumorIndex;
                     if (tumor.bam().isPresent()) {
                         pairs.add(() -> PipelineInput.builder()
-                                .reference(sample.normal().map(n -> SampleInput.builder().name(n.name()).bam(n.bam()).build()))
+                                .reference(sample.normal()
+                                        .map(n -> SampleInput.builder().name(n.name()).turquoiseSubject(n.name()).bam(n.bam()).build()))
                                 .tumor(SampleInput.builder()
                                         .name(tumor.name())
+                                        .turquoiseSubject(tumor.name())
                                         .bam(tumor.bam())
                                         .primaryTumorDoids(sample.primaryTumorDoids())
                                         .build())
@@ -45,9 +47,10 @@ public class ConvertFromGCSPaths implements PDLConversion {
                     } else {
 
                         pairs.add(() -> PipelineInput.builder()
-                                .reference(sample.normal().map(n -> SampleInput.builder().name(n.name()).lanes(toLanes(n.fastq())).build()))
+                                .reference(sample.normal().map(n -> SampleInput.builder().name(n.name()).turquoiseSubject(n.name()).lanes(toLanes(n.fastq())).build()))
                                 .tumor(SampleInput.builder()
                                         .name(tumor.name())
+                                        .turquoiseSubject(tumor.name())
                                         .lanes(toLanes(tumor.fastq()))
                                         .primaryTumorDoids(sample.primaryTumorDoids())
                                         .build())
@@ -58,7 +61,7 @@ public class ConvertFromGCSPaths implements PDLConversion {
                 }
             } else if (sample.normal().isPresent()) {
                 pairs.add(() -> PipelineInput.builder()
-                        .reference(sample.normal().map(n -> SampleInput.builder().name(n.name()).lanes(toLanes(n.fastq())).build()))
+                        .reference(sample.normal().map(n -> SampleInput.builder().name(n.name()).turquoiseSubject(n.name()).lanes(toLanes(n.fastq())).build()))
                         .setName(sample.name())
                         .build());
             }
