@@ -1,5 +1,7 @@
 package com.hartwig.platinum;
 
+import static java.lang.String.format;
+
 import java.util.concurrent.Callable;
 
 import com.google.cloud.storage.StorageOptions;
@@ -24,7 +26,8 @@ import picocli.CommandLine.Option;
 
 public class PlatinumMain implements Callable<Integer> {
     private static final Logger LOGGER = LoggerFactory.getLogger(PlatinumMain.class);
-    private static final String MIN_PV5_VERSION = "5.33";
+    private static final String MIN_PV5_VERSION = "5.33.8";
+    private static final String MAX_PV5_VERSION = VersionCompatibility.UNLIMITED;
 
     @Option(names = { "-n" },
             required = true,
@@ -50,7 +53,7 @@ public class PlatinumMain implements Callable<Integer> {
             PlatinumConfiguration configuration = addRegionAndProject(PlatinumConfiguration.from(inputJson));
             Validation.apply(runName, configuration);
 
-            new VersionCompatibility(MIN_PV5_VERSION, VersionCompatibility.UNLIMITED, new PipelineVersion()).check(configuration.image());
+            new VersionCompatibility(MIN_PV5_VERSION, MAX_PV5_VERSION, new PipelineVersion()).check(configuration.image());
 
             String clusterName = configuration.cluster().orElse(runName);
             KubernetesClientProxy kubernetesClientProxy =
