@@ -36,9 +36,9 @@ public class ConvertForBiopsies implements PDLConversion {
     public List<Supplier<PipelineInput>> apply(final PlatinumConfiguration configuration) {
         return configuration.sampleIds()
                 .stream()
-                .flatMap(biopsy -> sampleApi.list(null, null, null, null, SampleType.TUMOR, biopsy, null).stream())
-                .flatMap(sample -> setApi.list(null, sample.getId(), true).stream())
-                .flatMap(set -> runApi.list(Status.VALIDATED, Ini.SOMATIC_INI, set.getId(), null, null, null, null, "RESEARCH")
+                .flatMap(biopsy -> sampleApi.callList(null, null, null, null, SampleType.TUMOR, biopsy, null).stream())
+                .flatMap(sample -> setApi.callList(null, sample.getId(), true).stream())
+                .flatMap(set -> runApi.callList(Status.VALIDATED, Ini.SOMATIC_INI, set.getId(), null, null, null, null, "RESEARCH", null)
                         .stream()
                         .filter(run -> run.getEndTime() != null)
                         .max(Comparator.comparing(Run::getEndTime))

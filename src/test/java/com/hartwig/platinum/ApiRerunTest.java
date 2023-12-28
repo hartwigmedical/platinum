@@ -48,13 +48,13 @@ public class ApiRerunTest {
         List<Sample> samples = List.of(new Sample().name(biopsy).id(sampleId));
         sampleSet = new SampleSet().id(sampleSetId);
 
-        when(runs.list(null, null, sampleSet.getId(), null, null, null, null, null)).thenReturn(List.of(validatedRun));
+        when(runs.callList(null, null, sampleSet.getId(), null, null, null, null, null, null)).thenReturn(List.of(validatedRun));
         when(sets.canonical(biopsy, SampleType.TUMOR)).thenReturn(sampleSet);
     }
 
     @Test
     public void shouldReturnIdOfExistingRunIfItIsNotInvalidated() {
-        when(runs.list(null, Ini.RERUN_INI, sampleSet.getId(), version, version, null, null, null)).thenReturn(List.of(existingReRun));
+        when(runs.callList(null, Ini.RERUN_INI, sampleSet.getId(), version, version, null, null, null, null)).thenReturn(List.of(existingReRun));
         assertThat(new ApiRerun(runs, sets, bucket, version).create(biopsy)).isEqualTo(3L);
         verify(runs, never()).create(any());
     }
@@ -68,7 +68,7 @@ public class ApiRerunTest {
 
     @Test
     public void shouldCreateRunForSampleIfNoneExists() {
-        when(runs.list(null, Ini.RERUN_INI, sampleSet.getId(), version, version, null, null, null)).thenReturn(emptyList());
+        when(runs.callList(null, Ini.RERUN_INI, sampleSet.getId(), version, version, null, null, null, null)).thenReturn(emptyList());
         ArgumentCaptor<CreateRun> createRunCaptor = ArgumentCaptor.forClass(CreateRun.class);
         when(runs.create(createRunCaptor.capture())).thenReturn(new RunCreated().id(3L));
 

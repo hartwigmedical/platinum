@@ -48,7 +48,7 @@ public class ApiRerun {
      * @return Run ID, never null but the openAPI generated classes are limited.
      */
     private Long getOrCreateRun(final String tumorSampleName, final SampleSet sampleSet) {
-        return OnlyOne.ofNullable(runApi.list(null, Ini.RERUN_INI, sampleSet.getId(), version, version, null, null, null), Run.class)
+        return OnlyOne.ofNullable(runApi.callList(null, Ini.RERUN_INI, sampleSet.getId(), version, version, null, null, null, null), Run.class)
                 .filter(r -> !r.getStatus().equals(Status.INVALIDATED))
                 .map(r -> {
                     LOGGER.info("Using existing run for sample [{}] id [{}]", tumorSampleName, r.getId());
