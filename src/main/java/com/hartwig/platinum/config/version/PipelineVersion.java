@@ -6,7 +6,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class PipelineVersion {
-    String padVersionStringToSemanticVersion(final String candidate) {
+    String padVersionStringToSemanticVersion(final String inputCandidate) {
+        String candidate = inputCandidate.replaceAll("-(alpha|beta).[0-9]+$", "");
         ArrayList<String> versionsGiven = new ArrayList<>(List.of(candidate.split("\\.")));
         if (versionsGiven.size() > 3) {
             throw new IllegalArgumentException(format("Unrecognised pipeline version string [%s]", candidate));
