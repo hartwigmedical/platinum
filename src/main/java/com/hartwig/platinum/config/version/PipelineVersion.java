@@ -4,10 +4,21 @@ import static java.lang.String.format;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class PipelineVersion {
+    private static final Pattern VERSION_PATTERN = Pattern.compile("^(\\d+)\\.(\\d+)\\.(\\d+)(?:-((?:alpha|beta)(?:\\.[0-9]+)*))?$");
     String padVersionStringToSemanticVersion(final String candidate) {
-        ArrayList<String> versionsGiven = new ArrayList<>(List.of(candidate.split("\\.")));
+        Matcher matcher = VERSION_PATTERN.matcher(candidate);
+        ArrayList<String> versionsGiven;
+
+        if (matcher.find()) {
+            versionsGiven = new ArrayList<>(List.of(matcher.group(1), matcher.group(2), matcher.group(3)));
+        } else {
+            versionsGiven = new ArrayList<>(List.of(candidate.split("\\.")));
+        }
+
         if (versionsGiven.size() > 3) {
             throw new IllegalArgumentException(format("Unrecognised pipeline version string [%s]", candidate));
         }
