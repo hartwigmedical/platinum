@@ -143,7 +143,7 @@ See below for [advanced usage](#advanced-usage).
 
 ### Configuring your GCP Project
 
-There are a couple things requiring a one time configuration in your project:
+There are a couple of things requiring a one time configuration in your project:
 
 - Enabling private access such that your VMs will not be exposed to the public internet
 - Enabling the compute and kubernetes apis
@@ -246,7 +246,7 @@ Many use cases will be fine interacting with just the `platinum` script but its 
   locally. If you've made any modifications this will be immediately obvious. Also there are multiple branches containing Platinum versions
   that are compatible with different underlying Pipeline5 releases. To run with different `pipeline5` versions you may have to switch to a
   different branch, which requires basic knowledge of `git`. This approach allows us to keep shipping updates without worrying about keeping
-  compatability with old versions forever, while also not marooning users without a working Platinum.
+  compatibility with old versions forever, while also not marooning users without a working Platinum.
 
 ### Really-Quick Kubernetes Refresher
 
@@ -369,7 +369,7 @@ In our 4 ref + 4 tumor lane benchmark, the peak lasts approx. 45 minutes.
 
 | Quota                          | Peak                   | Description                                                                                                                                                                                                 |
 |--------------------------------|------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| CPU                            | 96 x # of lanes        | Each lane is aligned individually on a 96 core VM. While we use preemptible VMs, CPU count in the selected region is still contrained by this quota.                                                        |
+| CPU                            | 96 x # of lanes        | Each lane is aligned individually on a 96 core VM. While we use preemptible VMs, CPU count in the selected region is still constrained by this quota.                                                       |
 | CPU_ALL_REGIONS                | 96 x # of lanes        | This quota is another limit on CPUs, but also includes any CPUs used in other regions                                                                                                                       |
 | PREEMPTIBLE_LOCAL_SSD_TOTAL_GB | 1.125 TB  x # of lanes | Local SSDs can be attaches to a VM in 375Gb increments. Attaching 3 local SSDs to each VM ensures we have enough space for the input, output and temporary files involved in alignment and somatic calling. |
 | PERSISTENT_DISK_SSD_GB         | 200GB  x # of lanes    | Used for the O/S of each VM, along with HMF resources and tools                                                                                                                                             |
