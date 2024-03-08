@@ -37,7 +37,7 @@ public class ConvertForBiopsies implements PDLConversion {
         return configuration.sampleIds()
                 .stream()
                 .flatMap(biopsy -> sampleApi.callList(null, null, null, null, SampleType.TUMOR, biopsy, null).stream())
-                .flatMap(sample -> setApi.callList(null, sample.getId(), true).stream())
+                .flatMap(sample -> setApi.callList(null, null, sample.getId(), null, null, true).stream())
                 .flatMap(set -> runApi.callList(Status.VALIDATED, Ini.SOMATIC_INI, set.getId(), null, null, null, null, "RESEARCH", null)
                         .stream()
                         .filter(run -> run.getEndTime() != null)

@@ -20,14 +20,14 @@
         <commons-lang3.version>3.9</commons-lang3.version>
         <picocli.version>4.2.0</picocli.version>
         <fabric8.version>5.3.2</fabric8.version>
-        <jackson.version>2.10.0</jackson.version>
+        <jackson.version>2.16.1</jackson.version>
         <failsafe.version>2.0.1</failsafe.version>
         <google-api-services-iam.version>v1-rev20200709-1.30.10</google-api-services-iam.version>
         <google-api-services-cloudresourcemanager.version>v1-rev20200720-1.30.10
         </google-api-services-cloudresourcemanager.version>
         <google-api-services-container.version>v1beta1-rev20200724-1.30.10</google-api-services-container.version>
-        <java-client.version>3.5.5</java-client.version>
-        <pdl.version>1.7.1</pdl.version>
+        <java-client.version>3.7.0-beta.4</java-client.version>
+        <pdl.version>1.10.0</pdl.version>
         <semvar4j.version>3.1.0</semvar4j.version>
         <junit.version>4.13.1</junit.version>
         <mockito.version>4.3.1</mockito.version>
