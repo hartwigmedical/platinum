@@ -13,7 +13,7 @@ steps:
   - id: 'Set version for Maven'
     name: 'maven:3.9.2-eclipse-temurin-11'
     entrypoint: mvn
-    args: [ 'versions:set', '-DnewVersion=${SHORT_SHA}' ]
+    args: [ 'versions:set', '-DnewVersion=$TAG_NAME' ]
   - id: 'Compile, package, release'
     name: 'maven:3.9.2-eclipse-temurin-11'
     entrypoint: mvn
