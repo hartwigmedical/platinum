@@ -16,6 +16,7 @@ steps:
     args: [ 'versions:set', '-DnewVersion=${SHORT_SHA}' ]
   - id: 'Compile, package, release'
     name: 'maven:3.9.2-eclipse-temurin-11'
+    entrypoint: mvn
     args:
       - 'deploy'
       - '-Drelease'
