@@ -176,6 +176,7 @@
     </dependencies>
 
     <build>
+        <finalName>platinum</finalName>
         <extensions>
             <extension>
                 <groupId>com.gkatzioura.maven.cloud</groupId>
