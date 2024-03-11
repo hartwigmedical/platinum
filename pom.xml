@@ -26,7 +26,7 @@
         <google-api-services-cloudresourcemanager.version>v1-rev20200720-1.30.10
         </google-api-services-cloudresourcemanager.version>
         <google-api-services-container.version>v1beta1-rev20200724-1.30.10</google-api-services-container.version>
-        <java-client.version>3.7.0-beta.4</java-client.version>
+        <java-client.version>3.7.0</java-client.version>
         <pdl.version>1.10.0</pdl.version>
         <semvar4j.version>3.1.0</semvar4j.version>
         <junit.version>4.13.1</junit.version>
