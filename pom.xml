@@ -35,11 +35,16 @@
     </properties>
 
     <distributionManagement>
+        <snapshotRepository>
+            <id>artifact-registry</id>
+            <url>artifactregistry://europe-west4-maven.pkg.dev/hmf-build/hmf-maven</url>
+        </snapshotRepository>
         <repository>
-            <id>hmf-release</id>
-            <url>gs://hmf-maven-repository/release</url>
+            <id>artifact-registry</id>
+            <url>artifactregistry://europe-west4-maven.pkg.dev/hmf-build/hmf-maven</url>
         </repository>
     </distributionManagement>
+
 
     <dependencyManagement>
         <dependencies>
@@ -176,6 +181,7 @@
     </dependencies>
 
     <build>
+        <finalName>platinum</finalName>
         <extensions>
             <extension>
                 <groupId>com.gkatzioura.maven.cloud</groupId>
