@@ -2,6 +2,8 @@ package com.hartwig.platinum.kubernetes;
 
 import static java.util.List.of;
 
+import java.util.Map;
+
 import javax.inject.Provider;
 
 import com.hartwig.platinum.config.GcpConfiguration;
@@ -14,6 +16,7 @@ import io.fabric8.kubernetes.api.model.ConfigMapBuilder;
 import io.fabric8.kubernetes.api.model.ConfigMapList;
 import io.fabric8.kubernetes.api.model.ServiceAccount;
 import io.fabric8.kubernetes.api.model.ServiceAccountList;
+import io.fabric8.kubernetes.api.model.Volume;
 import io.fabric8.kubernetes.api.model.VolumeBuilder;
 import io.fabric8.kubernetes.api.model.batch.Job;
 import io.fabric8.kubernetes.api.model.batch.JobList;
@@ -44,21 +47,26 @@ public class KubernetesClientProxy {
         return executeWithRetries(() -> kubernetesClient.configMaps());
     }
 
-    public ConfigMapBuilder newConfigMapBuilder() {
+    public Volume ensureConfigMapVolumeExists(String volumeName, Map<String, String> configMapContents) {
         try {
-            return new ConfigMapBuilder();
+            configMaps().inNamespace(KubernetesCluster.NAMESPACE)
+                    .withName(volumeName)
+                    .createOrReplace(new ConfigMapBuilder()
+                            .addToData(configMapContents)
+                            .withNewMetadata()
+                            .withName(volumeName)
+                            .withNamespace(KubernetesCluster.NAMESPACE)
+                            .endMetadata()
+                            .build());
+            return new VolumeBuilder()
+                    .withName(volumeName)
+                    .editOrNewConfigMap()
+                    .withName(volumeName)
+                    .endConfigMap()
+                    .build();
         } catch (KubernetesClientException e) {
             authorise();
-            return newConfigMapBuilder();
-        }
-    }
-
-    public VolumeBuilder newVolumeBuilder() {
-        try {
-            return new VolumeBuilder();
-        } catch (KubernetesClientException e) {
-            authorise();
-            return newVolumeBuilder();
+            return ensureConfigMapVolumeExists(volumeName, configMapContents);
         }
     }
 
@@ -103,5 +111,4 @@ public class KubernetesClientProxy {
         }
         kubernetesClient = new DefaultKubernetesClient();
     }
-
 }
