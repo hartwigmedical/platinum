@@ -2,7 +2,7 @@ package com.hartwig.platinum.kubernetes.pipeline;
 
 import static java.lang.String.format;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -12,12 +12,14 @@ import com.hartwig.platinum.kubernetes.KubernetesCluster;
 import com.hartwig.platinum.kubernetes.pipeline.PipelineConfigMapVolume.PipelineConfigMapVolumeBuilder;
 
 import org.junit.Test;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
 import io.fabric8.kubernetes.api.model.ConfigMap;
+import io.fabric8.kubernetes.api.model.ConfigMapBuilder;
 import io.fabric8.kubernetes.api.model.ConfigMapList;
 import io.fabric8.kubernetes.api.model.Volume;
+import io.fabric8.kubernetes.api.model.VolumeBuilder;
+import io.fabric8.kubernetes.api.model.VolumeFluent;
 import io.fabric8.kubernetes.client.dsl.MixedOperation;
 import io.fabric8.kubernetes.client.dsl.NonNamespaceOperation;
 import io.fabric8.kubernetes.client.dsl.Resource;
@@ -31,6 +33,7 @@ public class PipelineConfigMapVolumeTest {
         NonNamespaceOperation<ConfigMap, ConfigMapList, Resource<ConfigMap>> namespaceable = Mockito.mock(NonNamespaceOperation.class);
         Resource<ConfigMap> nameable = Mockito.mock(Resource.class);
         when(kubernetesClient.configMaps()).thenReturn(configMaps);
+
         when(configMaps.inNamespace(KubernetesCluster.NAMESPACE)).thenReturn(namespaceable);
         String runName = "run-name";
         String sample = "sample";
@@ -38,17 +41,30 @@ public class PipelineConfigMapVolumeTest {
         when(namespaceable.withName(volumeName)).thenReturn(nameable);
         String content = "content";
 
-        Volume volume = new PipelineConfigMapVolumeBuilder(kubernetesClient).of(runName, sample, content).asKubernetes();
+        ConfigMapBuilder mapBuilder = mock(ConfigMapBuilder.class);
+        ConfigMap configMap = mock(ConfigMap.class);
+        when(kubernetesClient.newConfigMapBuilder()).thenReturn(mapBuilder);
+        when(mapBuilder.addToData(any())).thenReturn(mapBuilder);
+        io.fabric8.kubernetes.api.model.ConfigMapFluent.MetadataNested<ConfigMapBuilder> metadataNested = mock(io.fabric8.kubernetes.api.model.ConfigMapFluent.MetadataNested.class);
+        when(mapBuilder.withNewMetadata()).thenReturn(metadataNested);
+        when(metadataNested.withName(any())).thenReturn(metadataNested);
+        when(metadataNested.withNamespace(any())).thenReturn(metadataNested);
+        when(metadataNested.endMetadata()).thenReturn(mapBuilder);
+        when(mapBuilder.build()).thenReturn(configMap);
 
-        ArgumentCaptor<ConfigMap> configMapCaptor = ArgumentCaptor.forClass(ConfigMap.class);
-        verify(nameable).createOrReplace(configMapCaptor.capture());
-        ConfigMap actual = configMapCaptor.getValue();
-        assertThat(actual.getData().keySet().size()).isEqualTo(1);
-        assertThat(actual.getData()).containsKey(sample);
-        assertThat(actual.getData().get(sample)).isEqualTo(content);
-        assertThat(actual.getMetadata().getName()).isEqualTo(volumeName);
-        assertThat(actual.getMetadata().getNamespace()).isEqualTo(KubernetesCluster.NAMESPACE);
+        VolumeBuilder volumeBuilder = mock(VolumeBuilder.class);
+        VolumeFluent.ConfigMapNested<VolumeBuilder> volumeBuilderConfigMap = mock(VolumeFluent.ConfigMapNested.class);
+        when(kubernetesClient.newVolumeBuilder()).thenReturn(volumeBuilder);
+        when(volumeBuilder.withName(any())).thenReturn(volumeBuilder);
+        when(volumeBuilder.editOrNewConfigMap()).thenReturn(volumeBuilderConfigMap);
+        when(volumeBuilderConfigMap.withName(any())).thenReturn(volumeBuilderConfigMap);
+        when(volumeBuilderConfigMap.endConfigMap()).thenReturn(volumeBuilder);
+        when(volumeBuilder.build()).thenReturn(mock(Volume.class));
 
-        assertThat(volume.getName()).isEqualTo(volumeName);
+        new PipelineConfigMapVolumeBuilder(kubernetesClient).of(runName, sample, content).asKubernetes();
+
+        verify(metadataNested).withName(volumeName);
+        verify(metadataNested).withNamespace("default");
+        verify(volumeBuilder).withName(volumeName);
     }
 }

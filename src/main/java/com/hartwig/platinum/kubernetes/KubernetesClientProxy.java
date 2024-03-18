@@ -10,11 +10,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.fabric8.kubernetes.api.model.ConfigMap;
+import io.fabric8.kubernetes.api.model.ConfigMapBuilder;
 import io.fabric8.kubernetes.api.model.ConfigMapList;
-import io.fabric8.kubernetes.api.model.Secret;
-import io.fabric8.kubernetes.api.model.SecretList;
 import io.fabric8.kubernetes.api.model.ServiceAccount;
 import io.fabric8.kubernetes.api.model.ServiceAccountList;
+import io.fabric8.kubernetes.api.model.VolumeBuilder;
 import io.fabric8.kubernetes.api.model.batch.Job;
 import io.fabric8.kubernetes.api.model.batch.JobList;
 import io.fabric8.kubernetes.client.DefaultKubernetesClient;
@@ -44,8 +44,22 @@ public class KubernetesClientProxy {
         return executeWithRetries(() -> kubernetesClient.configMaps());
     }
 
-    public MixedOperation<Secret, SecretList, Resource<Secret>> secrets() {
-        return executeWithRetries(() -> kubernetesClient.secrets());
+    public ConfigMapBuilder newConfigMapBuilder() {
+        try {
+            return new ConfigMapBuilder();
+        } catch (KubernetesClientException e) {
+            authorise();
+            return newConfigMapBuilder();
+        }
+    }
+
+    public VolumeBuilder newVolumeBuilder() {
+        try {
+            return new VolumeBuilder();
+        } catch (KubernetesClientException e) {
+            authorise();
+            return newVolumeBuilder();
+        }
     }
 
     public NonNamespaceOperation<Job, JobList, ScalableResource<Job>> jobs() {
@@ -89,4 +103,5 @@ public class KubernetesClientProxy {
         }
         kubernetesClient = new DefaultKubernetesClient();
     }
+
 }
