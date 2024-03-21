@@ -7,12 +7,9 @@ import static com.hartwig.platinum.kubernetes.KubernetesUtil.toValidRFC1123Label
 import java.util.Map;
 
 import com.hartwig.platinum.kubernetes.KubernetesClientProxy;
-import com.hartwig.platinum.kubernetes.KubernetesCluster;
 import com.hartwig.platinum.kubernetes.KubernetesComponent;
 
-import io.fabric8.kubernetes.api.model.ConfigMapBuilder;
 import io.fabric8.kubernetes.api.model.Volume;
-import io.fabric8.kubernetes.api.model.VolumeBuilder;
 
 public class PipelineConfigMapVolume implements KubernetesComponent<Volume> {
     private final KubernetesClientProxy kubernetesClientProxy;
@@ -30,16 +27,7 @@ public class PipelineConfigMapVolume implements KubernetesComponent<Volume> {
 
     @Override
     public Volume asKubernetes() {
-        kubernetesClientProxy.configMaps()
-                .inNamespace(KubernetesCluster.NAMESPACE)
-                .withName(volumeName)
-                .createOrReplace(new ConfigMapBuilder().addToData(Map.of(sample, content))
-                        .withNewMetadata()
-                        .withName(volumeName)
-                        .withNamespace(KubernetesCluster.NAMESPACE)
-                        .endMetadata()
-                        .build());
-        return new VolumeBuilder().withName(volumeName).editOrNewConfigMap().withName(volumeName).endConfigMap().build();
+        return kubernetesClientProxy.ensureConfigMapVolumeExists(volumeName, Map.of(sample, content));
     }
 
     public static class PipelineConfigMapVolumeBuilder {

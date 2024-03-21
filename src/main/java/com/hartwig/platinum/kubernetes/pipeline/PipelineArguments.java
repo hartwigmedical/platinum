@@ -64,6 +64,7 @@ public class PipelineArguments {
         if (platinumConfiguration.hmfConfiguration().isPresent() && platinumConfiguration.hmfConfiguration().get().isRerun()) {
             builder.put("-profile", "production");
             builder.put("-context", "RESEARCH");
+            builder.put("-hmf_api_url", platinumConfiguration.hmfConfiguration().get().apiUrl());
         } else {
             builder.put("-context", "PLATINUM");
         }

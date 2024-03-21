@@ -27,7 +27,7 @@ public class JobSubmitter {
 
     public boolean submit(final PipelineJob job) {
         JobSpec spec = job.asKubernetes();
-        Job existing = kubernetesClientProxy.jobs().withName(job.getName()).get();
+        Job existing = kubernetesClientProxy.ensureJobExists(job.getName());
         if (existing == null) {
             submit(job, spec);
             return true;
@@ -37,7 +37,7 @@ public class JobSubmitter {
         } else if (jobIs(existing, JOB_FAILED_STATUS)) {
             if (retryFailed) {
                 LOGGER.info("Job [{}] existed but failed, restarting", job.getName());
-                kubernetesClientProxy.jobs().delete(existing);
+                kubernetesClientProxy.ensureJobDeleted(existing);
                 submit(job, spec);
                 return true;
             } else {
