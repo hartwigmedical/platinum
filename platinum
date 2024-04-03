@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-OLD_VERSION_FILE="$(dirname $0)/.old_platinum_versions"
+OLD_VERSIONS_FILE="$(dirname $0)/.old_platinum_versions"
 
 function bold() {
     echo "[1;30m${@}[0m"
@@ -32,7 +32,7 @@ function install {
 function upgrade() {
     read -p "Upgrade to latest on branch $(git branch --show-current) [y/N]? " response
     if [[ "$response" == "y" || "$response" == "Y" ]]; then
-        git show --oneline -s >> $OLD_VERSION_FILE
+        git show --oneline -s >> $OLD_VERSIONS_FILE
         git pull --rebase
         ./mvnw clean install -DskipTests
     else
