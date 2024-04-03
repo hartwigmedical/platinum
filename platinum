@@ -49,7 +49,7 @@ function login() {
 
 function run {
     export SUPPRESS_GCLOUD_CREDS_WARNING=true
-    JAR=./target/platinum-local-SNAPSHOT.jar
+    JAR=./target/platinum.jar
     if [ ! -f $JAR ]; then
         install
     fi
