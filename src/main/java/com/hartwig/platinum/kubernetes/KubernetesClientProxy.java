@@ -47,24 +47,6 @@ public class KubernetesClientProxy {
         return executeWithRetries(() -> kubernetesClient.configMaps());
     }
 
-    public Job ensureJobExists(String jobName){
-        try {
-            return jobs().withName(jobName).get();
-        } catch (KubernetesClientException e) {
-            authorise();
-            return ensureJobExists(jobName);
-        }
-    }
-
-    public void ensureJobDeleted(Job job){
-        try {
-            jobs().delete(job);
-        } catch (KubernetesClientException e) {
-            authorise();
-            ensureJobDeleted(job);
-        }
-    }
-
     public Volume ensureConfigMapVolumeExists(String volumeName, Map<String, String> configMapContents) {
         try {
             configMaps().inNamespace(KubernetesCluster.NAMESPACE)
