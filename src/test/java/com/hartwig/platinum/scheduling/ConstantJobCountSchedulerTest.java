@@ -16,9 +16,9 @@ import com.hartwig.platinum.kubernetes.pipeline.PipelineJob;
 import org.junit.Before;
 import org.junit.Test;
 
-import io.fabric8.kubernetes.api.model.batch.Job;
-import io.fabric8.kubernetes.api.model.batch.JobCondition;
-import io.fabric8.kubernetes.api.model.batch.JobStatus;
+import io.fabric8.kubernetes.api.model.batch.v1.Job;
+import io.fabric8.kubernetes.api.model.batch.v1.JobCondition;
+import io.fabric8.kubernetes.api.model.batch.v1.JobStatus;
 import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.fabric8.kubernetes.client.dsl.NonNamespaceOperation;
 import io.fabric8.kubernetes.client.dsl.ScalableResource;

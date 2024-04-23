@@ -12,9 +12,9 @@ import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.PodTemplateSpecFluent;
 import io.fabric8.kubernetes.api.model.Toleration;
 import io.fabric8.kubernetes.api.model.Volume;
-import io.fabric8.kubernetes.api.model.batch.JobSpec;
-import io.fabric8.kubernetes.api.model.batch.JobSpecBuilder;
-import io.fabric8.kubernetes.api.model.batch.JobSpecFluent;
+import io.fabric8.kubernetes.api.model.batch.v1.JobSpec;
+import io.fabric8.kubernetes.api.model.batch.v1.JobSpecBuilder;
+import io.fabric8.kubernetes.api.model.batch.v1.JobSpecFluent;
 
 public class PipelineJob implements KubernetesComponent<JobSpec> {
 
@@ -50,7 +50,8 @@ public class PipelineJob implements KubernetesComponent<JobSpec> {
     @Override
     public JobSpec asKubernetes() {
         JobSpecBuilder jobSpecBuilder = new JobSpecBuilder();
-        final PodTemplateSpecFluent.SpecNested<JobSpecFluent.TemplateNested<JobSpecBuilder>> dsl = jobSpecBuilder.withNewTemplate()
+        final PodTemplateSpecFluent<JobSpecFluent<JobSpecBuilder>.TemplateNested<JobSpecBuilder>>.SpecNested<JobSpecFluent<JobSpecBuilder>.TemplateNested<JobSpecBuilder>>
+                dsl = jobSpecBuilder.withNewTemplate()
                 .withNewSpec()
                 .withContainers(container)
                 .withRestartPolicy("Never")
