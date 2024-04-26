@@ -220,6 +220,21 @@ samples:
           read2: "gs://hmf-public/fastq/COLO829Mini/COLO829v003R_AHHKYHDSXX_S13_L004_R2_001.fastq.gz"
 ```
 
+Platinum can also be run from BAM with the following format:
+```yaml
+samples:
+  - name: SAMPLE_NAME
+    tumors:
+      - name: TUMOR1
+        bam: "gs://some/path/to/tumor.bam"
+      - name: TUMOR2 #Optional
+        bam: "gs://some/path/to/other_tumor.bam"
+    normal:
+      name: NORMAL
+      bam: "gs://some/path/to/normal.bam"
+```
+Alignment is skipped automatically when running from BAM.
+
 ### Reference Genomes
 
 Platinum can be run with either a 37 or 38 reference genome release. The default is 38, but to use 37 instead, include these lines at the
