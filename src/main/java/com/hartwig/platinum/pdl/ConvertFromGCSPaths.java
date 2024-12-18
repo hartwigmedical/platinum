@@ -60,10 +60,27 @@ public class ConvertFromGCSPaths implements PDLConversion {
                     tumorIndex++;
                 }
             } else if (sample.normal().isPresent()) {
-                pairs.add(() -> PipelineInput.builder()
-                        .reference(sample.normal().map(n -> SampleInput.builder().name(n.name()).turquoiseSubject(n.name()).lanes(toLanes(n.fastq())).build()))
-                        .setName(sample.name())
-                        .build());
+                if (sample.normal().get().bam().isPresent()) {
+                    pairs.add(() -> PipelineInput.builder()
+                            .reference(sample.normal()
+                                    .map(n -> SampleInput.builder()
+                                            .name(n.name())
+                                            .turquoiseSubject(n.name())
+                                            .bam(n.bam())
+                                            .build()))
+                            .setName(sample.name())
+                            .build());
+                } else {
+                    pairs.add(() -> PipelineInput.builder()
+                            .reference(sample.normal()
+                                    .map(n -> SampleInput.builder()
+                                            .name(n.name())
+                                            .turquoiseSubject(n.name())
+                                            .lanes(toLanes(n.fastq()))
+                                            .build()))
+                            .setName(sample.name())
+                            .build());
+                }
             }
         }
         return pairs;
