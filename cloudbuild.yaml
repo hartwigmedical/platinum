@@ -27,8 +27,8 @@ steps:
     env:
       - MAVEN_OPTS=-Dmaven.repo.local=/cache/.m2
   - id: 'Publish Docker image'
-    name: 'eu.gcr.io/hmf-build/docker-tag'
-    args: ['eu.gcr.io/hmf-build/platinum', '$TAG_NAME', 'Dockerfile']
+    name: 'europe-west4-docker.pkg.dev/hmf-build/docker-tag'
+    args: ['europe-west4-docker.pkg.dev/hmf-build/platinum', '$TAG_NAME', 'Dockerfile']
   - id: 'Refresh bucket from local Maven cache after build'
     name: 'gcr.io/cloud-builders/gsutil'
     args:
@@ -43,4 +43,4 @@ steps:
 options:
   machineType: 'E2_HIGHCPU_8'
 images:
-  - eu.gcr.io/hmf-build/platinum
+  - europe-west4-docker.pkg.dev/hmf-build/platinum
