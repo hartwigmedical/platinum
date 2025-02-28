@@ -9,16 +9,16 @@ import java.util.Optional;
 import java.util.function.Supplier;
 
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
-import com.google.api.services.container.v1beta1.Container;
-import com.google.api.services.container.v1beta1.Container.Projects.Locations.Clusters.Create;
-import com.google.api.services.container.v1beta1.Container.Projects.Locations.Clusters.Get;
-import com.google.api.services.container.v1beta1.model.Cluster;
-import com.google.api.services.container.v1beta1.model.CreateClusterRequest;
-import com.google.api.services.container.v1beta1.model.IPAllocationPolicy;
-import com.google.api.services.container.v1beta1.model.NodeConfig;
-import com.google.api.services.container.v1beta1.model.NodePool;
-import com.google.api.services.container.v1beta1.model.Operation;
-import com.google.api.services.container.v1beta1.model.PrivateClusterConfig;
+import com.google.api.services.container.Container;
+import com.google.api.services.container.Container.Projects.Locations.Clusters.Create;
+import com.google.api.services.container.Container.Projects.Locations.Clusters.Get;
+import com.google.api.services.container.model.Cluster;
+import com.google.api.services.container.model.CreateClusterRequest;
+import com.google.api.services.container.model.IPAllocationPolicy;
+import com.google.api.services.container.model.NodeConfig;
+import com.google.api.services.container.model.NodePool;
+import com.google.api.services.container.model.Operation;
+import com.google.api.services.container.model.PrivateClusterConfig;
 import com.hartwig.pdl.PipelineInput;
 import com.hartwig.platinum.Console;
 import com.hartwig.platinum.config.BatchConfiguration;
@@ -79,7 +79,6 @@ public class KubernetesEngine {
                 privateClusterConfig.setEnablePrivateEndpoint(true);
                 privateClusterConfig.setEnablePrivateNodes(true);
                 privateClusterConfig.setMasterIpv4CidrBlock(gcpConfiguration.masterIpv4CidrBlock());
-                newCluster.setPrivateCluster(true);
                 newCluster.setPrivateClusterConfig(privateClusterConfig);
                 ipAllocationPolicy.setUseIpAliases(true);
             }

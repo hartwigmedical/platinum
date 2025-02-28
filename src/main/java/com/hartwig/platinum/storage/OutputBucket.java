@@ -37,6 +37,7 @@ public class OutputBucket {
                     .setIamConfiguration(BucketInfo.IamConfiguration.newBuilder().setIsUniformBucketLevelAccessEnabled(true).build())
                     .setLocation(region)
                     .setDefaultKmsKeyName(configuration.cmek().orElse(null))
+                    .setAutoclass(BucketInfo.Autoclass.newBuilder().setEnabled(true).build())
                     .build());
             Policy bucketPolicy = storage.getIamPolicy(bucketName);
             storage.setIamPolicy(bucketName,

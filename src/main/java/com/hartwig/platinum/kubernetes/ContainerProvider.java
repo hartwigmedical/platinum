@@ -6,8 +6,8 @@ import java.util.Set;
 
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.json.jackson2.JacksonFactory;
-import com.google.api.services.container.v1beta1.Container;
-import com.google.api.services.container.v1beta1.ContainerScopes;
+import com.google.api.services.container.Container;
+import com.google.api.services.container.ContainerScopes;
 import com.google.auth.http.HttpCredentialsAdapter;
 import com.google.auth.oauth2.GoogleCredentials;
 
