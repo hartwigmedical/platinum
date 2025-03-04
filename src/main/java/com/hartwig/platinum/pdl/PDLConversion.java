@@ -4,8 +4,11 @@ import java.util.List;
 import java.util.function.Supplier;
 
 import com.hartwig.api.HmfApi;
+import com.hartwig.lama.client.DefaultApi;
+import com.hartwig.lama.client.LamaClient;
 import com.hartwig.pdl.PipelineInput;
 import com.hartwig.pdl.generator.PdlGenerator;
+import com.hartwig.pdl.generator.sample.Lamav2Api;
 import com.hartwig.platinum.ApiRerun;
 import com.hartwig.platinum.config.PlatinumConfiguration;
 
@@ -16,7 +19,9 @@ public interface PDLConversion {
     static PDLConversion create(final PlatinumConfiguration configuration) {
         return configuration.hmfConfiguration().map(hmfConfiguration -> {
             HmfApi api = HmfApi.create(hmfConfiguration.apiUrl());
-            PdlGenerator pdlGenerator = PdlGenerator.forResearch(api);
+
+            Lamav2Api lamav2Api = new Lamav2Api(getLamaClient(configuration));
+            PdlGenerator pdlGenerator = PdlGenerator.forResearch(api, lamav2Api);
             if (hmfConfiguration.isRerun()) {
                 return new ConvertForRerun(pdlGenerator,
                         new ApiRerun(api.runs(),
@@ -29,6 +34,10 @@ public interface PDLConversion {
                 return new ConvertForBiopsies(api.runs(), api.samples(), api.sets(), pdlGenerator);
             }
         }).orElse(new ConvertFromGCSPaths());
+    }
+
+    private static DefaultApi getLamaClient(final PlatinumConfiguration configuration) {
+        return configuration.lamaUrl().map(LamaClient::to).orElse(null);
     }
 
     private static String extractVersion(final String imageName) {
