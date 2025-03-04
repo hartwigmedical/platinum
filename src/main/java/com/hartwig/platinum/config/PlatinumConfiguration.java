@@ -52,6 +52,8 @@ public interface PlatinumConfiguration {
 
     Optional<HmfConfiguration> hmfConfiguration();
 
+    Optional<String> lamaUrl();
+
     Optional<String> keystorePassword();
 
     default PlatinumConfiguration withGcp(final GcpConfiguration gcp) {
