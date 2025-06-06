@@ -34,8 +34,7 @@ public class ConvertFromGCSPaths implements PDLConversion {
                     final int tumorIndexReadOnly = tumorIndex;
                     if (tumor.bam().isPresent()) {
                         pairs.add(() -> PipelineInput.builder()
-                                .reference(sample.normal()
-                                        .map(n -> SampleInput.builder().name(n.name()).turquoiseSubject(n.name()).bam(n.bam()).build()))
+                                .reference(sample.normal().map(ConvertFromGCSPaths::createReferenceInput))
                                 .tumor(SampleInput.builder()
                                         .name(tumor.name())
                                         .turquoiseSubject(tumor.name())
@@ -47,7 +46,7 @@ public class ConvertFromGCSPaths implements PDLConversion {
                     } else {
 
                         pairs.add(() -> PipelineInput.builder()
-                                .reference(sample.normal().map(n -> SampleInput.builder().name(n.name()).turquoiseSubject(n.name()).lanes(toLanes(n.fastq())).build()))
+                                .reference(sample.normal().map(ConvertFromGCSPaths::createReferenceInput))
                                 .tumor(SampleInput.builder()
                                         .name(tumor.name())
                                         .turquoiseSubject(tumor.name())
@@ -60,30 +59,40 @@ public class ConvertFromGCSPaths implements PDLConversion {
                     tumorIndex++;
                 }
             } else if (sample.normal().isPresent()) {
-                if (sample.normal().get().bam().isPresent()) {
-                    pairs.add(() -> PipelineInput.builder()
-                            .reference(sample.normal()
-                                    .map(n -> SampleInput.builder()
-                                            .name(n.name())
-                                            .turquoiseSubject(n.name())
-                                            .bam(n.bam())
-                                            .build()))
-                            .setName(sample.name())
-                            .build());
-                } else {
-                    pairs.add(() -> PipelineInput.builder()
-                            .reference(sample.normal()
-                                    .map(n -> SampleInput.builder()
-                                            .name(n.name())
-                                            .turquoiseSubject(n.name())
-                                            .lanes(toLanes(n.fastq()))
-                                            .build()))
-                            .setName(sample.name())
-                            .build());
-                }
+                pairs.add(() -> PipelineInput.builder()
+                        .reference(sample.normal().map(ConvertFromGCSPaths::createReferenceInput))
+                        .setName(sample.name())
+                        .build());
             }
         }
         return pairs;
+    }
+
+    private static SampleInput createReferenceInput(final RawDataConfiguration normal)
+    {
+        if (normal.bam().isPresent()) {
+            return createReferenceBamInput(normal);
+        } else {
+            return createReferenceFastqInput(normal);
+        }
+    }
+
+    private static SampleInput createReferenceBamInput(final RawDataConfiguration normal)
+    {
+        return SampleInput.builder()
+                .name(normal.name())
+                .turquoiseSubject(normal.name())
+                .bam(normal.bam())
+                .build();
+    }
+
+    private static SampleInput createReferenceFastqInput(final RawDataConfiguration normal)
+    {
+        return SampleInput.builder()
+                .name(normal.name())
+                .turquoiseSubject(normal.name())
+                .lanes(toLanes(normal.fastq()))
+                .build();
     }
 
     private static List<LaneInput> toLanes(final List<FastqConfiguration> referenceFastq) {
